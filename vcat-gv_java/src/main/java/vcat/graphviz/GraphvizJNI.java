@@ -21,8 +21,11 @@ import vcat.params.GraphvizParams;
  */
 public class GraphvizJNI implements Graphviz {
 
-	static {
-		GraphvizJNILoader.init();
+	public GraphvizJNI() throws GraphvizException {
+		// Make sure JNI is loaded
+		if (!GraphvizJNILoader.init()) {
+			throw new GraphvizException("Graphviz JNI library has not been loaded");
+		}
 	}
 
 	@Override

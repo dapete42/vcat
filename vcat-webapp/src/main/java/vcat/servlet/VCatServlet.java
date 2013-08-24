@@ -18,6 +18,7 @@ import vcat.VCatException;
 import vcat.VCatRenderer;
 import vcat.VCatRenderer.RenderedFileInfo;
 import vcat.graphviz.Graphviz;
+import vcat.graphviz.GraphvizException;
 import vcat.graphviz.GraphvizJNI;
 
 public class VCatServlet extends HttpServlet {
@@ -85,12 +86,12 @@ public class VCatServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
-		Graphviz graphviz = new GraphvizJNI();
 		try {
+			final Graphviz graphviz = new GraphvizJNI();
 			this.vCatRenderer = new VCatRenderer(TMP_DIR, graphviz);
 			this.vCatRenderer.setPurge(PURGE);
 			this.vCatRenderer.setPurgeMetadata(PURGE_METADATA);
-		} catch (VCatException e) {
+		} catch (Exception e) {
 			throw new ServletException(e);
 		}
 	}

@@ -5,6 +5,10 @@
 
 package vcat.graphviz;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Loader for the native <code>gv_java</code> library used by the Graphviz JNI.
  * 
@@ -12,25 +16,59 @@ package vcat.graphviz;
  */
 public abstract class GraphvizJNILoader {
 
+	private static String[] defaultLocations = { "/usr/lib/graphviz/java/libgv_java.so", "./libgv_java.so" };
+
 	/** Remember if the library has already been loadad. */
 	private static boolean initialized = false;
 
 	/**
-	 * Load the Graphviz JNI library, <code>gv_java</code>.
+	 * Try to load the Graphviz JNI library, <code>gv_java</code>, from default locations using
+	 * {@link System#load(String) load} or using {@link System#loadLibrary(String) loadLibrary}. This is called by new
+	 * {@link GraphvizJNI} instances automatically.
 	 */
-	public static synchronized void init() {
-		if (!initialized) {
-			// TODO These are just some hard coded paths, should be handled better
-			try {
-				System.load("/usr/lib/graphviz/java/libgv_java.so");
-			} catch (UnsatisfiedLinkError e1) {
+	public static synchronized boolean init() {
+		if (initialized) {
+			return true;
+		} else {
+			return init(new ArrayList<String>(0));
+		}
+	}
+
+	/**
+	 * Try to load the Graphviz JNI library, <code>gv_java</code>, from default locations and additional custom
+	 * locations using {@link System#load(String) load}, or using {@link System#loadLibrary(String) loadLibrary}. If the
+	 * library is not installed system-wide, this should be called with the appropriate paths before trying to use
+	 * {@link GraphvizJNI}.
+	 * 
+	 * @param customLocations
+	 *            List of locations (full file path) where the <code>gv_java</code> library can be found.
+	 */
+	public static synchronized boolean init(List<String> customLocations) {
+		if (initialized) {
+			return true;
+		} else {
+			// Build a list of all locations. Search custom locations first, then default ones.
+			ArrayList<String> locations = new ArrayList<String>(customLocations);
+			locations.addAll(Arrays.asList(defaultLocations));
+			loadLoop: for (String location : locations) {
 				try {
-					System.load("./libgv_java.so");
-				} catch (UnsatisfiedLinkError e2) {
-					System.loadLibrary("gv_java");
+					System.load(location);
+					initialized = true;
+					break loadLoop;
+				} catch (UnsatisfiedLinkError e1) {
+					// Do nothing
 				}
 			}
-			initialized = true;
+			if (!initialized) {
+				// If this did not work, try loadLibrary instead
+				try {
+					System.loadLibrary("gv_java");
+					initialized = true;
+				} catch (UnsatisfiedLinkError e1) {
+					// Do nothing
+				}
+			}
+			return initialized;
 		}
 	}
 
