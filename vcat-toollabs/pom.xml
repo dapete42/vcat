@@ -85,9 +85,6 @@
 							<mainClass>vcat.daemon.Main</mainClass>
 						</manifest>
 					</archive>
-					<includes>
-						<include>COPYING</include>
-					</includes>
 				</configuration>
 			</plugin>
 			<plugin>
