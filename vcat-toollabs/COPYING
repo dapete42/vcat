@@ -9,15 +9,15 @@ This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-In addition, as a special exception, the copyright holders of vcat-daemon give
-you permission to combine vcat-daemon with code from the vcat-gv_java
+In addition, as a special exception, the copyright holders of vcat-toollabs
+give you permission to combine vcat-toollabs with code from the vcat-gv_java
 project/artifact and the native Graphviz JNI library, both released under the
 terms of the Eclipse Public License (EPL) 1.0 (or modified versions of such
 code, with unchanged license). You may copy and distribute such a system
-following the terms of the GNU GPL for vcat-daemon and the EPL for the other
+following the terms of the GNU GPL for vcat-toollabs and the EPL for the other
 code concerned.
 
-Note that people who make modified versions of vcat-daemon are not obligated
+Note that people who make modified versions of vcat-toollabs are not obligated
 to grant this special exception for their modified versions; it is their
 choice whether to do so. The GNU General Public License gives permission to
 release a modified version without this exception; this exception also makes

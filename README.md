@@ -18,11 +18,9 @@ Maven artifacts. These are:
   category information from the wiki and render it into an image.
 * vcat-gv_java: An addition which allows the use of the Graphviz JNI, instead
   of relying on external program calls to the Graphviz command line utilities.
-* vcat-daemon: A daemon version of vCat which waits for JSON input files
-  containing parameters in one directory and outputs the finished files to
-  another.
 * vcat-webapp: A Java Servlet version of vCat which expects parameters as GET
   or POST parameters and directly returns the rendered file.
+* vcat-toollabs: A deamon version of vCat for use on Tool Labs.
 
 Licensing
 ---------
