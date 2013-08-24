@@ -14,11 +14,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import vcat.VCatException;
 import vcat.VCatRenderer;
 import vcat.VCatRenderer.RenderedFileInfo;
 import vcat.graphviz.Graphviz;
-import vcat.graphviz.GraphvizException;
 import vcat.graphviz.GraphvizJNI;
 
 public class VCatServlet extends HttpServlet {
