@@ -32,7 +32,7 @@ public class VCatServlet extends HttpServlet {
 
 	private static final File TMP_DIR = new File("/tmp/vcat");
 
-	private static VCatRenderer vCatRenderer;
+	private VCatRenderer vCatRenderer;
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -46,7 +46,7 @@ public class VCatServlet extends HttpServlet {
 
 	protected void doRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			RenderedFileInfo renderedFileInfo = vCatRenderer.render(req.getParameterMap());
+			RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(req.getParameterMap());
 
 			// Get finished rendered file
 			File resultFile = renderedFileInfo.getFile();
@@ -85,12 +85,11 @@ public class VCatServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
-		// Graphviz graphviz = new GraphvizExternal(GRAPHVIZ_DIR);
 		Graphviz graphviz = new GraphvizJNI();
 		try {
-			vCatRenderer = new VCatRenderer(TMP_DIR, graphviz);
-			vCatRenderer.setPurge(PURGE);
-			vCatRenderer.setPurgeMetadata(PURGE_METADATA);
+			this.vCatRenderer = new VCatRenderer(TMP_DIR, graphviz);
+			this.vCatRenderer.setPurge(PURGE);
+			this.vCatRenderer.setPurgeMetadata(PURGE_METADATA);
 		} catch (VCatException e) {
 			throw new ServletException(e);
 		}
