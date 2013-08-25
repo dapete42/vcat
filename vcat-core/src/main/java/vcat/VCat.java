@@ -11,7 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import vcat.cache.CacheException;
-import vcat.cache.GraphCache;
+import vcat.cache.file.GraphFileCache;
 import vcat.graph.Graph;
 import vcat.graph.Group;
 import vcat.graph.GroupRank;
@@ -194,7 +194,7 @@ public abstract class VCat {
 
 	protected abstract GroupRank renderGraphRootRank();
 
-	public void renderToCache(GraphCache cache) throws CacheException, VCatException, GraphvizException {
+	public void renderToCache(GraphFileCache cache) throws CacheException, VCatException, GraphvizException {
 		VCatParams vCatParams = this.all.getVCat();
 
 		// Check if already in cache; nothing to do in that case

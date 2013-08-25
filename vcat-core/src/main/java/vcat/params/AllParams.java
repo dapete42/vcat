@@ -7,9 +7,11 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 
 import vcat.VCatException;
-import vcat.cache.ApiCache;
-import vcat.cache.MetadataCache;
+import vcat.cache.CacheException;
+import vcat.cache.IApiCache;
+import vcat.cache.IMetadataCache;
 import vcat.mediawiki.ApiClient;
+import vcat.mediawiki.ApiException;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
@@ -46,8 +48,8 @@ public class AllParams {
 
 	private final Metadata metadata;
 
-	public AllParams(Map<String, String[]> requestParams, MetadataCache metadataCache, ApiCache apiCache)
-			throws VCatException {
+	public AllParams(final Map<String, String[]> requestParams, final IMetadataCache metadataCache,
+			final IApiCache apiCache) throws VCatException {
 
 		// Get a copy of the parameters we can modify
 		Map<String, String> singleParams = new HashMap<String, String>();
@@ -81,9 +83,15 @@ public class AllParams {
 		this.getVCat().setWiki(wiki);
 		this.apiClient = new CachedApiClient(wiki, apiCache);
 
+		String key = wiki.getApiUrl();
 		try {
-			this.metadata = metadataCache.getMetadataOrRetrieveFromApi(this.apiClient);
-		} catch (Exception e) {
+			Metadata metadata = metadataCache.getMetadata(key);
+			if (metadata == null) {
+				metadata = new Metadata(apiClient);
+				metadataCache.put(key, metadata);
+			}
+			this.metadata = metadata;
+		} catch (ApiException | CacheException e) {
 			throw new VCatException("Error retrieving metadata", e);
 		}
 
@@ -150,8 +158,8 @@ public class AllParams {
 		if (ns == null) {
 			// Automatically determine namespace from title. Checks if it starts with a namespace; if not, the default
 			// (0) is used.
-			namespace = metadata.namespaceFromTitle(title);
-			title = metadata.titleWithoutNamespace(title);
+			namespace = this.metadata.namespaceFromTitle(title);
+			title = this.metadata.titleWithoutNamespace(title);
 		} else {
 			// Try to parse 'ns' as an integer
 			try {
@@ -159,7 +167,7 @@ public class AllParams {
 			} catch (NumberFormatException e) {
 				throw new VCatException("Parameter 'ns': '" + ns + "' is not a valid number.", e);
 			}
-			if (metadata.getAllNames(namespace).isEmpty()) {
+			if (this.metadata.getAllNames(namespace).isEmpty()) {
 				throw new VCatException("Parameter 'ns': namespace " + namespace + " does not exist.");
 			}
 		}

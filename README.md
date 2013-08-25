@@ -18,6 +18,8 @@ Maven artifacts. These are:
   category information from the wiki and render it into an image.
 * vcat-gv_java: An addition which allows the use of the Graphviz JNI, instead
   of relying on external program calls to the Graphviz command line utilities.
+* vcat-redis: An addition which allows the use of Redis (through the Jedis
+  library) to store the API and metadata caches.
 * vcat-webapp: A Java Servlet version of vCat which expects parameters as GET
   or POST parameters and directly returns the rendered file.
 * vcat-toollabs: A deamon version of vCat for use on Tool Labs.
@@ -29,8 +31,11 @@ The vcat-gv_java project is released under the Eclipse Public License (EPL)
 1.0. This is because it uses the Graphviz JNI, which is released under this
 license.
 
-All other projects are released unter the GNU General Public License (GPL) 2 or
-later, with an additional exception which allows them to link to and use both
+The vcat-redis project is released under the GNU General Public License (GPL) 2
+or later.
+
+All other projects are released under the GNU General Public License (GPL) 2 or
+later with an additional exception which allows them to link to and use both
 vcat-gv_java and the Graphviz JNI libraries released unter the EPL. (See
 https://www.gnu.org/licenses/gpl-faq.html#GPLIncompatibleLibs for an
 explanation why this is necessary.)

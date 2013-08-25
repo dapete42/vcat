@@ -1,7 +1,8 @@
-package vcat.cache;
+package vcat.cache.file;
 
 import java.io.File;
 
+import vcat.cache.CacheException;
 import vcat.params.CombinedParams;
 
 public class RenderedFileCache extends AbstractFileCache<CombinedParams> {
@@ -10,8 +11,8 @@ public class RenderedFileCache extends AbstractFileCache<CombinedParams> {
 
 	private final static String SUFFIX = "";
 
-	public RenderedFileCache(File cacheDirectory) throws CacheException {
-		super(cacheDirectory, PREFIX, SUFFIX);
+	public RenderedFileCache(final File cacheDirectory, final int maxAgeInSeconds) throws CacheException {
+		super(cacheDirectory, PREFIX, SUFFIX, maxAgeInSeconds);
 	}
 
 	@Override

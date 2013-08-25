@@ -5,20 +5,19 @@ import java.util.Map.Entry;
 
 import org.json.JSONObject;
 
-import vcat.cache.ApiCache;
 import vcat.cache.CacheException;
-
+import vcat.cache.IApiCache;
 
 public class CachedApiClient extends ApiClient {
 
-	private final ApiCache cache;
+	private final IApiCache cache;
 
-	public CachedApiClient(IWiki wiki, ApiCache cache) {
+	public CachedApiClient(IWiki wiki, IApiCache cache) {
 		super(wiki);
 		this.cache = cache;
 	}
 
-	public ApiCache getCache() {
+	public IApiCache getCache() {
 		return cache;
 	}
 

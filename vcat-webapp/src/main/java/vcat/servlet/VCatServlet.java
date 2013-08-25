@@ -14,9 +14,16 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import vcat.VCatException;
 import vcat.VCatRenderer;
 import vcat.VCatRenderer.RenderedFileInfo;
+import vcat.cache.CacheException;
+import vcat.cache.IApiCache;
+import vcat.cache.IMetadataCache;
+import vcat.cache.file.ApiFileCache;
+import vcat.cache.file.MetadataFileCache;
 import vcat.graphviz.Graphviz;
+import vcat.graphviz.GraphvizException;
 import vcat.graphviz.GraphvizJNI;
 
 public class VCatServlet extends HttpServlet {
@@ -86,10 +93,10 @@ public class VCatServlet extends HttpServlet {
 	public void init() throws ServletException {
 		try {
 			final Graphviz graphviz = new GraphvizJNI();
-			this.vCatRenderer = new VCatRenderer(TMP_DIR, graphviz);
-			this.vCatRenderer.setPurge(PURGE);
-			this.vCatRenderer.setPurgeMetadata(PURGE_METADATA);
-		} catch (Exception e) {
+			final IApiCache apiCache = new ApiFileCache(new File(TMP_DIR, "api"), PURGE);
+			final IMetadataCache metadataCache = new MetadataFileCache(new File(TMP_DIR, "metadata"), PURGE_METADATA);
+			this.vCatRenderer = new VCatRenderer(graphviz, TMP_DIR, apiCache, metadataCache, PURGE);
+		} catch (CacheException | GraphvizException | VCatException e) {
 			throw new ServletException(e);
 		}
 	}

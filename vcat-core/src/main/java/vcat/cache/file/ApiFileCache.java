@@ -1,4 +1,4 @@
-package vcat.cache;
+package vcat.cache.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,16 +7,20 @@ import java.io.InputStreamReader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class ApiCache extends StringFileCache {
+import vcat.cache.CacheException;
+import vcat.cache.IApiCache;
+
+public class ApiFileCache extends StringFileCache implements IApiCache {
 
 	private final static String PREFIX = "ApiRequest-";
 
 	private final static String SUFFIX = ".json";
 
-	public ApiCache(File cacheDirectory) throws CacheException {
-		super(cacheDirectory, PREFIX, SUFFIX);
+	public ApiFileCache(final File cacheDirectory, final int maxAgeInSeconds) throws CacheException {
+		super(cacheDirectory, PREFIX, SUFFIX, maxAgeInSeconds);
 	}
 
+	@Override
 	public synchronized JSONObject getJSONObject(String key) throws CacheException {
 		if (this.containsKey(key)) {
 			InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key));
@@ -37,7 +41,9 @@ public class ApiCache extends StringFileCache {
 		}
 	}
 
+	@Override
 	public synchronized void put(String key, JSONObject jsonObject) throws CacheException {
 		this.put(key, jsonObject.toString().getBytes());
 	}
+
 }

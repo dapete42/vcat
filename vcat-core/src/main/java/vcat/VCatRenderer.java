@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.Map;
 
 import vcat.VCatException;
-import vcat.cache.ApiCache;
 import vcat.cache.CacheException;
-import vcat.cache.GraphCache;
-import vcat.cache.MetadataCache;
-import vcat.cache.RenderedFileCache;
+import vcat.cache.IApiCache;
+import vcat.cache.IMetadataCache;
+import vcat.cache.file.GraphFileCache;
+import vcat.cache.file.RenderedFileCache;
 import vcat.graphviz.Graphviz;
 import vcat.graphviz.GraphvizException;
 import vcat.params.AllParams;
@@ -39,17 +39,15 @@ public class VCatRenderer {
 
 	}
 
-	private final ApiCache apiCache;
+	private final IApiCache apiCache;
 
-	private final GraphCache graphCache;
+	private final GraphFileCache graphCache;
 
-	private final MetadataCache metadataCache;
+	private final IMetadataCache metadataCache;
 
 	private final Graphviz graphviz;
 
-	private int purge = 600;
-
-	private int purgeMetadata = 86400;
+	private final int purge;
 
 	private final RenderedFileCache renderedCache;
 
@@ -62,24 +60,29 @@ public class VCatRenderer {
 		}
 	}
 
-	public VCatRenderer(File tmpDir, Graphviz graphviz) throws VCatException {
-		this.graphviz = graphviz;
+	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final IApiCache apiCache,
+			final IMetadataCache metadataCache) throws VCatException {
+		this(graphviz, tmpDir, apiCache, metadataCache, 600);
+	}
 
-		File apiCacheDir = new File(tmpDir, "api");
+	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final IApiCache apiCache,
+			final IMetadataCache metadataCache, final int purge) throws VCatException {
+		this.graphviz = graphviz;
+		this.purge = purge;
+
 		File metadataCacheDir = new File(tmpDir, "metadata");
 		File graphCacheDir = new File(tmpDir, "graphFile");
 		File renderedFileCacheDir = new File(tmpDir, "renderedFile");
 
-		mkdirsWithError(apiCacheDir);
 		mkdirsWithError(metadataCacheDir);
 		mkdirsWithError(graphCacheDir);
 		mkdirsWithError(renderedFileCacheDir);
 
 		try {
-			this.apiCache = new ApiCache(apiCacheDir);
-			this.metadataCache = new MetadataCache(metadataCacheDir);
-			this.graphCache = new GraphCache(graphCacheDir);
-			this.renderedCache = new RenderedFileCache(renderedFileCacheDir);
+			this.apiCache = apiCache;
+			this.metadataCache = metadataCache;
+			this.graphCache = new GraphFileCache(graphCacheDir, this.purge);
+			this.renderedCache = new RenderedFileCache(renderedFileCacheDir, this.purge);
 		} catch (CacheException e) {
 			throw new VCatException("Error while setting up caches", e);
 		}
@@ -126,19 +129,11 @@ public class VCatRenderer {
 		return renderedCache.getCacheFile(combinedParams);
 	}
 
-	public int getPurge() {
-		return this.purge;
-	}
-
-	public int getPurgeMetadata() {
-		return this.purgeMetadata;
-	}
-
 	public void purge() {
-		this.apiCache.purge(this.purge);
-		this.graphCache.purge(this.purge);
-		this.renderedCache.purge(this.purge);
-		this.metadataCache.purge(this.purgeMetadata);
+		this.apiCache.purge();
+		this.graphCache.purge();
+		this.renderedCache.purge();
+		this.metadataCache.purge();
 	}
 
 	public RenderedFileInfo render(Map<String, String[]> parameterMap) throws VCatException {
@@ -161,14 +156,6 @@ public class VCatRenderer {
 		} catch (CacheException | GraphvizException e) {
 			throw new VCatException(e);
 		}
-	}
-
-	public void setPurge(int purge) {
-		this.purge = purge;
-	}
-
-	public void setPurgeMetadata(int purgeMetadata) {
-		this.purgeMetadata = purgeMetadata;
 	}
 
 }

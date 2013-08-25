@@ -1,4 +1,4 @@
-package vcat.cache;
+package vcat.cache.file;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,6 +18,8 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import vcat.cache.CacheException;
+
 /**
  * Abstract base class for caches to store generic {@link Serializable} objects, backed by files in a directory in the
  * file system.
@@ -33,6 +35,9 @@ public abstract class AbstractFileCache<K extends Serializable> {
 
 	/** The cache directory. */
 	protected final File cacheDirectory;
+
+	/** Maximum age of cached items in seconds */
+	protected int maxAgeInSeconds;
 
 	/** File name prefix. */
 	protected final String prefix;
@@ -52,7 +57,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	 * @throws CacheException
 	 *             If the directory does not exist or is not writeable.
 	 */
-	protected AbstractFileCache(File cacheDirectory, String prefix, String suffix) throws CacheException {
+	protected AbstractFileCache(File cacheDirectory, String prefix, String suffix, final int maxAgeInSeconds)
+			throws CacheException {
 		if (!cacheDirectory.exists() || !cacheDirectory.isDirectory() || !cacheDirectory.canWrite()) {
 			throw new CacheException("Cache directory '" + cacheDirectory.getAbsolutePath()
 					+ "' must exist, be a directory and be writable.");
@@ -60,6 +66,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 		this.cacheDirectory = cacheDirectory;
 		this.prefix = prefix;
 		this.suffix = suffix;
+		this.maxAgeInSeconds = maxAgeInSeconds;
 	}
 
 	public synchronized void clear() {
@@ -162,8 +169,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
 		return this.hash(SerializationUtils.serialize(key));
 	}
 
-	public synchronized void purge(long maxAgeInSeconds) {
-		long lastModifiedThreshold = System.currentTimeMillis() - (maxAgeInSeconds * 1000);
+	public synchronized void purge() {
+		long lastModifiedThreshold = System.currentTimeMillis() - (1000l * this.maxAgeInSeconds);
 		int purgedFiles = 0;
 		for (File file : this.getAllFiles()) {
 			if (file.lastModified() < lastModifiedThreshold) {
