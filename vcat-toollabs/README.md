@@ -17,13 +17,13 @@ properties that need to be set in this file:
 	
 	# Redis server information
 	redis.server.hostname=localhost
-	#redis.server.port=
-	#redis.server.password=
+	#redis.server.port=6379
 	
 	# Redis secret used for prefix
 	redis.secret=1234567890
 	
 	# Redis channel suffixes
+	redis.channel.control.suffix=-control
 	redis.channel.request.suffix=-requests
 	redis.channel.response.suffix=-responses
 	
