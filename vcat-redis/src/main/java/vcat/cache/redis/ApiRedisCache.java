@@ -16,7 +16,10 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 
 	@Override
 	public JSONObject getJSONObject(final String key) throws CacheException {
-		String jsonString = this.jedis.get(this.jedisKey(key));
+		final String jsonString;
+		synchronized (this.jedis) {
+			jsonString = this.jedis.get(this.jedisKey(key));
+		}
 		if (jsonString == null) {
 			return null;
 		} else {
@@ -29,7 +32,7 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 	}
 
 	@Override
-	public void put(final String key, final JSONObject jsonObject) throws CacheException {
+	public synchronized void put(final String key, final JSONObject jsonObject) throws CacheException {
 		this.jedis.set(this.jedisKey(key), jsonObject.toString());
 		this.jedis.expire(this.jedisKey(key), this.maxAgeInSeconds);
 	}

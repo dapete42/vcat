@@ -17,7 +17,7 @@ public class StringRedisCache {
 		this.maxAgeInSeconds = maxAgeInSeconds;
 	}
 
-	public boolean containsKey(final String key) {
+	public synchronized boolean containsKey(final String key) {
 		return this.jedis.exists(this.jedisKey(key));
 	}
 
@@ -25,7 +25,7 @@ public class StringRedisCache {
 		return this.redisPrefix + key;
 	}
 
-	protected byte[] jedisKeyBytes(final String key) {
+	protected synchronized byte[] jedisKeyBytes(final String key) {
 		return this.jedisKey(key).getBytes();
 	}
 
@@ -33,7 +33,7 @@ public class StringRedisCache {
 		// Do nothing, this is handled by redis itself
 	}
 
-	public void remove(String key) {
+	public synchronized void remove(String key) {
 		this.jedis.del(this.jedisKey(key));
 	}
 

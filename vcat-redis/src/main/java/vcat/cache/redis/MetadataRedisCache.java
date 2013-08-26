@@ -20,7 +20,8 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 
 	public synchronized Metadata getMetadata(String key) throws CacheException {
 		if (this.containsKey(key)) {
-			Object metadataObject = SerializationUtils.deserialize(this.jedis.get(this.jedisKeyBytes(key)));
+			final byte[] metadataObjectData = this.jedis.get(this.jedisKeyBytes(key));
+			Object metadataObject = SerializationUtils.deserialize(metadataObjectData);
 			if (metadataObject instanceof Metadata) {
 				return (Metadata) metadataObject;
 			} else {
