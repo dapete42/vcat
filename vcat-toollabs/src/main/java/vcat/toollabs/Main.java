@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -30,12 +33,19 @@ import vcat.cache.redis.MetadataRedisCache;
 import vcat.graphviz.Graphviz;
 import vcat.graphviz.GraphvizException;
 import vcat.graphviz.GraphvizJNI;
+import vcat.params.AllParams;
 
 public class Main {
 
 	private static final Log log = LogFactory.getLog(Main.class);
 
 	private static String cacheDir;
+
+	private static String jdbcUrl;
+
+	private static String jdbcUser;
+
+	private static String jdbcPassword;
 
 	private static int purge;
 
@@ -63,16 +73,26 @@ public class Main {
 
 	private static int redisServerPort;
 
+	private static ToollabsMetainfoReader toollabsMetainfo;
+
 	public static void main(final String[] args) throws CacheException, GraphvizException, VCatException {
 
 		if (!initProperties(args)) {
 			return;
 		}
-		
+
+		final Connection connection;
+		try {
+			connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword);
+		} catch (SQLException e) {
+			throw new VCatException("Error connecting to database url '" + jdbcUrl + '\'', e);
+		}
+		toollabsMetainfo = new ToollabsMetainfoReader(connection);
+
 		redisKeyPrefix = redisSecret + '-';
 
-		final String redisApiCacheKeyPrefix = redisKeyPrefix + "-api-cache-";
-		final String redisMetadataCacheKeyPrefix = redisKeyPrefix + "-metadata-cache-";
+		final String redisApiCacheKeyPrefix = redisKeyPrefix + "cache-api-";
+		final String redisMetadataCacheKeyPrefix = redisKeyPrefix + "cache-metadata-";
 
 		// Pool of Redis connections
 		final JedisPool jedisPool = new JedisPool(redisServerHostname, redisServerPort);
@@ -106,7 +126,7 @@ public class Main {
 					}
 				} else if (redisChannelRequest.equals(channel)) {
 					log.info("Received Redis request '" + message + '\'');
-					renderJson(jedis, message, vCatRenderer);
+					renderJson(jedis, message, vCatRenderer, metadataCache, apiCache);
 				}
 			}
 
@@ -165,6 +185,24 @@ public class Main {
 		cacheDir = properties.getProperty("cache.dir");
 		if (cacheDir == null || cacheDir.isEmpty()) {
 			log.error("Property cache.dir missing or empty");
+			errors++;
+		}
+
+		jdbcUrl = properties.getProperty("jdbc.url");
+		if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+			log.error("Property jdbc.url missing or empty");
+			errors++;
+		}
+
+		jdbcUser = properties.getProperty("jdbc.user");
+		if (jdbcUser == null || jdbcUser.isEmpty()) {
+			log.error("Property jdbc.user missing or empty");
+			errors++;
+		}
+
+		jdbcPassword = properties.getProperty("jdbc.password");
+		if (jdbcPassword == null || jdbcPassword.isEmpty()) {
+			log.error("Property jdbc.password missing or empty");
 			errors++;
 		}
 
@@ -300,7 +338,8 @@ public class Main {
 		jedis.del(redisKeyPrefix + jedisKey + redisKeyRequestSuffix);
 	}
 
-	protected static void renderJson(final Jedis jedis, final String jedisKey, final VCatRenderer vCatRenderer) {
+	protected static void renderJson(final Jedis jedis, final String jedisKey, final VCatRenderer vCatRenderer,
+			final IMetadataCache metadataCache, final IApiCache apiCache) {
 
 		final String jsonRequestKey = redisKeyPrefix + jedisKey + redisKeyRequestSuffix;
 		final String jsonResponseHeadersKey = redisKeyPrefix + jedisKey + redisKeyResponseHeadersSuffix;
@@ -321,7 +360,8 @@ public class Main {
 				super.run();
 				RenderedFileInfo renderedFileInfo;
 				try {
-					renderedFileInfo = vCatRenderer.render(parameterMap);
+					final AllParams all = new AllParamsToollabs(parameterMap, apiCache, metadataCache, toollabsMetainfo);
+					renderedFileInfo = vCatRenderer.render(all);
 				} catch (VCatException e) {
 					handleError(jedis, jedisKey, e);
 					jedis.del(jsonRequestKey);

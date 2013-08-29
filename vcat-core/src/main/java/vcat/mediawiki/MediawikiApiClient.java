@@ -24,8 +24,7 @@ import org.json.JSONTokener;
 import vcat.mediawiki.Metadata.General;
 import vcat.util.CollectionHelper;
 
-
-public class ApiClient {
+public class MediawikiApiClient {
 
 	/** Maximum number of titles parameters to use in one request. */
 	private final static int TITLES_MAX = 50;
@@ -37,7 +36,7 @@ public class ApiClient {
 
 	private DefaultHttpClient client;
 
-	public ApiClient(IWiki wiki) {
+	public MediawikiApiClient(IWiki wiki) {
 		this.wiki = wiki;
 		this.client = new DefaultHttpClient();
 		this.client.getParams().setParameter("User-Agent", USER_AGENT);
@@ -59,7 +58,7 @@ public class ApiClient {
 		 * API Etiquette: There should always be only one concurrent HTTP access; at least for Wikimedia-run wikis,
 		 * doing more at the same time may lead to being blocked. It is probably nice to do this for any wiki, anyway.
 		 */
-		synchronized (ApiClient.class) {
+		synchronized (MediawikiApiClient.class) {
 			InputStream content;
 			try {
 				HttpResponse response = builder.asResponse();

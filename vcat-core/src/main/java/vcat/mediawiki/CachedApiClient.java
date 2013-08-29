@@ -1,5 +1,7 @@
 package vcat.mediawiki;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,7 +10,7 @@ import org.json.JSONObject;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 
-public class CachedApiClient extends ApiClient {
+public class CachedApiClient extends MediawikiApiClient {
 
 	private final IApiCache cache;
 
@@ -27,9 +29,14 @@ public class CachedApiClient extends ApiClient {
 		requestStuff.append(this.wiki.getApiUrl());
 		requestStuff.append('&');
 		for (Entry<String, String> param : params.entrySet()) {
-			requestStuff.append(param.getKey());
-			requestStuff.append('&');
-			requestStuff.append(param.getValue());
+			try {
+				requestStuff.append(URLEncoder.encode(param.getKey(), "UTF8"));
+				requestStuff.append('&');
+				requestStuff.append(URLEncoder.encode(param.getValue(), "UTF8"));
+			} catch (UnsupportedEncodingException e) {
+				throw new ApiException("This should never happen, URLEncoder.encode claims it does not support UTF-8",
+						e);
+			}
 		}
 		String cacheKey = requestStuff.toString();
 		if (this.cache.containsKey(cacheKey)) {

@@ -25,6 +25,7 @@ import vcat.cache.file.MetadataFileCache;
 import vcat.graphviz.Graphviz;
 import vcat.graphviz.GraphvizException;
 import vcat.graphviz.GraphvizJNI;
+import vcat.params.AllParams;
 
 public class VCatServlet extends HttpServlet {
 
@@ -37,6 +38,10 @@ public class VCatServlet extends HttpServlet {
 	private static int PURGE_METADATA = 86400;
 
 	private static final File TMP_DIR = new File("/tmp/vcat");
+
+	IApiCache apiCache;
+
+	IMetadataCache metadataCache;
 
 	private VCatRenderer vCatRenderer;
 
@@ -52,7 +57,8 @@ public class VCatServlet extends HttpServlet {
 
 	protected void doRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(req.getParameterMap());
+			final AllParams all = new AllParams(req.getParameterMap(), apiCache, metadataCache);
+			RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(all);
 
 			// Get finished rendered file
 			File resultFile = renderedFileInfo.getFile();
@@ -93,8 +99,8 @@ public class VCatServlet extends HttpServlet {
 	public void init() throws ServletException {
 		try {
 			final Graphviz graphviz = new GraphvizJNI();
-			final IApiCache apiCache = new ApiFileCache(new File(TMP_DIR, "api"), PURGE);
-			final IMetadataCache metadataCache = new MetadataFileCache(new File(TMP_DIR, "metadata"), PURGE_METADATA);
+			this.apiCache = new ApiFileCache(new File(TMP_DIR, "api"), PURGE);
+			this.metadataCache = new MetadataFileCache(new File(TMP_DIR, "metadata"), PURGE_METADATA);
 			this.vCatRenderer = new VCatRenderer(graphviz, TMP_DIR, apiCache, metadataCache, PURGE);
 		} catch (CacheException | GraphvizException | VCatException e) {
 			throw new ServletException(e);

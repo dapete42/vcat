@@ -15,6 +15,11 @@ properties that need to be set in this file:
 	# Purge metadata after (seconds)
 	purge.metadata=86400
 	
+	# JDBC URL and login information for MySQL/MariaDB access to wiki table
+	jdbc.url=jdbc:mysql://enwiki.labsdb:3306/meta_p
+	jdbc.user=username_for_db
+	jdbc.password=password_for_db
+	
 	# Redis server information
 	redis.server.hostname=localhost
 	#redis.server.port=6379

@@ -34,7 +34,7 @@ public class Metadata implements Serializable {
 
 	private final General general = new General();
 
-	public Metadata(ApiClient apiClient) throws ApiException {
+	public Metadata(MediawikiApiClient apiClient) throws ApiException {
 		apiClient.requestMetadata(this.general, this.authoritativeNamespaces, this.allNamespacesInverse);
 	}
 

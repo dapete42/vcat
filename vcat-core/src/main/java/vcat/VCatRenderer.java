@@ -2,7 +2,6 @@ package vcat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import vcat.VCatException;
 import vcat.cache.CacheException;
@@ -136,13 +135,10 @@ public class VCatRenderer {
 		this.metadataCache.purge();
 	}
 
-	public RenderedFileInfo render(Map<String, String[]> parameterMap) throws VCatException {
+	public RenderedFileInfo render(AllParams all) throws VCatException {
 		try {
 			// Purge caches
 			this.purge();
-
-			// Get parameters
-			final AllParams all = new AllParams(parameterMap, this.metadataCache, this.apiCache);
 
 			// Get and, if necessary, create result file
 			final File resultFile;

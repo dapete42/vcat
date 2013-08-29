@@ -10,7 +10,7 @@ import vcat.VCatException;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
-import vcat.mediawiki.ApiClient;
+import vcat.mediawiki.MediawikiApiClient;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.IWiki;
@@ -28,28 +28,22 @@ public class AllParams {
 
 	private static final int MAX_LIMIT = 500;
 
-	private static String getAndRemove(Map<String, String> params, String key) {
-		String value = params.get(key);
-		params.remove(key);
-		return value;
-	}
-
-	private static String unescapeMediawikiTitle(String title) {
-		if (title == null) {
-			return null;
-		} else {
-			return title.replace('_', ' ');
-		}
-	}
-
-	private final ApiClient apiClient;
+	private MediawikiApiClient apiClient;
 
 	private final CombinedParams combinedParams = new CombinedParams();
 
-	private final Metadata metadata;
+	private Metadata metadata;
 
-	public AllParams(final Map<String, String[]> requestParams, final IMetadataCache metadataCache,
-			final IApiCache apiCache) throws VCatException {
+	protected AllParams() {
+	}
+
+	public AllParams(final Map<String, String[]> requestParams, final IApiCache apiCache,
+			final IMetadataCache metadataCache) throws VCatException {
+		init(requestParams, apiCache, metadataCache);
+	}
+
+	protected void init(final Map<String, String[]> requestParams, final IApiCache apiCache,
+			final IMetadataCache metadataCache) throws VCatException {
 
 		// Get a copy of the parameters we can modify
 		Map<String, String> singleParams = new HashMap<String, String>();
@@ -70,16 +64,11 @@ public class AllParams {
 					+ "'.");
 		}
 
-		//
-		// Determine Wiki from supplied host, and get an API client and metadata for it
-		//
-
 		String wikiString = getAndRemove(singleParams, "wiki");
 		if (wikiString == null) {
 			throw new VCatException("Parameter 'wiki' missing.");
 		}
-
-		IWiki wiki = new WikimediaWiki(wikiString);
+		IWiki wiki = initWiki(wikiString);
 		this.getVCat().setWiki(wiki);
 		this.apiClient = new CachedApiClient(wiki, apiCache);
 
@@ -240,7 +229,32 @@ public class AllParams {
 
 	}
 
-	public ApiClient getApiClient() {
+	protected static String getAndRemove(Map<String, String> params, String key) {
+		String value = params.get(key);
+		params.remove(key);
+		return value;
+	}
+
+	/**
+	 * Determine Wiki from supplied wiki parameter.
+	 * 
+	 * @param wikiString
+	 * @return
+	 * @throws VCatException
+	 */
+	protected IWiki initWiki(final String wikiString) throws VCatException {
+		return new WikimediaWiki(wikiString);
+	}
+
+	private static String unescapeMediawikiTitle(String title) {
+		if (title == null) {
+			return null;
+		} else {
+			return title.replace('_', ' ');
+		}
+	}
+
+	public MediawikiApiClient getApiClient() {
 		return this.apiClient;
 	}
 
