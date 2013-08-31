@@ -406,13 +406,13 @@ public class Main {
 				// Clean up request
 				jedis.del(jsonRequestKey);
 
-				log.info("Finished thread '" + this.getName() + "'for job '" + jedisKey + '\'');
+				log.info("Finished thread '" + this.getName() + "' for job '" + jedisKey + '\'');
 			}
 
 			@Override
 			public void start() {
 				super.start();
-				log.info("Started thread '" + this.getName() + "'for job '" + jedisKey + '\'');
+				log.info("Started thread '" + this.getName() + "' for job '" + jedisKey + '\'');
 			}
 
 		}.start();
