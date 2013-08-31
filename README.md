@@ -28,14 +28,7 @@ Licensing
 ---------
 
 The vcat-gv_java project is released under the Eclipse Public License (EPL)
-1.0. This is because it uses the Graphviz JNI, which is released under this
-license.
+1.0. This is because it contains code from the Graphviz JNI, which is released
+under this license.
 
-The vcat-redis project is released under the GNU General Public License (GPL) 3
-or later.
-
-All other projects are released under the GNU General Public License (GPL) 3 or
-later with an additional exception which allows them to link to and use both
-vcat-gv_java and the Graphviz JNI libraries released unter the EPL. (See
-https://www.gnu.org/licenses/gpl-faq.html#GPLIncompatibleLibs for an
-explanation why this is necessary.)
+All other projects are released under the Apache License, Version 2.0.
