@@ -28,8 +28,6 @@ public class MainConfig {
 
 	public int purgeMetadata;
 
-	private String redisKeyPrefix;
-
 	public String redisSecret;
 
 	public String redisChannelControl;
@@ -51,19 +49,19 @@ public class MainConfig {
 	public int redisServerPort;
 
 	public String buildRedisKeyRequest(final String jedisKey) {
-		return this.redisKeyPrefix + jedisKey + this.redisKeyRequestSuffix;
+		return this.redisSecret + '-' + jedisKey + this.redisKeyRequestSuffix;
 	}
 
 	public String buildRedisKeyResponse(final String jedisKey) {
-		return this.redisKeyPrefix + jedisKey + this.redisKeyResponseSuffix;
+		return this.redisSecret + '-' + jedisKey + this.redisKeyResponseSuffix;
 	}
 
 	public String buildRedisKeyResponseError(final String jedisKey) {
-		return this.redisKeyPrefix + jedisKey + this.redisKeyResponseErrorSuffix;
+		return this.redisSecret + '-' + jedisKey + this.redisKeyResponseErrorSuffix;
 	}
 
 	public String buildRedisKeyResponseHeaders(final String jedisKey) {
-		return this.redisKeyPrefix + jedisKey + this.redisKeyResponseHeadersSuffix;
+		return this.redisSecret + '-' + jedisKey + this.redisKeyResponseHeadersSuffix;
 	}
 
 	public boolean readFromPropertyFile(final File propertiesFile) throws VCatException {
