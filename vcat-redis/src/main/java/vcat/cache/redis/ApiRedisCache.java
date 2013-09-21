@@ -3,6 +3,7 @@ package vcat.cache.redis;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import vcat.cache.CacheException;
@@ -17,9 +18,9 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 	@Override
 	public JSONObject getJSONObject(final String key) throws CacheException {
 		final String jsonString;
-		synchronized (this.jedis) {
-			jsonString = this.jedis.get(this.jedisKey(key));
-		}
+		final Jedis jedis = this.jedisPool.getResource();
+		this.jedisPool.returnResource(jedis);
+		jsonString = jedis.get(this.jedisKey(key));
 		if (jsonString == null) {
 			return null;
 		} else {
@@ -33,8 +34,10 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 
 	@Override
 	public synchronized void put(final String key, final JSONObject jsonObject) throws CacheException {
-		this.jedis.set(this.jedisKey(key), jsonObject.toString());
-		this.jedis.expire(this.jedisKey(key), this.maxAgeInSeconds);
+		final Jedis jedis = this.jedisPool.getResource();
+		jedis.set(this.jedisKey(key), jsonObject.toString());
+		jedis.expire(this.jedisKey(key), this.maxAgeInSeconds);
+		this.jedisPool.returnResource(jedis);
 	}
 
 }

@@ -37,11 +37,6 @@
 		</dependency>
 		<dependency>
 			<groupId>vcat</groupId>
-			<artifactId>vcat-gv_java</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>vcat</groupId>
 			<artifactId>vcat-redis</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>

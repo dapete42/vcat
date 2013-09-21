@@ -5,20 +5,23 @@ import redis.clients.jedis.JedisPool;
 
 public class StringRedisCache {
 
-	protected final Jedis jedis;
+	protected final JedisPool jedisPool;
 
 	protected final int maxAgeInSeconds;
 
 	protected final String redisPrefix;
 
 	public StringRedisCache(final JedisPool jedisPool, final String redisPrefix, final int maxAgeInSeconds) {
-		this.jedis = jedisPool.getResource();
+		this.jedisPool = jedisPool;
 		this.redisPrefix = redisPrefix;
 		this.maxAgeInSeconds = maxAgeInSeconds;
 	}
 
 	public synchronized boolean containsKey(final String key) {
-		return this.jedis.exists(this.jedisKey(key));
+		final Jedis jedis = jedisPool.getResource();
+		final boolean containsKey = jedis.exists(this.jedisKey(key));
+		jedisPool.returnResource(jedis);
+		return containsKey;
 	}
 
 	protected String jedisKey(final String key) {
@@ -34,7 +37,9 @@ public class StringRedisCache {
 	}
 
 	public synchronized void remove(String key) {
-		this.jedis.del(this.jedisKey(key));
+		final Jedis jedis = jedisPool.getResource();
+		jedis.del(this.jedisKey(key));
+		jedisPool.returnResource(jedis);
 	}
 
 }

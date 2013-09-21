@@ -3,6 +3,8 @@ package vcat.graphviz;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,7 +18,7 @@ import vcat.params.GraphvizParams;
  */
 public class GraphvizExternal implements Graphviz {
 
-	private Log log = LogFactory.getLog(this.getClass());
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	private final File programPath;
 
@@ -32,6 +34,15 @@ public class GraphvizExternal implements Graphviz {
 		}
 	}
 
+	public List<String> buildCommandParts(final String command, GraphvizParams params, File inputFile, File outputFile) {
+		ArrayList<String> commandParts = new ArrayList<String>(4);
+		commandParts.add(command);
+		commandParts.add("-T" + params.getOutputFormat().getGraphvizTypeParameter());
+		commandParts.add("-o" + outputFile.getAbsolutePath());
+		commandParts.add(inputFile.getAbsolutePath());
+		return commandParts;
+	}
+
 	@Override
 	public void render(File inputFile, File outputFile, GraphvizParams params) throws GraphvizException {
 		final Runtime runtime = Runtime.getRuntime();
@@ -43,13 +54,10 @@ public class GraphvizExternal implements Graphviz {
 			throw new InvalidParameterException("Program file '" + programFile.getAbsolutePath()
 					+ "' must exist and be executable. Is Graphviz installed?");
 		}
+
 		final String command = programFile.getAbsolutePath();
 
-		final String outputFormatParam = "-T" + params.getOutputFormat().getGraphvizTypeParameter();
-		final String outputFileParam = "-o" + outputFile.getAbsolutePath();
-		final String inputFileParam = inputFile.getAbsolutePath();
-
-		final String[] commandArray = { command, outputFormatParam, outputFileParam, inputFileParam };
+		final String[] commandArray = (String[]) buildCommandParts(command, params, inputFile, outputFile).toArray();
 
 		Process graphvizProcess;
 		try {

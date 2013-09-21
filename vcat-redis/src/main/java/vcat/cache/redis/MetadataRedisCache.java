@@ -4,6 +4,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import vcat.cache.CacheException;
@@ -20,7 +21,9 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 
 	public synchronized Metadata getMetadata(String key) throws CacheException {
 		if (this.containsKey(key)) {
-			final byte[] metadataObjectData = this.jedis.get(this.jedisKeyBytes(key));
+			final Jedis jedis = this.jedisPool.getResource();
+			final byte[] metadataObjectData = jedis.get(this.jedisKeyBytes(key));
+			this.jedisPool.returnResource(jedis);
 			Object metadataObject = SerializationUtils.deserialize(metadataObjectData);
 			if (metadataObject instanceof Metadata) {
 				return (Metadata) metadataObject;
@@ -37,7 +40,9 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 	}
 
 	public synchronized void put(String key, Metadata metadata) throws CacheException {
-		this.jedis.set(this.jedisKeyBytes(key), SerializationUtils.serialize(metadata));
+		final Jedis jedis = this.jedisPool.getResource();
+		jedis.set(this.jedisKeyBytes(key), SerializationUtils.serialize(metadata));
+		this.jedisPool.returnResource(jedis);
 	}
 
 }

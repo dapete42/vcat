@@ -1,15 +1,10 @@
 package vcat.toollabs;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +16,7 @@ import org.json.JSONTokener;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.exceptions.JedisException;
 
 import vcat.VCatException;
 import vcat.VCatRenderer;
@@ -30,103 +26,75 @@ import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
 import vcat.cache.redis.ApiRedisCache;
 import vcat.cache.redis.MetadataRedisCache;
-import vcat.graphviz.Graphviz;
 import vcat.graphviz.GraphvizException;
-import vcat.graphviz.GraphvizJNI;
+import vcat.graphviz.GraphvizExternal;
 import vcat.params.AllParams;
 
 public class Main {
 
 	private static final Log log = LogFactory.getLog(Main.class);
 
-	private static String cacheDir;
+	private static final MainConfig config = new MainConfig();
 
-	private static String jdbcUrl;
+	private static JedisPool jedisPool;
 
-	private static String jdbcUser;
-
-	private static String jdbcPassword;
-
-	private static int purge;
-
-	private static int purgeMetadata;
-
-	private static String redisKeyPrefix;
-
-	private static String redisSecret;
-
-	private static String redisChannelControl;
-
-	private static String redisChannelRequest;
-
-	private static String redisChannelResponse;
-
-	private static String redisKeyRequestSuffix;
-
-	private static String redisKeyResponseErrorSuffix;
-
-	private static String redisKeyResponseHeadersSuffix;
-
-	private static String redisKeyResponseSuffix;
-
-	private static String redisServerHostname;
-
-	private static int redisServerPort;
+	private static boolean running = true;
 
 	private static ToollabsMetainfoReader toollabsMetainfo;
 
 	public static void main(final String[] args) throws CacheException, GraphvizException, VCatException {
 
-		if (!initProperties(args)) {
+		if (!initConfig(args)) {
 			return;
 		}
 
 		final Connection connection;
 		try {
-			connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword);
+			connection = DriverManager.getConnection(config.jdbcUrl, config.jdbcUser, config.jdbcPassword);
 		} catch (SQLException e) {
-			throw new VCatException("Error connecting to database url '" + jdbcUrl + '\'', e);
+			throw new VCatException("Error connecting to database url '" + config.jdbcUrl + '\'', e);
 		}
 		toollabsMetainfo = new ToollabsMetainfoReader(connection);
 
-		redisKeyPrefix = redisSecret + '-';
-
-		final String redisApiCacheKeyPrefix = redisKeyPrefix + "cache-api-";
-		final String redisMetadataCacheKeyPrefix = redisKeyPrefix + "cache-metadata-";
+		final String redisApiCacheKeyPrefix = config.redisSecret + '-' + "cache-api-";
+		final String redisMetadataCacheKeyPrefix = config.redisSecret + '-' + "cache-metadata-";
 
 		// Pool of Redis connections
-		final JedisPool jedisPool = new JedisPool(redisServerHostname, redisServerPort);
-		// Get some for myself
-		final Jedis jedis = jedisPool.getResource();
-		final Jedis jedisListen = jedisPool.getResource();
+		jedisPool = new JedisPool(config.redisServerHostname, config.redisServerPort);
 
 		// Use Redis for API and metadata caches
-		final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, purge);
+		final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, config.purge);
 		final IMetadataCache metadataCache = new MetadataRedisCache(jedisPool, redisMetadataCacheKeyPrefix,
-				purgeMetadata);
+				config.purgeMetadata);
+
 		// For other caches, use this directory
-		final File tmpDir = new File(cacheDir);
+		final File cacheDir = new File(config.cacheDir);
 
 		// Call Graphviz using JNI
-		final Graphviz graphviz = new GraphvizJNI();
+		// final GraphvizJsub graphviz = new GraphvizJsub(new File("/usr/bin"), 512);
+		// Call Graphviz executables directly
+		final GraphvizExternal graphviz = new GraphvizExternal(new File("/usr/bin"));
 
 		// Create renderer
-		final VCatRenderer vCatRenderer = new VCatRenderer(graphviz, tmpDir, apiCache, metadataCache, purge);
+		final VCatRenderer vCatRenderer = new VCatRenderer(graphviz, cacheDir, apiCache, metadataCache, config.purge);
 
 		final JedisPubSub jedisSubscribe = new JedisPubSub() {
 
 			@Override
 			public void onMessage(final String channel, final String message) {
-				if (redisChannelControl.equals(channel)) {
+				if (config.redisChannelControl.equals(channel)) {
 					if ("stop".equalsIgnoreCase(message)) {
 						log.info("Received STOP command on Redis control channel");
+						// Set flag so listening connectin is not re-established
+						running = false;
+						// Unsubscribing causes the main program to continue running
 						this.unsubscribe();
 					} else {
 						log.warn("Received invalid command '" + message + "' on Redis control channel");
 					}
-				} else if (redisChannelRequest.equals(channel)) {
+				} else if (config.redisChannelRequest.equals(channel)) {
 					log.info("Received Redis request '" + message + '\'');
-					renderJson(jedis, message, vCatRenderer, metadataCache, apiCache);
+					renderJson(message, vCatRenderer, metadataCache, apiCache);
 				}
 			}
 
@@ -152,13 +120,29 @@ public class Main {
 
 		};
 
-		log.info("Start listening to Redis control channel '" + redisChannelControl + '\'');
-		log.info("Start listening to Redis request channel '" + redisChannelRequest + '\'');
-		jedisListen.subscribe(jedisSubscribe, redisChannelControl, redisChannelRequest);
+		log.info("Start listening to Redis control channel '" + config.redisChannelControl + '\'');
+		log.info("Start listening to Redis request channel '" + config.redisChannelRequest + '\'');
+
+		while (running) {
+			Jedis jedis = null;
+			try {
+				jedis = jedisPool.getResource();
+				jedis.subscribe(jedisSubscribe, config.redisChannelControl, config.redisChannelRequest);
+			} catch (JedisException je) {
+				// Most likely the connection has been lost. Resource is broken.
+				jedisPool.returnBrokenResource(jedis);
+				log.warn("Jedis error, re-establishing connection", je);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException ie) {
+					// Ignore, does no harm
+				}
+			}
+		}
 
 	}
 
-	private static boolean initProperties(final String[] args) {
+	private static boolean initConfig(final String[] args) throws VCatException {
 		if (args.length != 1) {
 			log.error("This program expects the name of a .properties file as a command line parameter");
 			return false;
@@ -170,144 +154,7 @@ public class Main {
 			return false;
 		}
 
-		Properties properties = new Properties();
-		try {
-			BufferedReader propertiesReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-					propertiesFile), "UTF8"));
-			properties.load(propertiesReader);
-		} catch (IOException e) {
-			log.error("Error reading .properties file '" + propertiesFile.getAbsolutePath() + "'", e);
-			return false;
-		}
-
-		int errors = 0;
-
-		cacheDir = properties.getProperty("cache.dir");
-		if (cacheDir == null || cacheDir.isEmpty()) {
-			log.error("Property cache.dir missing or empty");
-			errors++;
-		}
-
-		jdbcUrl = properties.getProperty("jdbc.url");
-		if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-			log.error("Property jdbc.url missing or empty");
-			errors++;
-		}
-
-		jdbcUser = properties.getProperty("jdbc.user");
-		if (jdbcUser == null || jdbcUser.isEmpty()) {
-			log.error("Property jdbc.user missing or empty");
-			errors++;
-		}
-
-		jdbcPassword = properties.getProperty("jdbc.password");
-		if (jdbcPassword == null || jdbcPassword.isEmpty()) {
-			log.error("Property jdbc.password missing or empty");
-			errors++;
-		}
-
-		final String purgeString = properties.getProperty("purge");
-		if (purgeString == null || purgeString.isEmpty()) {
-			purge = 60;
-			log.info("Property purge not set, using default value " + purge);
-		} else {
-			try {
-				purge = Integer.parseInt(purgeString);
-			} catch (NumberFormatException e) {
-				log.error("Property purge is not a number", e);
-				errors++;
-			}
-		}
-
-		final String purgeMetadataString = properties.getProperty("purge.metadata");
-		if (purgeMetadataString == null || purgeMetadataString.isEmpty()) {
-			purgeMetadata = 60;
-			log.info("Property purge.metadata not set, using default value " + purgeMetadata);
-		} else {
-			try {
-				purgeMetadata = Integer.parseInt(purgeMetadataString);
-			} catch (NumberFormatException e) {
-				log.error("Property purge.metadata is not a number", e);
-				errors++;
-			}
-		}
-
-		redisServerHostname = properties.getProperty("redis.server.hostname");
-		if (redisServerHostname == null) {
-			log.error("Property redis.server.hostname missing");
-			errors++;
-		}
-
-		final String redisServerPortString = properties.getProperty("redis.server.port");
-		if (redisServerPortString == null || redisServerPortString.isEmpty()) {
-			redisServerPort = 6379;
-			log.info("Property redis.server.port not set, using default value " + redisServerPort);
-		} else {
-			try {
-				redisServerPort = Integer.parseInt(redisServerPortString);
-			} catch (NumberFormatException e) {
-				log.error("Property redis.server.port is not a number", e);
-				errors++;
-			}
-		}
-
-		redisSecret = properties.getProperty("redis.secret");
-		if (redisSecret == null) {
-			log.error("Property redis.secret missing");
-			errors++;
-		} else {
-			log.info("Using redis secret " + redisSecret);
-		}
-
-		final String redisChannelControlSuffix = properties.getProperty("redis.channel.control.suffix");
-		if (redisChannelControlSuffix == null || redisChannelControlSuffix.isEmpty()) {
-			log.error("Property redis.channel.control.suffix missing or empty");
-			errors++;
-		} else {
-			redisChannelControl = redisSecret + redisChannelControlSuffix;
-		}
-
-		final String redisChannelRequestSuffix = properties.getProperty("redis.channel.request.suffix");
-		if (redisChannelRequestSuffix == null || redisChannelRequestSuffix.isEmpty()) {
-			log.error("Property redis.channel.request.suffix missing or empty");
-			errors++;
-		} else {
-			redisChannelRequest = redisSecret + redisChannelRequestSuffix;
-		}
-
-		final String redisChannelResponseSuffix = properties.getProperty("redis.channel.response.suffix");
-		if (redisChannelResponseSuffix == null || redisChannelResponseSuffix.isEmpty()) {
-			log.error("Property redis.channel.response.suffix missing or empty");
-			errors++;
-		} else {
-			redisChannelResponse = redisSecret + redisChannelResponseSuffix;
-		}
-
-		redisKeyRequestSuffix = properties.getProperty("redis.key.request.suffix");
-		if (redisKeyRequestSuffix == null || redisKeyRequestSuffix.isEmpty()) {
-			log.error("Property redis.key.requests.suffix missing or empty");
-			errors++;
-		}
-
-		redisKeyResponseErrorSuffix = properties.getProperty("redis.key.response.error.suffix");
-		if (redisKeyResponseErrorSuffix == null || redisKeyResponseErrorSuffix.isEmpty()) {
-			log.error("Property redis.key.response.error.suffix missing or empty");
-			errors++;
-		}
-
-		redisKeyResponseHeadersSuffix = properties.getProperty("redis.key.response.headers.suffix");
-		if (redisKeyResponseHeadersSuffix == null || redisKeyResponseHeadersSuffix.isEmpty()) {
-			log.error("Property redis.key.response.headers.suffix missing or empty");
-			errors++;
-		}
-
-		redisKeyResponseSuffix = properties.getProperty("redis.key.response.suffix");
-		if (redisKeyResponseSuffix == null || redisKeyResponseSuffix.isEmpty()) {
-			log.error("Property redis.key.response.suffix missing or empty");
-			errors++;
-		}
-
-		return errors == 0;
+		return config.readFromPropertyFile(propertiesFile);
 	}
 
 	private static void fillParametersFromJson(final HashMap<String, String[]> parameterMap, final String jsonString)
@@ -332,18 +179,21 @@ public class Main {
 	private static void handleError(final Jedis jedis, final String jedisKey, final Exception e) {
 		log.error(e);
 		e.printStackTrace();
-		jedis.set(redisKeyPrefix + jedisKey + redisKeyResponseErrorSuffix, e.getMessage());
+		jedis.set(config.buildRedisKeyResponseError(jedisKey), e.getMessage());
 		jedis.expire(jedisKey, 60);
-		jedis.publish(redisChannelResponse, jedisKey);
-		jedis.del(redisKeyPrefix + jedisKey + redisKeyRequestSuffix);
+		jedis.publish(config.redisChannelResponse, jedisKey);
+		jedis.del(config.buildRedisKeyRequest(jedisKey));
 	}
 
-	protected static void renderJson(final Jedis jedis, final String jedisKey, final VCatRenderer vCatRenderer,
+	protected static void renderJson(final String jedisKey, final VCatRenderer vCatRenderer,
 			final IMetadataCache metadataCache, final IApiCache apiCache) {
 
-		final String jsonRequestKey = redisKeyPrefix + jedisKey + redisKeyRequestSuffix;
-		final String jsonResponseHeadersKey = redisKeyPrefix + jedisKey + redisKeyResponseHeadersSuffix;
-		final String responseKey = redisKeyPrefix + jedisKey + redisKeyResponseSuffix;
+		final String jsonRequestKey = config.buildRedisKeyRequest(jedisKey);
+		final String jsonResponseHeadersKey = config.buildRedisKeyResponseHeaders(jedisKey);
+		final String responseKey = config.buildRedisKeyResponse(jedisKey);
+
+		// Get Jedis connection from pool
+		final Jedis jedis = jedisPool.getResource();
 
 		final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
 		try {
@@ -353,11 +203,18 @@ public class Main {
 			return;
 		}
 
+		// Return Jedis connection to pool
+		jedisPool.returnResource(jedis);
+
 		new Thread() {
 
 			@Override
 			public void run() {
 				super.run();
+
+				// Get Jedis connection from pool
+				final Jedis jedis = jedisPool.getResource();
+
 				RenderedFileInfo renderedFileInfo;
 				try {
 					final AllParams all = new AllParamsToollabs(parameterMap, apiCache, metadataCache, toollabsMetainfo);
@@ -393,7 +250,7 @@ public class Main {
 				jedis.expire(jsonResponseHeadersKey, 60);
 				jedis.expire(responseKey, 60);
 				// Notify client that response is ready
-				long receivers = jedis.publish(redisChannelResponse, jedisKey);
+				long receivers = jedis.publish(config.redisChannelResponse, jedisKey);
 
 				// If nobody received the message, something was wrong
 				if (receivers == 0) {
@@ -406,7 +263,11 @@ public class Main {
 				// Clean up request
 				jedis.del(jsonRequestKey);
 
+				// Return Jedis connection to pool
+				jedisPool.returnResource(jedis);
+
 				log.info("Finished thread '" + this.getName() + "' for job '" + jedisKey + '\'');
+
 			}
 
 			@Override
