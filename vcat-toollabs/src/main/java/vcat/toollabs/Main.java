@@ -188,96 +188,110 @@ public class Main {
 	protected static void renderJson(final String jedisKey, final VCatRenderer vCatRenderer,
 			final IMetadataCache metadataCache, final IApiCache apiCache) {
 
-		final String jsonRequestKey = config.buildRedisKeyRequest(jedisKey);
-		final String jsonResponseHeadersKey = config.buildRedisKeyResponseHeaders(jedisKey);
-		final String responseKey = config.buildRedisKeyResponse(jedisKey);
-
-		// Get Jedis connection from pool
-		final Jedis jedis = jedisPool.getResource();
-
-		final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
 		try {
-			fillParametersFromJson(parameterMap, jedis.get(jsonRequestKey));
-		} catch (VCatException e) {
+
+			final String jsonRequestKey = config.buildRedisKeyRequest(jedisKey);
+			final String jsonResponseHeadersKey = config.buildRedisKeyResponseHeaders(jedisKey);
+			final String responseKey = config.buildRedisKeyResponse(jedisKey);
+
+			// Get Jedis connection from pool
+			final Jedis jedis = jedisPool.getResource();
+
+			final String jsonString = jedis.get(jsonRequestKey);
+			if (jsonString == null) {
+				throw new VCatException("Redis request data not found: " + jsonRequestKey);
+			}
+
+			final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
+			try {
+				fillParametersFromJson(parameterMap, jsonString);
+			} catch (VCatException e) {
+				handleError(jedis, jedisKey, e);
+				return;
+			}
+
+			// Return Jedis connection to pool
+			jedisPool.returnResource(jedis);
+
+			new Thread() {
+
+				@Override
+				public void run() {
+					super.run();
+
+					// Get Jedis connection from pool
+					final Jedis jedis = jedisPool.getResource();
+
+					RenderedFileInfo renderedFileInfo;
+					try {
+						final AllParams all = new AllParamsToollabs(parameterMap, apiCache, metadataCache,
+								toollabsMetainfo);
+						renderedFileInfo = vCatRenderer.render(all);
+					} catch (VCatException e) {
+						handleError(jedis, jedisKey, e);
+						jedis.del(jsonRequestKey);
+						return;
+					}
+
+					JSONObject json = new JSONObject();
+					try {
+						// Content-type, as returned from rendering process
+						String contentType = renderedFileInfo.getMimeType();
+						json.put("Content-type", contentType);
+						// Content-length, using length of temporary output file already written
+						long length = renderedFileInfo.getFile().length();
+						if (length < Integer.MAX_VALUE) {
+							json.put("Content-length", Long.toString(length));
+						}
+						// Content-disposition, to determine filename of returned contents
+						String filename = renderedFileInfo.getFile().getName();
+						json.put("Content-disposition", "filename=\"" + filename + "\"");
+					} catch (JSONException e) {
+						handleError(jedis, jedisKey, e);
+						return;
+					}
+
+					// Set return values
+					jedis.set(jsonResponseHeadersKey, json.toString());
+					jedis.set(responseKey, renderedFileInfo.getFile().getAbsolutePath());
+					// Values last for 60 seconds
+					jedis.expire(jsonResponseHeadersKey, 60);
+					jedis.expire(responseKey, 60);
+					// Notify client that response is ready
+					long receivers = jedis.publish(config.redisChannelResponse, jedisKey);
+
+					// If nobody received the message, something was wrong
+					if (receivers == 0) {
+						log.error("Response for job '" + jedisKey
+								+ "' was sent to Redis response channel, but nobody was listening");
+					} else {
+						log.info("Response for job '" + jedisKey + "' was sent to Redis response channel");
+					}
+
+					// Clean up request
+					jedis.del(jsonRequestKey);
+
+					// Return Jedis connection to pool
+					jedisPool.returnResource(jedis);
+
+					log.info("Finished thread '" + this.getName() + "' for job '" + jedisKey + '\'');
+
+				}
+
+				@Override
+				public void start() {
+					super.start();
+					log.info("Started thread '" + this.getName() + "' for job '" + jedisKey + '\'');
+				}
+
+			}.start();
+
+		} catch (Exception e) {
+			// All exceptions are caught to prevent the daemon from crashing
+			Jedis jedis = jedisPool.getResource();
 			handleError(jedis, jedisKey, e);
-			return;
+			jedisPool.returnResource(jedis);
 		}
 
-		// Return Jedis connection to pool
-		jedisPool.returnResource(jedis);
-
-		new Thread() {
-
-			@Override
-			public void run() {
-				super.run();
-
-				// Get Jedis connection from pool
-				final Jedis jedis = jedisPool.getResource();
-
-				RenderedFileInfo renderedFileInfo;
-				try {
-					final AllParams all = new AllParamsToollabs(parameterMap, apiCache, metadataCache, toollabsMetainfo);
-					renderedFileInfo = vCatRenderer.render(all);
-				} catch (VCatException e) {
-					handleError(jedis, jedisKey, e);
-					jedis.del(jsonRequestKey);
-					return;
-				}
-
-				JSONObject json = new JSONObject();
-				try {
-					// Content-type, as returned from rendering process
-					String contentType = renderedFileInfo.getMimeType();
-					json.put("Content-type", contentType);
-					// Content-length, using length of temporary output file already written
-					long length = renderedFileInfo.getFile().length();
-					if (length < Integer.MAX_VALUE) {
-						json.put("Content-length", Long.toString(length));
-					}
-					// Content-disposition, to determine filename of returned contents
-					String filename = renderedFileInfo.getFile().getName();
-					json.put("Content-disposition", "filename=\"" + filename + "\"");
-				} catch (JSONException e) {
-					handleError(jedis, jedisKey, e);
-					return;
-				}
-
-				// Set return values
-				jedis.set(jsonResponseHeadersKey, json.toString());
-				jedis.set(responseKey, renderedFileInfo.getFile().getAbsolutePath());
-				// Values last for 60 seconds
-				jedis.expire(jsonResponseHeadersKey, 60);
-				jedis.expire(responseKey, 60);
-				// Notify client that response is ready
-				long receivers = jedis.publish(config.redisChannelResponse, jedisKey);
-
-				// If nobody received the message, something was wrong
-				if (receivers == 0) {
-					log.error("Response for job '" + jedisKey
-							+ "' was sent to Redis response channel, but nobody was listening");
-				} else {
-					log.info("Response for job '" + jedisKey + "' was sent to Redis response channel");
-				}
-
-				// Clean up request
-				jedis.del(jsonRequestKey);
-
-				// Return Jedis connection to pool
-				jedisPool.returnResource(jedis);
-
-				log.info("Finished thread '" + this.getName() + "' for job '" + jedisKey + '\'');
-
-			}
-
-			@Override
-			public void start() {
-				super.start();
-				log.info("Started thread '" + this.getName() + "' for job '" + jedisKey + '\'');
-			}
-
-		}.start();
-
 	}
-
 }
