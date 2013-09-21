@@ -57,7 +57,12 @@ public class GraphvizExternal implements Graphviz {
 
 		final String command = programFile.getAbsolutePath();
 
-		final String[] commandArray = (String[]) buildCommandParts(command, params, inputFile, outputFile).toArray();
+		final List<String> commandList = buildCommandParts(command, params, inputFile, outputFile);
+		final int len = commandList.size();
+		final String[] commandArray = new String[len];
+		for (int i = 0; i < len; i++) {
+			commandArray[i] = commandList.get(i);
+		}
 
 		Process graphvizProcess;
 		try {
