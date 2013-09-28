@@ -30,7 +30,7 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 			} else {
 				// Wrong type - remove from cache and throw error
 				this.remove(key);
-				String message = "Error while deserializing cached file to Metadata";
+				String message = "Error while deserializing cached data to Metadata";
 				log.error(message);
 				throw new CacheException(message);
 			}
