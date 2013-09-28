@@ -15,6 +15,7 @@ import org.json.JSONTokener;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.exceptions.JedisException;
 
@@ -59,8 +60,14 @@ public class Main {
 		final String redisApiCacheKeyPrefix = config.redisSecret + '-' + "cache-api-";
 		final String redisMetadataCacheKeyPrefix = config.redisSecret + '-' + "cache-metadata-";
 
+		// Conservative configuration for Redis connection pool - check connections as often as possible
+		JedisPoolConfig poolConfig = new JedisPoolConfig();
+		poolConfig.setTestOnBorrow(true);
+		poolConfig.setTestOnReturn(true);
+		poolConfig.setTestWhileIdle(true);
+
 		// Pool of Redis connections
-		jedisPool = new JedisPool(config.redisServerHostname, config.redisServerPort);
+		jedisPool = new JedisPool(poolConfig, config.redisServerHostname, config.redisServerPort);
 
 		// Use Redis for API and metadata caches
 		final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, config.purge);
@@ -70,8 +77,6 @@ public class Main {
 		// For other caches, use this directory
 		final File cacheDir = new File(config.cacheDir);
 
-		// Call Graphviz using JNI
-		// final GraphvizJsub graphviz = new GraphvizJsub(new File("/usr/bin"), 512);
 		// Call Graphviz executables directly
 		final GraphvizExternal graphviz = new GraphvizExternal(new File("/usr/bin"));
 
