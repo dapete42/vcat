@@ -69,11 +69,9 @@ public class VCatRenderer {
 		this.graphviz = graphviz;
 		this.purge = purge;
 
-		File metadataCacheDir = new File(tmpDir, "metadata");
 		File graphCacheDir = new File(tmpDir, "graphFile");
 		File renderedFileCacheDir = new File(tmpDir, "renderedFile");
 
-		mkdirsWithError(metadataCacheDir);
 		mkdirsWithError(graphCacheDir);
 		mkdirsWithError(renderedFileCacheDir);
 
