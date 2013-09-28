@@ -101,7 +101,6 @@ public class MainConfig {
 		if (this.graphvizDir == null || this.graphvizDir.isEmpty()) {
 			this.graphvizDir = DEFAULT_GRAPHVIZ_DIR;
 			log.error("Property graphviz.dir not set, using default value " + this.graphvizDir);
-			errors++;
 		}
 
 		this.jdbcUrl = properties.getProperty("jdbc.url");
