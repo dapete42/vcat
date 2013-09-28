@@ -78,7 +78,7 @@ public class Main {
 		final File cacheDir = new File(config.cacheDir);
 
 		// Call Graphviz executables directly
-		final GraphvizExternal graphviz = new GraphvizExternal(new File("/usr/bin"));
+		final GraphvizExternal graphviz = new GraphvizExternal(new File(config.graphvizDir));
 
 		// Create renderer
 		final VCatRenderer vCatRenderer = new VCatRenderer(graphviz, cacheDir, apiCache, metadataCache, config.purge);

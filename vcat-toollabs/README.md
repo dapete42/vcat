@@ -5,15 +5,19 @@ Configuration file
 ------------------
 
 The finished program needs a configuration file. This is an example of the
-properties that need to be set in this file:
+properties that need to be set in this file (default values are commented
+out):
 
 	# Cache directory for Graphviz and image files
 	cache.dir=./cache
 	
+	# Directory with Graphviz binaries (dot, fdp)
+	#graphviz.dir=/usr/bin
+	
 	# Purge caches after (seconds)
-	purge=600
+	#purge=600
 	# Purge metadata after (seconds)
-	purge.metadata=86400
+	#purge.metadata=86400
 	
 	# JDBC URL and login information for MySQL/MariaDB access to wiki table
 	jdbc.url=jdbc:mysql://enwiki.labsdb:3306/meta_p

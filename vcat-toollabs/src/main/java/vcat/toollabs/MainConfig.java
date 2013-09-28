@@ -16,7 +16,21 @@ public class MainConfig {
 
 	private static final Log log = LogFactory.getLog(MainConfig.class);
 
+	/** Default value for {@link #graphvizDir} */
+	private static final String DEFAULT_GRAPHVIZ_DIR = "/usr/bin";
+
+	/** Default value for {@link #purge} */
+	private static final int DEFAULT_PURGE = 600;
+
+	/** Default value for {@link #purgeMetadata} */
+	private static final int DEFAULT_PURGE_METADATA = 86400;
+
+	/** Default value for {@link #redisServerPort} */
+	private static final int DEFAULT_REDIS_SERVER_PORT = 6379;
+
 	public String cacheDir;
+
+	public String graphvizDir;
 
 	public String jdbcUrl;
 
@@ -77,37 +91,44 @@ public class MainConfig {
 
 		int errors = 0;
 
-		cacheDir = properties.getProperty("cache.dir");
-		if (cacheDir == null || cacheDir.isEmpty()) {
+		this.cacheDir = properties.getProperty("cache.dir");
+		if (this.cacheDir == null || this.cacheDir.isEmpty()) {
 			log.error("Property cache.dir missing or empty");
 			errors++;
 		}
 
-		jdbcUrl = properties.getProperty("jdbc.url");
-		if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+		this.graphvizDir = properties.getProperty("graphviz.dir");
+		if (this.graphvizDir == null || this.graphvizDir.isEmpty()) {
+			this.graphvizDir = DEFAULT_GRAPHVIZ_DIR;
+			log.error("Property graphviz.dir not set, using default value " + this.graphvizDir);
+			errors++;
+		}
+
+		this.jdbcUrl = properties.getProperty("jdbc.url");
+		if (this.jdbcUrl == null || this.jdbcUrl.isEmpty()) {
 			log.error("Property jdbc.url missing or empty");
 			errors++;
 		}
 
-		jdbcUser = properties.getProperty("jdbc.user");
-		if (jdbcUser == null || jdbcUser.isEmpty()) {
+		this.jdbcUser = properties.getProperty("jdbc.user");
+		if (this.jdbcUser == null || this.jdbcUser.isEmpty()) {
 			log.error("Property jdbc.user missing or empty");
 			errors++;
 		}
 
-		jdbcPassword = properties.getProperty("jdbc.password");
-		if (jdbcPassword == null || jdbcPassword.isEmpty()) {
+		this.jdbcPassword = properties.getProperty("jdbc.password");
+		if (this.jdbcPassword == null || this.jdbcPassword.isEmpty()) {
 			log.error("Property jdbc.password missing or empty");
 			errors++;
 		}
 
 		final String purgeString = properties.getProperty("purge");
 		if (purgeString == null || purgeString.isEmpty()) {
-			purge = 60;
-			log.info("Property purge not set, using default value " + purge);
+			this.purge = DEFAULT_PURGE;
+			log.info("Property purge not set, using default value " + this.purge);
 		} else {
 			try {
-				purge = Integer.parseInt(purgeString);
+				this.purge = Integer.parseInt(purgeString);
 			} catch (NumberFormatException e) {
 				log.error("Property purge is not a number", e);
 				errors++;
@@ -116,30 +137,30 @@ public class MainConfig {
 
 		final String purgeMetadataString = properties.getProperty("purge.metadata");
 		if (purgeMetadataString == null || purgeMetadataString.isEmpty()) {
-			purgeMetadata = 60;
-			log.info("Property purge.metadata not set, using default value " + purgeMetadata);
+			this.purgeMetadata = DEFAULT_PURGE_METADATA;
+			log.info("Property purge.metadata not set, using default value " + this.purgeMetadata);
 		} else {
 			try {
-				purgeMetadata = Integer.parseInt(purgeMetadataString);
+				this.purgeMetadata = Integer.parseInt(purgeMetadataString);
 			} catch (NumberFormatException e) {
 				log.error("Property purge.metadata is not a number", e);
 				errors++;
 			}
 		}
 
-		redisServerHostname = properties.getProperty("redis.server.hostname");
-		if (redisServerHostname == null) {
+		this.redisServerHostname = properties.getProperty("redis.server.hostname");
+		if (this.redisServerHostname == null || this.redisServerHostname.isEmpty()) {
 			log.error("Property redis.server.hostname missing");
 			errors++;
 		}
 
 		final String redisServerPortString = properties.getProperty("redis.server.port");
 		if (redisServerPortString == null || redisServerPortString.isEmpty()) {
-			redisServerPort = 6379;
-			log.info("Property redis.server.port not set, using default value " + redisServerPort);
+			this.redisServerPort = DEFAULT_REDIS_SERVER_PORT;
+			log.info("Property redis.server.port not set, using default value " + this.redisServerPort);
 		} else {
 			try {
-				redisServerPort = Integer.parseInt(redisServerPortString);
+				this.redisServerPort = Integer.parseInt(redisServerPortString);
 			} catch (NumberFormatException e) {
 				log.error("Property redis.server.port is not a number", e);
 				errors++;
