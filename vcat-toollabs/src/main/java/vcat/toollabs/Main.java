@@ -177,7 +177,8 @@ public class Main {
 	}
 
 	private static void handleError(final Jedis jedis, final String jedisKey, final Exception e) {
-		log.error(e);
+		// There has been an error, but is is handled gracefully; so a warning is enough
+		log.warn(e);
 		e.printStackTrace();
 		jedis.set(config.buildRedisKeyResponseError(jedisKey), e.getMessage());
 		jedis.expire(jedisKey, 60);
@@ -222,54 +223,61 @@ public class Main {
 					// Get Jedis connection from pool
 					final Jedis jedis = jedisPool.getResource();
 
-					RenderedFileInfo renderedFileInfo;
 					try {
-						final AllParams all = new AllParamsToollabs(parameterMap, apiCache, metadataCache,
-								toollabsMetainfo);
-						renderedFileInfo = vCatRenderer.render(all);
-					} catch (VCatException e) {
-						handleError(jedis, jedisKey, e);
-						jedis.del(jsonRequestKey);
-						return;
-					}
 
-					JSONObject json = new JSONObject();
-					try {
-						// Content-type, as returned from rendering process
-						String contentType = renderedFileInfo.getMimeType();
-						json.put("Content-type", contentType);
-						// Content-length, using length of temporary output file already written
-						long length = renderedFileInfo.getFile().length();
-						if (length < Integer.MAX_VALUE) {
-							json.put("Content-length", Long.toString(length));
+						RenderedFileInfo renderedFileInfo;
+						try {
+							final AllParams all = new AllParamsToollabs(parameterMap, apiCache, metadataCache,
+									toollabsMetainfo);
+							renderedFileInfo = vCatRenderer.render(all);
+						} catch (VCatException e) {
+							handleError(jedis, jedisKey, e);
+							jedis.del(jsonRequestKey);
+							return;
 						}
-						// Content-disposition, to determine filename of returned contents
-						String filename = renderedFileInfo.getFile().getName();
-						json.put("Content-disposition", "filename=\"" + filename + "\"");
-					} catch (JSONException e) {
+
+						JSONObject json = new JSONObject();
+						try {
+							// Content-type, as returned from rendering process
+							String contentType = renderedFileInfo.getMimeType();
+							json.put("Content-type", contentType);
+							// Content-length, using length of temporary output file already written
+							long length = renderedFileInfo.getFile().length();
+							if (length < Integer.MAX_VALUE) {
+								json.put("Content-length", Long.toString(length));
+							}
+							// Content-disposition, to determine filename of returned contents
+							String filename = renderedFileInfo.getFile().getName();
+							json.put("Content-disposition", "filename=\"" + filename + "\"");
+						} catch (JSONException e) {
+							handleError(jedis, jedisKey, e);
+							return;
+						}
+
+						// Set return values
+						jedis.set(jsonResponseHeadersKey, json.toString());
+						jedis.set(responseKey, renderedFileInfo.getFile().getAbsolutePath());
+						// Values last for 60 seconds
+						jedis.expire(jsonResponseHeadersKey, 60);
+						jedis.expire(responseKey, 60);
+						// Notify client that response is ready
+						long receivers = jedis.publish(config.redisChannelResponse, jedisKey);
+
+						// If nobody received the message, something was wrong
+						if (receivers == 0) {
+							log.error("Response for job '" + jedisKey
+									+ "' was sent to Redis response channel, but nobody was listening");
+						} else {
+							log.info("Response for job '" + jedisKey + "' was sent to Redis response channel");
+						}
+
+						// Clean up request
+						jedis.del(jsonRequestKey);
+
+					} catch (Exception e) {
+						// All exceptions are caught so client is informed of error, if possible
 						handleError(jedis, jedisKey, e);
-						return;
 					}
-
-					// Set return values
-					jedis.set(jsonResponseHeadersKey, json.toString());
-					jedis.set(responseKey, renderedFileInfo.getFile().getAbsolutePath());
-					// Values last for 60 seconds
-					jedis.expire(jsonResponseHeadersKey, 60);
-					jedis.expire(responseKey, 60);
-					// Notify client that response is ready
-					long receivers = jedis.publish(config.redisChannelResponse, jedisKey);
-
-					// If nobody received the message, something was wrong
-					if (receivers == 0) {
-						log.error("Response for job '" + jedisKey
-								+ "' was sent to Redis response channel, but nobody was listening");
-					} else {
-						log.info("Response for job '" + jedisKey + "' was sent to Redis response channel");
-					}
-
-					// Clean up request
-					jedis.del(jsonRequestKey);
 
 					// Return Jedis connection to pool
 					jedisPool.returnResource(jedis);
