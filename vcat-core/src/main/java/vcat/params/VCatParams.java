@@ -5,11 +5,11 @@ import java.io.Serializable;
 import vcat.mediawiki.IWiki;
 
 /**
- * Parameters for the graph generation used by the {@link vcat.VCat VCat} class.
+ * Parameters for the graph generation used by the {@link vcat.AbstractVCat VCat} class.
  * 
  * @author Peter Schlömer
  */
-public class VCatParams implements Serializable {
+public class VCatParams<W extends IWiki> implements Serializable {
 
 	private static final long serialVersionUID = 1489025067225330489L;
 
@@ -25,7 +25,7 @@ public class VCatParams implements Serializable {
 
 	private String title;
 
-	private IWiki wiki;
+	private W wiki;
 
 	public Integer getDepth() {
 		return this.depth;
@@ -43,7 +43,7 @@ public class VCatParams implements Serializable {
 		return this.title;
 	}
 
-	public IWiki getWiki() {
+	public W getWiki() {
 		return this.wiki;
 	}
 
@@ -79,7 +79,7 @@ public class VCatParams implements Serializable {
 		this.title = title;
 	}
 
-	public void setWiki(IWiki wiki) {
+	public void setWiki(W wiki) {
 		this.wiki = wiki;
 	}
 

@@ -7,15 +7,15 @@ import java.sql.SQLException;
 
 import vcat.VCatException;
 
-public class ToollabsMetainfoReader {
+public class ToollabsWikiProvider {
 
-	Connection connection;
+	private final Connection connection;
 
-	public ToollabsMetainfoReader(final Connection connection) {
+	public ToollabsWikiProvider(final Connection connection) {
 		this.connection = connection;
 	}
 
-	public ToollabsWiki wikiFor(final String dbname) throws VCatException {
+	public ToollabsWiki fromDbname(final String dbname) throws VCatException {
 		try {
 			final PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?");
 			statement.setString(1, dbname);
@@ -24,12 +24,15 @@ public class ToollabsMetainfoReader {
 						+ "': dbname not found");
 			}
 			ResultSet rs = statement.getResultSet();
-			rs.first();
-			final String lang = rs.getString("lang");
+			if (!rs.first()) {
+				rs.close();
+				throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbname
+						+ "': dbname not found");
+			}
 			final String name = rs.getString("name");
 			final String url = rs.getString("url");
 			rs.close();
-			return new ToollabsWiki(dbname, lang, name, url);
+			return new ToollabsWiki(dbname, name, url);
 		} catch (SQLException e) {
 			throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbname + '\'', e);
 		}

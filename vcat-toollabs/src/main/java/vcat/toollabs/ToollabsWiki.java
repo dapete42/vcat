@@ -4,19 +4,16 @@ import vcat.mediawiki.IWiki;
 
 public class ToollabsWiki implements IWiki {
 
-	private static final long serialVersionUID = 6128456466437536067L;
+	private static final long serialVersionUID = -8039078925472549881L;
 
 	private final String dbname;
-
-	private final String lang;
 
 	private final String name;
 
 	private final String url;
 
-	public ToollabsWiki(final String dbname, final String lang, final String name, final String url) {
+	protected ToollabsWiki(final String dbname, final String name, final String url) {
 		this.dbname = dbname;
-		this.lang = lang;
 		this.name = name;
 		this.url = url;
 	}
@@ -26,8 +23,17 @@ public class ToollabsWiki implements IWiki {
 		return this.url + "/w/api.php";
 	}
 
+	public String getDbname() {
+		return this.dbname;
+	}
+
 	@Override
 	public String getName() {
+		return this.dbname;
+	}
+
+	@Override
+	public String getDisplayName() {
 		return this.name + " (" + this.dbname + ')';
 	}
 

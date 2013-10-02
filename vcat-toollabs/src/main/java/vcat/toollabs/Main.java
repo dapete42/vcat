@@ -5,6 +5,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -21,7 +26,6 @@ import redis.clients.jedis.exceptions.JedisException;
 
 import vcat.VCatException;
 import vcat.VCatRenderer;
-import vcat.VCatRenderer.RenderedFileInfo;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
@@ -29,7 +33,13 @@ import vcat.cache.redis.ApiRedisCache;
 import vcat.cache.redis.MetadataRedisCache;
 import vcat.graphviz.GraphvizException;
 import vcat.graphviz.GraphvizExternal;
-import vcat.params.AllParams;
+import vcat.graphviz.QueuedGraphviz;
+import vcat.mediawiki.CachedApiClient;
+import vcat.mediawiki.CachedMetadataProvider;
+import vcat.mediawiki.ICategoryProvider;
+import vcat.mediawiki.IMetadataProvider;
+import vcat.toollabs.params.AllParamsToollabs;
+import vcat.toollabs.util.ThreadHelper;
 
 public class Main {
 
@@ -37,11 +47,13 @@ public class Main {
 
 	private static final MainConfig config = new MainConfig();
 
+	private static ExecutorService executorService;
+
 	private static JedisPool jedisPool;
 
 	private static boolean running = true;
 
-	private static ToollabsMetainfoReader toollabsMetainfo;
+	private static ToollabsWikiProvider toollabsMetainfo;
 
 	public static void main(final String[] args) throws CacheException, GraphvizException, VCatException {
 
@@ -55,7 +67,7 @@ public class Main {
 		} catch (SQLException e) {
 			throw new VCatException("Error connecting to database url '" + config.jdbcUrl + '\'', e);
 		}
-		toollabsMetainfo = new ToollabsMetainfoReader(connection);
+		toollabsMetainfo = new ToollabsWikiProvider(connection);
 
 		final String redisApiCacheKeyPrefix = config.redisSecret + '-' + "cache-api-";
 		final String redisMetadataCacheKeyPrefix = config.redisSecret + '-' + "cache-metadata-";
@@ -77,11 +89,29 @@ public class Main {
 		// For other caches, use this directory
 		final File cacheDir = new File(config.cacheDir);
 
-		// Call Graphviz executables directly
-		final GraphvizExternal graphviz = new GraphvizExternal(new File(config.graphvizDir));
+		// Call external executables, but use a QueuedGraphviz to limit number of concurrent processes.
+		final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File(config.graphvizDir)),
+				config.graphvizProcesses);
+
+		final CachedApiClient<ToollabsWiki> apiClient = new CachedApiClient<ToollabsWiki>(apiCache);
+
+		final ICategoryProvider<ToollabsWiki> categoryProvider = apiClient;
+		// final ToollabsConnectionBuilder connectionBuilder = new ToollabsConnectionBuilder(config.jdbcUrl,
+		// config.jdbcUser, config.jdbcPassword);
+		// final ICategoryProvider<ToollabsWiki> categoryProvider = new ToollabsCategoryProvider(connectionBuilder,
+		// metadataProvider);
+
+		final IMetadataProvider metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
 
 		// Create renderer
-		final VCatRenderer vCatRenderer = new VCatRenderer(graphviz, cacheDir, apiCache, metadataCache, config.purge);
+		final VCatRenderer<ToollabsWiki> vCatRenderer = new VCatRenderer<ToollabsWiki>(graphviz, cacheDir,
+				categoryProvider, config.purge);
+
+		// Executor service for threads
+		final ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
+		tfb.setNameFormat(Main.class.getSimpleName() + "-vcat-pool-%d");
+		final ThreadFactory tf = tfb.build();
+		executorService = Executors.newCachedThreadPool(tf);
 
 		final JedisPubSub jedisSubscribe = new JedisPubSub() {
 
@@ -99,7 +129,7 @@ public class Main {
 					}
 				} else if (config.redisChannelRequest.equals(channel)) {
 					log.info("Received Redis request '" + message + '\'');
-					renderJson(message, vCatRenderer, metadataCache, apiCache);
+					renderJson(message, vCatRenderer, metadataProvider, apiCache);
 				}
 			}
 
@@ -137,11 +167,7 @@ public class Main {
 				// Most likely the connection has been lost. Resource is broken.
 				jedisPool.returnBrokenResource(jedis);
 				log.warn("Jedis error, re-establishing connection", je);
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException ie) {
-					// Ignore, does no harm
-				}
+				ThreadHelper.sleep(1000);
 			}
 		}
 
@@ -191,8 +217,8 @@ public class Main {
 		jedis.del(config.buildRedisKeyRequest(jedisKey));
 	}
 
-	protected static void renderJson(final String jedisKey, final VCatRenderer vCatRenderer,
-			final IMetadataCache metadataCache, final IApiCache apiCache) {
+	private static void renderJson(final String jedisKey, final VCatRenderer<ToollabsWiki> vCatRenderer,
+			final IMetadataProvider metadataProvider, final IApiCache apiCache) {
 
 		try {
 
@@ -219,20 +245,20 @@ public class Main {
 			// Return Jedis connection to pool
 			jedisPool.returnResource(jedis);
 
-			new Thread() {
+			executorService.execute(new Runnable() {
 
 				@Override
 				public void run() {
-					super.run();
+					log.info("Started thread '" + Thread.currentThread().getName() + "' for job '" + jedisKey + '\'');
 
 					// Get Jedis connection from pool
 					final Jedis jedis = jedisPool.getResource();
 
 					try {
 
-						RenderedFileInfo renderedFileInfo;
+						VCatRenderer<ToollabsWiki>.RenderedFileInfo renderedFileInfo;
 						try {
-							final AllParams all = new AllParamsToollabs(parameterMap, apiCache, metadataCache,
+							final AllParamsToollabs all = new AllParamsToollabs(parameterMap, metadataProvider,
 									toollabsMetainfo);
 							renderedFileInfo = vCatRenderer.render(all);
 						} catch (VCatException e) {
@@ -244,16 +270,21 @@ public class Main {
 						JSONObject json = new JSONObject();
 						try {
 							// Content-type, as returned from rendering process
-							String contentType = renderedFileInfo.getMimeType();
+							final String contentType = renderedFileInfo.getMimeType();
 							json.put("Content-type", contentType);
 							// Content-length, using length of temporary output file already written
-							long length = renderedFileInfo.getFile().length();
+							final long length = renderedFileInfo.getFile().length();
 							if (length < Integer.MAX_VALUE) {
 								json.put("Content-length", Long.toString(length));
 							}
 							// Content-disposition, to determine filename of returned contents
-							String filename = renderedFileInfo.getFile().getName();
+							final String filename = renderedFileInfo.getFile().getName();
 							json.put("Content-disposition", "filename=\"" + filename + "\"");
+							// Control caching behaviour
+							// Although we have our own cache, let proxys and browsers also cache for a while. Half of
+							// our own purging interval seems fitting (so updates are still possible).
+							final String cacheControl = "max-age=" + (config.purge / 2);
+							json.put("Cache-Control", cacheControl);
 						} catch (JSONException e) {
 							handleError(jedis, jedisKey, e);
 							return;
@@ -287,17 +318,11 @@ public class Main {
 					// Return Jedis connection to pool
 					jedisPool.returnResource(jedis);
 
-					log.info("Finished thread '" + this.getName() + "' for job '" + jedisKey + '\'');
+					log.info("Finished thread '" + Thread.currentThread().getName() + "' for job '" + jedisKey + '\'');
 
 				}
 
-				@Override
-				public void start() {
-					super.start();
-					log.info("Started thread '" + this.getName() + "' for job '" + jedisKey + '\'');
-				}
-
-			}.start();
+			});
 
 		} catch (Exception e) {
 			// All exceptions are caught to prevent the daemon from crashing

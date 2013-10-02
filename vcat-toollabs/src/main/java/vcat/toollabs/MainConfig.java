@@ -19,6 +19,9 @@ public class MainConfig {
 	/** Default value for {@link #graphvizDir} */
 	private static final String DEFAULT_GRAPHVIZ_DIR = "/usr/bin";
 
+	/** Default value for {@link #graphvizProcesses} */
+	private static final int DEFAULT_GRAPHVIZ_PROCESSES = 0;
+
 	/** Default value for {@link #purge} */
 	private static final int DEFAULT_PURGE = 600;
 
@@ -31,6 +34,8 @@ public class MainConfig {
 	public String cacheDir;
 
 	public String graphvizDir;
+
+	public int graphvizProcesses;
 
 	public String jdbcUrl;
 
@@ -101,6 +106,19 @@ public class MainConfig {
 		if (this.graphvizDir == null || this.graphvizDir.isEmpty()) {
 			this.graphvizDir = DEFAULT_GRAPHVIZ_DIR;
 			log.error("Property graphviz.dir not set, using default value " + this.graphvizDir);
+		}
+
+		final String graphvizProcessesString = properties.getProperty("graphviz.processes");
+		if (graphvizProcessesString == null || graphvizProcessesString.isEmpty()) {
+			this.graphvizProcesses = DEFAULT_GRAPHVIZ_PROCESSES;
+			log.info("Property graphviz.processes not set, using default value " + this.graphvizProcesses);
+		} else {
+			try {
+				this.graphvizProcesses = Integer.parseInt(graphvizProcessesString);
+			} catch (NumberFormatException e) {
+				log.error("Property graphviz.processes is not a number", e);
+				errors++;
+			}
 		}
 
 		this.jdbcUrl = properties.getProperty("jdbc.url");

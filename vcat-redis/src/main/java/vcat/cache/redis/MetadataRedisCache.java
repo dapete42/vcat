@@ -9,6 +9,7 @@ import redis.clients.jedis.JedisPool;
 
 import vcat.cache.CacheException;
 import vcat.cache.IMetadataCache;
+import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
 
 public class MetadataRedisCache extends StringRedisCache implements IMetadataCache {
@@ -19,7 +20,9 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 		super(jedisPool, redisPrefix, maxAgeInSeconds);
 	}
 
-	public synchronized Metadata getMetadata(String key) throws CacheException {
+	@Override
+	public synchronized Metadata getMetadata(IWiki wiki) throws CacheException {
+		final String key = wiki.getApiUrl();
 		if (this.containsKey(key)) {
 			final Jedis jedis = this.jedisPool.getResource();
 			final byte[] metadataObjectData = jedis.get(this.jedisKeyBytes(key));
@@ -39,7 +42,9 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 		}
 	}
 
-	public synchronized void put(String key, Metadata metadata) throws CacheException {
+	@Override
+	public synchronized void put(IWiki wiki, Metadata metadata) throws CacheException {
+		final String key = wiki.getApiUrl();
 		final Jedis jedis = this.jedisPool.getResource();
 		jedis.set(this.jedisKeyBytes(key), SerializationUtils.serialize(metadata));
 		this.jedisPool.returnResource(jedis);

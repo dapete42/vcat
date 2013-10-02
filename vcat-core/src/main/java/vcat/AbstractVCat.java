@@ -19,39 +19,32 @@ import vcat.graph.Node;
 import vcat.graphviz.GraphWriter;
 import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ApiException;
+import vcat.mediawiki.ICategoryProvider;
+import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
-import vcat.params.AllParams;
+import vcat.params.AbstractAllParams;
 import vcat.params.VCatParams;
 import vcat.params.Relation;
 
-public abstract class VCat {
-
-	public static VCat createInstance(AllParams all) throws VCatException {
-		Relation relation = all.getVCat().getRelation();
-		switch (relation) {
-		case Category:
-			return new VCatForCategories(all);
-		case Subcategory:
-			return new VCatForSubcategories(all);
-		default:
-			throw new VCatException("Relation type '" + relation.name() + "' not supported.");
-		}
-	}
+public abstract class AbstractVCat<W extends IWiki> {
 
 	private Log log = LogFactory.getLog(this.getClass());
 
-	protected final AllParams all;
+	protected final AbstractAllParams<W> all;
 
-	protected VCat(AllParams all) {
+	protected final ICategoryProvider<W> categoryProvider;
+
+	protected AbstractVCat(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider) {
 		this.all = all;
+		this.categoryProvider = categoryProvider;
 	}
 
-	public AllParams getAllParams() {
+	public AbstractAllParams<W> getAllParams() {
 		return this.all;
 	}
 
 	protected String getDefaultGraphLabel(String fullTitle) {
-		final StringBuilder sb = new StringBuilder(this.all.getVCat().getWiki().getName());
+		final StringBuilder sb = new StringBuilder(this.all.getVCat().getWiki().getDisplayName());
 		sb.append(' ').append(fullTitle);
 		return sb.toString();
 	}
@@ -67,7 +60,7 @@ public abstract class VCat {
 		final Graph graph = new Graph();
 
 		final Metadata metadata = this.all.getMetadata();
-		final VCatParams vCatParams = this.all.getVCat();
+		final VCatParams<W> vCatParams = this.all.getVCat();
 
 		final String categoryNamespacePrefix = metadata.getAuthoritativeName(Metadata.NS_CATEGORY) + ':';
 		final int categoryNamespacePrefixLength = categoryNamespacePrefix.length();
@@ -194,8 +187,8 @@ public abstract class VCat {
 
 	protected abstract GroupRank renderGraphRootRank();
 
-	public void renderToCache(GraphFileCache cache) throws CacheException, VCatException, GraphvizException {
-		VCatParams vCatParams = this.all.getVCat();
+	public void renderToCache(GraphFileCache<W> cache) throws CacheException, VCatException, GraphvizException {
+		VCatParams<W> vCatParams = this.all.getVCat();
 
 		// Check if already in cache; nothing to do in that case
 		if (cache.containsKey(vCatParams)) {

@@ -10,12 +10,11 @@ import org.json.JSONObject;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 
-public class CachedApiClient extends MediawikiApiClient {
+public class CachedApiClient<W extends IWiki> extends ApiClient<W> {
 
 	private final IApiCache cache;
 
-	public CachedApiClient(IWiki wiki, IApiCache cache) {
-		super(wiki);
+	public CachedApiClient(IApiCache cache) {
 		this.cache = cache;
 	}
 
@@ -24,9 +23,9 @@ public class CachedApiClient extends MediawikiApiClient {
 	}
 
 	@Override
-	protected JSONObject request(Map<String, String> params) throws ApiException {
+	protected JSONObject request(String apiUrl, Map<String, String> params) throws ApiException {
 		StringBuilder requestStuff = new StringBuilder();
-		requestStuff.append(this.wiki.getApiUrl());
+		requestStuff.append(apiUrl);
 		requestStuff.append('&');
 		for (Entry<String, String> param : params.entrySet()) {
 			try {
@@ -39,20 +38,23 @@ public class CachedApiClient extends MediawikiApiClient {
 			}
 		}
 		String cacheKey = requestStuff.toString();
-		if (this.cache.containsKey(cacheKey)) {
-			try {
-				return this.cache.getJSONObject(cacheKey);
-			} catch (CacheException e) {
-				throw new ApiException("Error accessing API cache", e);
+
+		synchronized (cache) {
+			if (this.cache.containsKey(cacheKey)) {
+				try {
+					return this.cache.getJSONObject(cacheKey);
+				} catch (CacheException e) {
+					throw new ApiException("Error accessing API cache", e);
+				}
+			} else {
+				JSONObject jsonObject = super.request(apiUrl, params);
+				try {
+					this.cache.put(cacheKey, jsonObject);
+				} catch (CacheException e) {
+					throw new ApiException("Error caching API result", e);
+				}
+				return jsonObject;
 			}
-		} else {
-			JSONObject jsonObject = super.request(params);
-			try {
-				this.cache.put(cacheKey, jsonObject);
-			} catch (CacheException e) {
-				throw new ApiException("Error caching API result", e);
-			}
-			return jsonObject;
 		}
 	}
 

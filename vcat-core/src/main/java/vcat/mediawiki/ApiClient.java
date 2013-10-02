@@ -21,34 +21,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import vcat.mediawiki.Metadata.General;
 import vcat.util.CollectionHelper;
 
-public class MediawikiApiClient {
+public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetadataProvider {
 
 	/** Maximum number of titles parameters to use in one request. */
 	private final static int TITLES_MAX = 50;
 
 	/** User-agent string to use */
-	private final String USER_AGENT = "VCat (" + this.getClass().getName() + "; dapete@dapete.net)";
-
-	protected IWiki wiki;
+	private final String USER_AGENT = "VCat (http://tools.wmflabs.org/vcat/; " + this.getClass().getName()
+			+ "; dev@dapete.net)";
 
 	private DefaultHttpClient client;
 
-	public MediawikiApiClient(IWiki wiki) {
-		this.wiki = wiki;
+	public ApiClient(/* IWiki wiki */) {
 		this.client = new DefaultHttpClient();
 		this.client.getParams().setParameter("User-Agent", USER_AGENT);
 	}
 
-	public IWiki getWiki() {
-		return this.wiki;
-	}
-
-	protected JSONObject request(Map<String, String> params) throws ApiException {
+	protected JSONObject request(String apiUrl, Map<String, String> params) throws ApiException {
 		// API Etiquette: use get to enable server-side caching
-		HttpRequestBuilder builder = Http.get(this.wiki.getApiUrl());
+		HttpRequestBuilder builder = Http.get(apiUrl);
 		builder.use(this.client).charset("utf-8");
 		builder.data("format", "json");
 		builder.data("action", "query");
@@ -58,7 +51,7 @@ public class MediawikiApiClient {
 		 * API Etiquette: There should always be only one concurrent HTTP access; at least for Wikimedia-run wikis,
 		 * doing more at the same time may lead to being blocked. It is probably nice to do this for any wiki, anyway.
 		 */
-		synchronized (MediawikiApiClient.class) {
+		synchronized (ApiClient.class) {
 			InputStream content;
 			try {
 				HttpResponse response = builder.asResponse();
@@ -78,29 +71,22 @@ public class MediawikiApiClient {
 		}
 	}
 
-	/**
-	 * @param fullTitles
-	 *            Full titles (including namespace) of pages.
-	 * @return Set of strings with the full titles (with namespace) of categories the page with the supplied full title
-	 *         is in.
-	 * @throws ApiException
-	 *             If there are any errors accessing the MediaWiki API.
-	 */
-	public Map<String, Collection<String>> requestCategories(Collection<String> fullTitles, boolean showhidden)
+	@Override
+	public Map<String, Collection<String>> requestCategories(W wiki, Collection<String> fullTitles, boolean showhidden)
 			throws ApiException {
 		HashMap<String, Collection<String>> categorySet = new HashMap<String, Collection<String>>();
 		String clshow = showhidden ? null : "!hidden";
-		this.requestCategoriesRecursive(fullTitles, categorySet, null, clshow);
+		this.requestCategoriesRecursive(wiki.getApiUrl(), fullTitles, categorySet, null, clshow);
 		return categorySet;
 	}
 
-	private void requestCategoriesRecursive(Collection<String> fullTitles,
+	private void requestCategoriesRecursive(String apiUrl, Collection<String> fullTitles,
 			final Map<String, Collection<String>> categoryMap, String clcontinue, String clshow) throws ApiException {
 
 		if (fullTitles.size() > TITLES_MAX) {
 
 			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TITLES_MAX)) {
-				requestCategoriesRecursive(fullTitlesPart, categoryMap, clcontinue, clshow);
+				requestCategoriesRecursive(apiUrl, fullTitlesPart, categoryMap, clcontinue, clshow);
 			}
 
 		} else {
@@ -116,7 +102,7 @@ public class MediawikiApiClient {
 			if (clcontinue != null) {
 				params.put("clcontinue", clcontinue);
 			}
-			JSONObject result = this.request(params);
+			JSONObject result = this.request(apiUrl, params);
 
 			try {
 				JSONObject query = result.getJSONObject("query");
@@ -140,8 +126,9 @@ public class MediawikiApiClient {
 
 				// If query-continue was returned, make another request
 				if (result.has("query-continue")) {
-					this.requestCategoriesRecursive(fullTitles, categoryMap, result.getJSONObject("query-continue")
-							.getJSONObject("categories").getString("clcontinue"), clshow);
+					this.requestCategoriesRecursive(apiUrl, fullTitles, categoryMap,
+							result.getJSONObject("query-continue").getJSONObject("categories").getString("clcontinue"),
+							clshow);
 				}
 			} catch (JSONException e) {
 				throw new ApiException("Error while parsing JSON response", e);
@@ -150,27 +137,26 @@ public class MediawikiApiClient {
 		}
 	}
 
-	public List<String> requestCategorymembers(String fullTitle, String cmtype) throws ApiException {
+	@Override
+	public List<String> requestCategorymembers(final IWiki wiki, final String fullTitle) throws ApiException {
 		List<String> categories = new ArrayList<String>();
-		this.requestCategorymembersRecursive(fullTitle, categories, cmtype, null);
+		this.requestCategorymembersRecursive(wiki.getApiUrl(), fullTitle, categories, null);
 		return categories;
 	}
 
-	private void requestCategorymembersRecursive(String fullTitle, final List<String> categories, String cmtype,
-			String cmcontinue) throws ApiException {
+	private void requestCategorymembersRecursive(final String apiUrl, final String fullTitle,
+			final List<String> categories, final String cmcontinue) throws ApiException {
 
 		// Set query properties
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("list", "categorymembers");
 		params.put("cmlimit", "max");
 		params.put("cmtitle", fullTitle);
-		if (cmtype != null) {
-			params.put("cmtype", cmtype);
-		}
+		params.put("cmtype", "subcat");
 		if (cmcontinue != null) {
 			params.put("cmcontinue", cmcontinue);
 		}
-		JSONObject result = this.request(params);
+		JSONObject result = this.request(apiUrl, params);
 
 		try {
 			JSONObject query = result.getJSONObject("query");
@@ -184,7 +170,7 @@ public class MediawikiApiClient {
 
 			// If query-continue was returned, make another request
 			if (result.has("query-continue")) {
-				this.requestCategorymembersRecursive(fullTitle, categories, cmtype,
+				this.requestCategorymembersRecursive(apiUrl, fullTitle, categories,
 						result.getJSONObject("query-continue").getJSONObject("categorymembers").getString("cmcontinue"));
 			}
 		} catch (JSONException e) {
@@ -193,31 +179,35 @@ public class MediawikiApiClient {
 
 	}
 
-	public void requestMetadata(final General general, final Map<Integer, String> namespaceMap,
-			final Map<String, Integer> inverseNamespaceMap) throws ApiException {
+	@Override
+	public Metadata requestMetadata(final IWiki wiki) throws ApiException {
 		// Set query properties
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("meta", "siteinfo");
 		params.put("siprop", "general|namespaces|namespacealiases");
 
-		JSONObject json = this.request(params);
+		JSONObject json = this.request(wiki.getApiUrl(), params);
+
+		String articlepath;
+		final Map<Integer, String> authoritativeNamespaces = new HashMap<Integer, String>();
+		final Map<String, Integer> allNamespacesInverse = new HashMap<String, Integer>();
 
 		try {
 			JSONObject query = json.getJSONObject("query");
 
-			general.articlepath = query.getJSONObject("general").getString("articlepath");
+			articlepath = query.getJSONObject("general").getString("articlepath");
 
 			JSONObject namespaces = query.getJSONObject("namespaces");
 			for (String nsIdString : JSONObject.getNames(namespaces)) {
 				JSONObject namespaceData = namespaces.getJSONObject(nsIdString);
 				int nsId = Integer.parseInt(nsIdString);
 				String nsName = namespaceData.getString("*");
-				namespaceMap.put(nsId, nsName);
-				inverseNamespaceMap.put(nsName, nsId);
+				authoritativeNamespaces.put(nsId, nsName);
+				allNamespacesInverse.put(nsName, nsId);
 				if (namespaceData.has("canonical")) {
 					String nsCanonical = namespaceData.getString("canonical");
 					if (nsCanonical != null && !nsCanonical.isEmpty()) {
-						inverseNamespaceMap.put(nsCanonical, nsId);
+						allNamespacesInverse.put(nsCanonical, nsId);
 					}
 				}
 			}
@@ -228,7 +218,7 @@ public class MediawikiApiClient {
 				int nsId = namespacealiasData.getInt("id");
 				String nsName = namespacealiasData.getString("*");
 				if (nsName != null && !nsName.isEmpty()) {
-					inverseNamespaceMap.put(nsName, nsId);
+					allNamespacesInverse.put(nsName, nsId);
 				}
 			}
 
@@ -236,6 +226,7 @@ public class MediawikiApiClient {
 			throw new ApiException("Error while decoding JSON response", e);
 		}
 
-	}
+		return new Metadata(wiki, articlepath, authoritativeNamespaces, allNamespacesInverse);
 
+	}
 }

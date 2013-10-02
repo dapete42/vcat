@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import vcat.cache.CacheException;
 import vcat.cache.IMetadataCache;
+import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
 
 public class MetadataFileCache extends StringFileCache implements IMetadataCache {
@@ -23,7 +24,8 @@ public class MetadataFileCache extends StringFileCache implements IMetadataCache
 	}
 
 	@Override
-	public synchronized Metadata getMetadata(String key) throws CacheException {
+	public synchronized Metadata getMetadata(IWiki wiki) throws CacheException {
+		final String key = wiki.getApiUrl();
 		if (this.containsKey(key)) {
 			Object metadataObject = SerializationUtils.deserialize(this.get(key));
 			if (metadataObject instanceof Metadata) {
@@ -41,7 +43,8 @@ public class MetadataFileCache extends StringFileCache implements IMetadataCache
 	}
 
 	@Override
-	public synchronized void put(String key, Metadata metadata) throws CacheException {
+	public synchronized void put(IWiki wiki, Metadata metadata) throws CacheException {
+		final String key = wiki.getApiUrl();
 		this.put(key, SerializationUtils.serialize(metadata));
 	}
 

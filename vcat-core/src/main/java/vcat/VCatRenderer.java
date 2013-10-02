@@ -5,17 +5,18 @@ import java.io.IOException;
 
 import vcat.VCatException;
 import vcat.cache.CacheException;
-import vcat.cache.IApiCache;
-import vcat.cache.IMetadataCache;
 import vcat.cache.file.GraphFileCache;
 import vcat.cache.file.RenderedFileCache;
 import vcat.graphviz.Graphviz;
 import vcat.graphviz.GraphvizException;
-import vcat.params.AllParams;
+import vcat.mediawiki.ICategoryProvider;
+import vcat.mediawiki.IWiki;
+import vcat.params.AbstractAllParams;
 import vcat.params.CombinedParams;
 import vcat.params.OutputFormat;
+import vcat.params.VCatFactory;
 
-public class VCatRenderer {
+public class VCatRenderer<W extends IWiki> {
 
 	public class RenderedFileInfo {
 
@@ -38,17 +39,15 @@ public class VCatRenderer {
 
 	}
 
-	private final IApiCache apiCache;
-
-	private final GraphFileCache graphCache;
-
-	private final IMetadataCache metadataCache;
+	private final GraphFileCache<W> graphCache;
 
 	private final Graphviz graphviz;
 
 	private final int purge;
 
-	private final RenderedFileCache renderedCache;
+	private final RenderedFileCache<W> renderedCache;
+
+	private final VCatFactory<W> vCatFactory;
 
 	private static void mkdirsWithError(File dir) throws VCatException {
 		if (!dir.exists()) {
@@ -59,13 +58,13 @@ public class VCatRenderer {
 		}
 	}
 
-	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final IApiCache apiCache,
-			final IMetadataCache metadataCache) throws VCatException {
-		this(graphviz, tmpDir, apiCache, metadataCache, 600);
+	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final ICategoryProvider<W> categoryProvider)
+			throws VCatException {
+		this(graphviz, tmpDir, categoryProvider, 600);
 	}
 
-	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final IApiCache apiCache,
-			final IMetadataCache metadataCache, final int purge) throws VCatException {
+	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final ICategoryProvider<W> categoryProvider,
+			final int purge) throws VCatException {
 		this.graphviz = graphviz;
 		this.purge = purge;
 
@@ -76,10 +75,9 @@ public class VCatRenderer {
 		mkdirsWithError(renderedFileCacheDir);
 
 		try {
-			this.apiCache = apiCache;
-			this.metadataCache = metadataCache;
-			this.graphCache = new GraphFileCache(graphCacheDir, this.purge);
-			this.renderedCache = new RenderedFileCache(renderedFileCacheDir, this.purge);
+			this.graphCache = new GraphFileCache<W>(graphCacheDir, this.purge);
+			this.renderedCache = new RenderedFileCache<W>(renderedFileCacheDir, this.purge);
+			this.vCatFactory = new VCatFactory<W>(categoryProvider);
 		} catch (CacheException e) {
 			throw new VCatException("Error while setting up caches", e);
 		}
@@ -87,15 +85,15 @@ public class VCatRenderer {
 		this.purge();
 	}
 
-	private File createGraphFile(AllParams all) throws CacheException, VCatException, GraphvizException {
-		final VCat vCat = VCat.createInstance(all);
+	private File createGraphFile(AbstractAllParams<W> all) throws CacheException, VCatException, GraphvizException {
+		final AbstractVCat<W> vCat = this.vCatFactory.createInstance(all);
 		vCat.renderToCache(this.graphCache);
 		File graphFile = this.graphCache.getCacheFile(all.getVCat());
 		return graphFile;
 	}
 
-	private File createRenderedFile(AllParams all) throws CacheException, VCatException, GraphvizException {
-		CombinedParams combinedParams = all.getCombined();
+	private File createRenderedFile(AbstractAllParams<W> all) throws CacheException, VCatException, GraphvizException {
+		CombinedParams<W> combinedParams = all.getCombined();
 		if (!this.renderedCache.containsKey(combinedParams)) {
 			File graphFile = this.createGraphFile(all);
 			// Parameters may have changed when creating the graph file, due to the handling of limit parameters, so we
@@ -127,13 +125,11 @@ public class VCatRenderer {
 	}
 
 	public void purge() {
-		this.apiCache.purge();
 		this.graphCache.purge();
 		this.renderedCache.purge();
-		this.metadataCache.purge();
 	}
 
-	public RenderedFileInfo render(AllParams all) throws VCatException {
+	public RenderedFileInfo render(AbstractAllParams<W> all) throws VCatException {
 		try {
 			// Purge caches
 			this.purge();

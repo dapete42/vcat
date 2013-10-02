@@ -11,12 +11,15 @@ import vcat.graph.Graph;
 import vcat.graph.GroupRank;
 import vcat.graph.Node;
 import vcat.mediawiki.ApiException;
-import vcat.params.AllParams;
+import vcat.mediawiki.ICategoryProvider;
+import vcat.mediawiki.IWiki;
+import vcat.params.AbstractAllParams;
 
-public class VCatForCategories extends VCat {
+public class VCatForCategories<W extends IWiki> extends AbstractVCat<W> {
 
-	public VCatForCategories(AllParams all) throws VCatException {
-		super(all);
+	public VCatForCategories(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider)
+			throws VCatException {
+		super(all, categoryProvider);
 	}
 
 	protected void renderGraphInnerLoop(Graph graph, Node rootNode, Set<Node> allNodesFound, Collection<Node> newNodes,
@@ -38,8 +41,8 @@ public class VCatForCategories extends VCat {
 			throws ApiException {
 		Collection<String> rootFullTitles = Collections.singleton(fullTitle);
 		{
-			Collection<String> categoryFullTitles = this.all.getApiClient()
-					.requestCategories(rootFullTitles, showhidden).get(fullTitle);
+			Collection<String> categoryFullTitles = this.categoryProvider.requestCategories(this.all.getWiki(),
+					rootFullTitles, showhidden).get(fullTitle);
 			if (categoryFullTitles != null) {
 				renderGraphInnerLoop(graph, rootNode, allNodesFound, newNodes, categoryFullTitles,
 						categoryNamespacePrefixLength);
@@ -59,8 +62,8 @@ public class VCatForCategories extends VCat {
 		}
 
 		// Request categories using API
-		Map<String, Collection<String>> apiResponse = this.all.getApiClient().requestCategories(curFullTitles,
-				showhidden);
+		Map<String, Collection<String>> apiResponse = this.categoryProvider.requestCategories(this.all.getWiki(),
+				curFullTitles, showhidden);
 		// Look at API results
 		for (Entry<String, Collection<String>> categoryFullEntry : apiResponse.entrySet()) {
 			// For each API result, first get the node it contains categories for

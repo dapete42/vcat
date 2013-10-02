@@ -16,15 +16,18 @@ import org.apache.commons.logging.LogFactory;
 
 import vcat.VCatException;
 import vcat.VCatRenderer;
-import vcat.VCatRenderer.RenderedFileInfo;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
 import vcat.cache.file.ApiFileCache;
 import vcat.cache.file.MetadataFileCache;
-import vcat.graphviz.Graphviz;
-import vcat.graphviz.GraphvizException;
-import vcat.graphviz.GraphvizJNI;
+import vcat.graphviz.GraphvizExternal;
+import vcat.graphviz.QueuedGraphviz;
+import vcat.mediawiki.CachedApiClient;
+import vcat.mediawiki.CachedMetadataProvider;
+import vcat.mediawiki.ICategoryProvider;
+import vcat.mediawiki.IMetadataProvider;
+import vcat.mediawiki.SimpleWikimediaWiki;
 import vcat.params.AllParams;
 
 public class VCatServlet extends HttpServlet {
@@ -39,11 +42,11 @@ public class VCatServlet extends HttpServlet {
 
 	private static final File TMP_DIR = new File("/tmp/vcat");
 
-	IApiCache apiCache;
+	private ICategoryProvider<SimpleWikimediaWiki> categoryProvider;
 
-	IMetadataCache metadataCache;
+	private IMetadataProvider metadataProvider;
 
-	private VCatRenderer vCatRenderer;
+	private VCatRenderer<SimpleWikimediaWiki> vCatRenderer;
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -57,8 +60,8 @@ public class VCatServlet extends HttpServlet {
 
 	protected void doRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			final AllParams all = new AllParams(req.getParameterMap(), apiCache, metadataCache);
-			RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(all);
+			final AllParams all = new AllParams(req.getParameterMap(), this.metadataProvider);
+			VCatRenderer<SimpleWikimediaWiki>.RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(all);
 
 			// Get finished rendered file
 			File resultFile = renderedFileInfo.getFile();
@@ -98,13 +101,15 @@ public class VCatServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		try {
-			final Graphviz graphviz = new GraphvizJNI();
-			this.apiCache = new ApiFileCache(new File(TMP_DIR, "api"), PURGE);
-			this.metadataCache = new MetadataFileCache(new File(TMP_DIR, "metadata"), PURGE_METADATA);
-			this.vCatRenderer = new VCatRenderer(graphviz, TMP_DIR, apiCache, metadataCache, PURGE);
-		} catch (CacheException | GraphvizException | VCatException e) {
+			final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File("/usr/bin")), 1);
+			final IApiCache apiCache = new ApiFileCache(new File(TMP_DIR, "api"), PURGE);
+			final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<SimpleWikimediaWiki>(apiCache);
+			this.categoryProvider = apiClient;
+			final IMetadataCache metadataCache = new MetadataFileCache(new File(TMP_DIR, "metadata"), PURGE_METADATA);
+			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
+			this.vCatRenderer = new VCatRenderer<SimpleWikimediaWiki>(graphviz, TMP_DIR, this.categoryProvider, PURGE);
+		} catch (CacheException | VCatException e) {
 			throw new ServletException(e);
 		}
 	}
-
 }

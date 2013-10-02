@@ -2,7 +2,6 @@ package vcat.mediawiki;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,15 +9,7 @@ import java.util.Set;
 
 public class Metadata implements Serializable {
 
-	protected class General implements Serializable {
-
-		private static final long serialVersionUID = 3451289507538778447L;
-
-		protected String articlepath;
-
-	}
-
-	private static final long serialVersionUID = -285281559588857239L;
+	private static final long serialVersionUID = -4021889274400016225L;
 
 	/** ID of the article namespace. */
 	public final static int NS_ARTICLE = 0;
@@ -26,19 +17,22 @@ public class Metadata implements Serializable {
 	/** ID of the category namespace. */
 	public final static int NS_CATEGORY = 14;
 
-	/** A map of the authoritative namespace names of the MediaWiki installation. */
-	private final Map<Integer, String> authoritativeNamespaces = new HashMap<Integer, String>();
-
 	/** A map of all namespace names of the MediaWiki installation. */
-	private final Map<String, Integer> allNamespacesInverse = new HashMap<String, Integer>();
+	private final Map<String, Integer> allNamespacesInverse;
 
-	private final General general = new General();
+	protected String articlepath;
 
-	public Metadata(MediawikiApiClient apiClient) throws ApiException {
-		apiClient.requestMetadata(this.general, this.authoritativeNamespaces, this.allNamespacesInverse);
+	/** A map of the authoritative namespace names of the MediaWiki installation. */
+	private final Map<Integer, String> authoritativeNamespaces;
+
+	protected Metadata(final IWiki wiki, final String articlepath, final Map<Integer, String> authoritativeNamespaces,
+			final Map<String, Integer> allNamespacesInverse) throws ApiException {
+		this.articlepath = articlepath;
+		this.authoritativeNamespaces = authoritativeNamespaces;
+		this.allNamespacesInverse = allNamespacesInverse;
 	}
 
-	public String fullTitle(String title, int namespace) throws ApiException {
+	public String fullTitle(final String title, final int namespace) throws ApiException {
 		String namespaceName = this.getAuthoritativeName(namespace);
 		if (namespaceName == null) {
 			throw new ApiException("Error while determining full article title: unknown namespace " + namespace);
@@ -64,7 +58,7 @@ public class Metadata implements Serializable {
 	}
 
 	public String getArticlepath() {
-		return this.general.articlepath;
+		return this.articlepath;
 	}
 
 	public String getAuthoritativeName(int namespace) {

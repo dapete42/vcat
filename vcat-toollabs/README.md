@@ -9,10 +9,12 @@ properties that need to be set in this file (default values are commented
 out):
 
 	# Cache directory for Graphviz and image files
-	cache.dir=./cache
+	cache.dir=/tmp/vcat-cache
 	
 	# Directory with Graphviz binaries (dot, fdp)
 	#graphviz.dir=/usr/bin
+	# Maximum number of concurrent processes running Graphviz (0=unlimited)
+	#graphviz.processes=0
 	
 	# Purge caches after (seconds)
 	#purge=600

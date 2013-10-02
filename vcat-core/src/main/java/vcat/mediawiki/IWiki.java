@@ -6,6 +6,8 @@ public interface IWiki extends Serializable {
 
 	String getApiUrl();
 
+	String getDisplayName();
+
 	String getName();
 
 }

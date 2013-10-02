@@ -1,13 +1,14 @@
 package vcat.cache;
 
+import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
 
 public interface IMetadataCache {
 
-	Metadata getMetadata(String key) throws CacheException;
+	Metadata getMetadata(IWiki wiki) throws CacheException;
 
 	void purge();
 
-	void put(String key, Metadata metadata) throws CacheException;
+	void put(IWiki wiki, Metadata metadata) throws CacheException;
 
 }
