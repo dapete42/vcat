@@ -65,7 +65,7 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 				statement.setString(2, title);
 				if (statement.execute()) {
 					ResultSet rs = statement.getResultSet();
-					while (!rs.next()) {
+					while (rs.next()) {
 						categoryTitles.add(metadata.fullTitle(rs.getString("cl_to"), Metadata.NS_CATEGORY));
 					}
 					rs.close();
@@ -117,7 +117,7 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 			statement.setString(1, title);
 			if (statement.execute()) {
 				ResultSet rs = statement.getResultSet();
-				while (!rs.next()) {
+				while (rs.next()) {
 					result.add(metadata.fullTitle(rs.getString("page_title"), rs.getInt("page_namespace")));
 				}
 				rs.close();
