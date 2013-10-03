@@ -15,26 +15,27 @@ public class ToollabsWikiProvider {
 		this.connection = connection;
 	}
 
-	public ToollabsWiki fromDbname(final String dbname) throws VCatException {
+	public ToollabsWiki fromDbname(final String dbnameParam) throws VCatException {
 		try {
 			final PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?");
-			statement.setString(1, dbname);
+			statement.setString(1, dbnameParam);
 			if (!statement.execute()) {
-				throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbname
+				throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbnameParam
 						+ "': dbname not found");
 			}
-			ResultSet rs = statement.getResultSet();
+			final ResultSet rs = statement.getResultSet();
 			if (!rs.first()) {
 				rs.close();
-				throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbname
+				throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbnameParam
 						+ "': dbname not found");
 			}
+			final String dbname = rs.getString("dbname");
 			final String name = rs.getString("name");
 			final String url = rs.getString("url");
 			rs.close();
 			return new ToollabsWiki(dbname, name, url);
 		} catch (SQLException e) {
-			throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbname + '\'', e);
+			throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbnameParam + '\'', e);
 		}
 	}
 
