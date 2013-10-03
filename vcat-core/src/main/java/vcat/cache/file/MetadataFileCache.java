@@ -2,6 +2,7 @@ package vcat.cache.file;
 
 import java.io.File;
 
+import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,15 +28,24 @@ public class MetadataFileCache extends StringFileCache implements IMetadataCache
 	public synchronized Metadata getMetadata(IWiki wiki) throws CacheException {
 		final String key = wiki.getApiUrl();
 		if (this.containsKey(key)) {
-			Object metadataObject = SerializationUtils.deserialize(this.get(key));
-			if (metadataObject instanceof Metadata) {
-				return (Metadata) metadataObject;
-			} else {
-				// Wrong type - remove from cache and throw error
+			Object metadataObject = null;
+			try {
+				metadataObject = SerializationUtils.deserialize(this.get(key));
+				if (metadataObject != null && metadataObject instanceof Metadata) {
+					return (Metadata) metadataObject;
+				} else {
+					// Wrong type
+					this.remove(key);
+					String message = "Error while deserializing cached file to Metadata; removing from cache";
+					log.error(message);
+					throw new CacheException(message);
+				}
+			} catch (SerializationException e) {
+				// Error during deserializing
 				this.remove(key);
-				String message = "Error while deserializing cached file to Metadata";
-				log.error(message);
-				throw new CacheException(message);
+				String message = "Error while deserializing cached file to Metadata; removing from cache";
+				log.warn(message, e);
+				throw new CacheException(message, e);
 			}
 		} else {
 			return null;

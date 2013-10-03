@@ -1,5 +1,6 @@
 package vcat.cache.redis;
 
+import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,15 +28,24 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 			final Jedis jedis = this.jedisPool.getResource();
 			final byte[] metadataObjectData = jedis.get(this.jedisKeyBytes(key));
 			this.jedisPool.returnResource(jedis);
-			Object metadataObject = SerializationUtils.deserialize(metadataObjectData);
-			if (metadataObject instanceof Metadata) {
-				return (Metadata) metadataObject;
-			} else {
-				// Wrong type - remove from cache and throw error
+			Object metadataObject = null;
+			try {
+				metadataObject = SerializationUtils.deserialize(metadataObjectData);
+				if (metadataObject != null && metadataObject instanceof Metadata) {
+					return (Metadata) metadataObject;
+				} else {
+					// Wrong type
+					this.remove(key);
+					String message = "Error while deserializing cached file to Metadata; removing from cache";
+					log.error(message);
+					throw new CacheException(message);
+				}
+			} catch (SerializationException e) {
+				// Error during deserializing
 				this.remove(key);
-				String message = "Error while deserializing cached data to Metadata";
-				log.error(message);
-				throw new CacheException(message);
+				String message = "Error while deserializing cached file to Metadata; removing from cache";
+				log.warn(message, e);
+				throw new CacheException(message, e);
 			}
 		} else {
 			return null;
