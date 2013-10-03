@@ -8,29 +8,23 @@ import vcat.VCatException;
 
 public class ToollabsConnectionBuilder {
 
-	private final String jdbcPassword;
+	private static final String JDBC_URL_TEMPLATE = "jdbc:mysql://%s:3306/%s";
 
-	/**
-	 * Template for the jdbc connection URL. Must be in the String format used by
-	 * {@link String#format(String, Object...)}, containing two String placeholders (<code>%s</code>), the first for the
-	 * host name, the second for the database name to connect to.
-	 */
-	private final String jdbcUrlTemplate;
+	private final String jdbcPassword;
 
 	private final String jdbcUser;
 
-	public ToollabsConnectionBuilder(final String jdbcUrlTemplate, final String jdbcUser, final String jdbcPassword) {
-		this.jdbcUrlTemplate = jdbcUrlTemplate;
+	public ToollabsConnectionBuilder(final String jdbcUser, final String jdbcPassword) {
 		this.jdbcUser = jdbcUser;
 		this.jdbcPassword = jdbcPassword;
 	}
 
 	public Connection buildConnection(final String name) throws VCatException {
-		final String jdbcUrl = String.format(jdbcUrlTemplate, name + ".labsdb", name + "_p");
+		final String jdbcUrl = String.format(JDBC_URL_TEMPLATE, name + ".labsdb", name + "_p");
 		try {
 			return DriverManager.getConnection(jdbcUrl, this.jdbcUser, this.jdbcPassword);
 		} catch (SQLException e) {
-			throw new VCatException("Error connecting to database url '" + jdbcUrl + '\'', e);
+			throw new VCatException("Error connecting to database URL '" + jdbcUrl + '\'', e);
 		}
 	}
 

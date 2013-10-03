@@ -95,13 +95,13 @@ public class Main {
 
 		final CachedApiClient<ToollabsWiki> apiClient = new CachedApiClient<ToollabsWiki>(apiCache);
 
+		final IMetadataProvider metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
+
 		final ICategoryProvider<ToollabsWiki> categoryProvider = apiClient;
-		// final ToollabsConnectionBuilder connectionBuilder = new ToollabsConnectionBuilder(config.jdbcUrl,
-		// config.jdbcUser, config.jdbcPassword);
+		// final ToollabsConnectionBuilder connectionBuilder = new ToollabsConnectionBuilder(config.jdbcUser,
+		// config.jdbcPassword);
 		// final ICategoryProvider<ToollabsWiki> categoryProvider = new ToollabsCategoryProvider(connectionBuilder,
 		// metadataProvider);
-
-		final IMetadataProvider metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
 
 		// Create renderer
 		final VCatRenderer<ToollabsWiki> vCatRenderer = new VCatRenderer<ToollabsWiki>(graphviz, cacheDir,
