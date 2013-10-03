@@ -52,7 +52,7 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		for (final String fullTitle : fullTitles) {
 			final String title = metadata.titleWithoutNamespace(fullTitle);
 			final int namespace = metadata.namespaceFromTitle(fullTitle);
-			final ArrayList<String> categoryTitles = new ArrayList<String>();
+			final ArrayList<String> categoryFullTitles = new ArrayList<String>();
 			try {
 				StringBuilder sql = new StringBuilder(
 						"SELECT cl_to FROM categorylinks INNER JOIN page ON page_id=cl_from"
@@ -63,18 +63,17 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 				final PreparedStatement statement = connection.prepareStatement(sql.toString());
 				statement.setInt(1, namespace);
 				statement.setString(2, title);
-				if (statement.execute()) {
-					ResultSet rs = statement.getResultSet();
-					while (rs.next()) {
-						categoryTitles.add(metadata.fullTitle(rs.getString("cl_to"), Metadata.NS_CATEGORY));
-					}
-					rs.close();
+				ResultSet rs = statement.executeQuery();
+				while (rs.next()) {
+					final String cl_to = rs.getString("cl_to");
+					categoryFullTitles.add(metadata.fullTitle(cl_to, Metadata.NS_CATEGORY));
 				}
+				rs.close();
 			} catch (SQLException e) {
 				throw new ApiException("Error reading categories from Tool Labs database '" + dbname + '\'', e);
 			}
-			if (!categoryTitles.isEmpty()) {
-				result.put(title, categoryTitles);
+			if (!categoryFullTitles.isEmpty()) {
+				result.put(fullTitle, categoryFullTitles);
 			}
 		}
 
@@ -90,6 +89,8 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 
 	@Override
 	public List<String> requestCategorymembers(ToollabsWiki wiki, String fullTitle) throws ApiException {
+
+		// TODO: Does not work yet.
 
 		final String dbname = wiki.getName();
 		Metadata metadata;
@@ -113,15 +114,14 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		try {
 			final PreparedStatement statement = connection
 					.prepareStatement("SELECT page_title, page_namespace FROM page INNER JOIN categorylinks ON cl_from=page_id WHERE cl_to=?");
-			// AND NOT EXISTS (SELECT * FROM page_props WHERE pp_page=page_id AND pp_propname='hiddencat');
 			statement.setString(1, title);
-			if (statement.execute()) {
-				ResultSet rs = statement.getResultSet();
-				while (rs.next()) {
-					result.add(metadata.fullTitle(rs.getString("page_title"), rs.getInt("page_namespace")));
-				}
-				rs.close();
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				final String page_title = rs.getString("page_title");
+				final int page_namespace = rs.getInt("page_namespace");
+				result.add(metadata.fullTitle(page_title, page_namespace));
 			}
+			rs.close();
 		} catch (SQLException e) {
 			throw new ApiException("Error reading category members from Tool Labs database '" + dbname + '\'', e);
 		}
