@@ -19,11 +19,7 @@ public class ToollabsWikiProvider {
 		try {
 			final PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?");
 			statement.setString(1, dbnameParam);
-			if (!statement.execute()) {
-				throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbnameParam
-						+ "': dbname not found");
-			}
-			final ResultSet rs = statement.getResultSet();
+			ResultSet rs = statement.executeQuery();
 			if (!rs.first()) {
 				rs.close();
 				throw new VCatException("Error reading Tool Labs meta information for dbname '" + dbnameParam
