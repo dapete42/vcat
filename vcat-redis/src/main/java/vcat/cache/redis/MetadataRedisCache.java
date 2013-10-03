@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Transaction;
 
 import vcat.cache.CacheException;
 import vcat.cache.IMetadataCache;
@@ -54,9 +55,12 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 
 	@Override
 	public synchronized void put(IWiki wiki, Metadata metadata) throws CacheException {
-		final String key = wiki.getApiUrl();
+		final byte[] keyBytes = this.jedisKeyBytes(wiki.getApiUrl());
 		final Jedis jedis = this.jedisPool.getResource();
-		jedis.set(this.jedisKeyBytes(key), SerializationUtils.serialize(metadata));
+		Transaction t = jedis.multi();
+		t.set(keyBytes, SerializationUtils.serialize(metadata));
+		t.expire(keyBytes, this.maxAgeInSeconds);
+		t.exec();
 		this.jedisPool.returnResource(jedis);
 	}
 

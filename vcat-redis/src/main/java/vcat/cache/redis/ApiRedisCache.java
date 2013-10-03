@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Transaction;
 
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
@@ -34,9 +35,12 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 
 	@Override
 	public synchronized void put(final String key, final JSONObject jsonObject) throws CacheException {
+		final String jedisKey = this.jedisKey(key);
 		final Jedis jedis = this.jedisPool.getResource();
-		jedis.set(this.jedisKey(key), jsonObject.toString());
-		jedis.expire(this.jedisKey(key), this.maxAgeInSeconds);
+		Transaction t = jedis.multi();
+		t.set(jedisKey, jsonObject.toString());
+		t.expire(jedisKey, this.maxAgeInSeconds);
+		t.exec();
 		this.jedisPool.returnResource(jedis);
 	}
 

@@ -22,6 +22,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisException;
 
 import vcat.VCatException;
@@ -211,10 +212,12 @@ public class Main {
 		// There has been an error, but is is handled gracefully; so a warning is enough
 		log.warn(e);
 		e.printStackTrace();
-		jedis.set(config.buildRedisKeyResponseError(jedisKey), e.getMessage());
-		jedis.expire(jedisKey, 60);
-		jedis.publish(config.redisChannelResponse, jedisKey);
 		jedis.del(config.buildRedisKeyRequest(jedisKey));
+		Transaction t = jedis.multi();
+		t.set(config.buildRedisKeyResponseError(jedisKey), e.getMessage());
+		t.expire(jedisKey, 60);
+		t.publish(config.redisChannelResponse, jedisKey);
+		t.exec();
 	}
 
 	private static void renderJson(final String jedisKey, final VCatRenderer<ToollabsWiki> vCatRenderer,
@@ -290,12 +293,16 @@ public class Main {
 							return;
 						}
 
+						Transaction t = jedis.multi();
 						// Set return values
-						jedis.set(jsonResponseHeadersKey, json.toString());
-						jedis.set(responseKey, renderedFileInfo.getFile().getAbsolutePath());
+						t.set(jsonResponseHeadersKey, json.toString());
+						t.set(responseKey, renderedFileInfo.getFile().getAbsolutePath());
 						// Values last for 60 seconds
-						jedis.expire(jsonResponseHeadersKey, 60);
-						jedis.expire(responseKey, 60);
+						t.expire(jsonResponseHeadersKey, 60);
+						t.expire(responseKey, 60);
+
+						t.exec();
+
 						// Notify client that response is ready
 						long receivers = jedis.publish(config.redisChannelResponse, jedisKey);
 
@@ -313,10 +320,10 @@ public class Main {
 					} catch (Exception e) {
 						// All exceptions are caught so client is informed of error, if possible
 						handleError(jedis, jedisKey, e);
+					} finally {
+						// Return Jedis connection to pool
+						jedisPool.returnResource(jedis);
 					}
-
-					// Return Jedis connection to pool
-					jedisPool.returnResource(jedis);
 
 					log.info("Finished thread '" + Thread.currentThread().getName() + "' for job '" + jedisKey + '\'');
 
