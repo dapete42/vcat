@@ -1,8 +1,8 @@
 package vcat.params;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,25 +31,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			throws VCatException {
 
 		// Get a copy of the parameters we can modify
-		Map<String, String> singleParams = new HashMap<String, String>();
-		Map<String, String[]> multiParams = new HashMap<String, String[]>();
-		for (Entry<String, String[]> entry : requestParams.entrySet()) {
-			String key = entry.getKey();
-			String[] values = entry.getValue();
-			if (values.length == 1) {
-				singleParams.put(key, values[0]);
-			} else {
-				multiParams.put(key, values);
-			}
-		}
+		HashMap<String, String[]> params = new HashMap<String, String[]>(requestParams);
 
-		// Currently, multiple parameters are not supported at all - if any are set, this is an error
-		if (!multiParams.isEmpty()) {
-			throw new VCatException("Parameter(s) supplied twice: '" + StringUtils.join(multiParams.keySet(), "', '")
-					+ "'.");
-		}
-
-		String wikiString = getAndRemove(singleParams, "wiki");
+		String wikiString = getAndRemove(params, "wiki");
 		if (wikiString == null) {
 			throw new VCatException("Parameter 'wiki' missing.");
 		}
@@ -66,16 +50,12 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		// Parameters for graphviz itself
 		//
 
-		String formatString = getAndRemove(singleParams, "format");
-		String algorithmString = getAndRemove(singleParams, "algorithm");
+		String formatString = getAndRemove(params, "format");
+		String algorithmString = getAndRemove(params, "algorithm");
 
 		OutputFormat format = OutputFormat.PNG;
 		if (formatString != null) {
-			if ("dot".equals(formatString)) {
-				format = OutputFormat.GraphvizRaw;
-			} else {
-				format = OutputFormat.valueOfIgnoreCase(formatString);
-			}
+			format = OutputFormat.valueOfIgnoreCase(formatString);
 			if (format == null) {
 				throw new VCatException("Unknown value for parameter 'format': '" + formatString + "'");
 			}
@@ -96,39 +76,44 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		// Parameter for vCat creation
 		//
 
-		String category = getAndRemove(singleParams, "category");
-		String title = getAndRemove(singleParams, "title");
-		String ns = getAndRemove(singleParams, "ns");
-		String depthString = getAndRemove(singleParams, "depth");
-		String limitString = getAndRemove(singleParams, "limit");
-		String showhiddenString = getAndRemove(singleParams, "showhidden");
-		String relationString = getAndRemove(singleParams, "rel");
+		String[] categoryStrings = getAndRemoveMulti(params, "category");
+		String[] titles = getAndRemoveMulti(params, "title");
+		String ns = getAndRemove(params, "ns");
+		String depthString = getAndRemove(params, "depth");
+		String limitString = getAndRemove(params, "limit");
+		String showhiddenString = getAndRemove(params, "showhidden");
+		String relationString = getAndRemove(params, "rel");
 
 		// 'category'
-		if (category != null) {
+		if (categoryStrings != null) {
 			// If set, convert it to 'title' and 'ns' parameters; the other parameter may not also be used
-			if (title != null || ns != null) {
+			if (titles != null || ns != null) {
 				throw new VCatException("Parameters 'title' and 'ns' may not be used together with 'category'.");
 			}
-			title = category;
+			titles = categoryStrings;
 			ns = Integer.toString(Metadata.NS_CATEGORY);
 		}
 
 		// 'title'
-		if (title == null) {
+		if (titles == null) {
 			throw new VCatException("Parameter 'title' or 'category' missing.");
 		}
-		title = unescapeMediawikiTitle(title);
+		for (int i = 0; i < titles.length; i++) {
+			titles[i] = unescapeMediawikiTitle(titles[i]);
+		}
 
 		// 'ns' (namespace)
-		int namespace = 0;
+		int[] namespaces = new int[titles.length];
 		if (ns == null) {
-			// Automatically determine namespace from title. Checks if it starts with a namespace; if not, the default
+			// Automatically determine namespace from titles. Checks if it starts with a namespace; if not, the default
 			// (0) is used.
-			namespace = this.metadata.namespaceFromTitle(title);
-			title = this.metadata.titleWithoutNamespace(title);
+			for (int i = 0; i < titles.length; i++) {
+				namespaces[i] = this.metadata.namespaceFromTitle(titles[i]);
+				titles[i] = this.metadata.titleWithoutNamespace(titles[i]);
+			}
 		} else {
 			// Try to parse 'ns' as an integer
+			int namespace;
 			try {
 				namespace = Integer.parseInt(ns);
 			} catch (NumberFormatException e) {
@@ -136,6 +121,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			}
 			if (this.metadata.getAllNames(namespace).isEmpty()) {
 				throw new VCatException("Parameter 'ns': namespace " + namespace + " does not exist.");
+			}
+			for (int i = 0; i < titles.length; i++) {
+				namespaces[i] = namespace;
 			}
 		}
 
@@ -180,8 +168,11 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				// all ok
 				break;
 			case Subcategory:
-				if (namespace != Metadata.NS_CATEGORY) {
-					throw new VCatException("Parameter 'rel=" + relationString + "' can only be used for categories");
+				for (int namespace : namespaces) {
+					if (namespace != Metadata.NS_CATEGORY) {
+						throw new VCatException("Parameter 'rel=" + relationString
+								+ "' can only be used for categories");
+					}
 				}
 				break;
 			default:
@@ -189,9 +180,14 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			}
 		}
 
+		// Build TitleNamespaceParams
+		ArrayList<TitleNamespaceParam> titleNamespaceList = new ArrayList<TitleNamespaceParam>(titles.length);
+		for (int i = 0; i < titles.length; i++) {
+			titleNamespaceList.add(new TitleNamespaceParam(titles[i], namespaces[i]));
+		}
+
 		// Move values to parameters
-		this.getVCat().setTitle(title);
-		this.getVCat().setNamespace(namespace);
+		this.getVCat().setTitleNamespaceParams(titleNamespaceList);
 		this.getVCat().setDepth(depth);
 		this.getVCat().setLimit(limit);
 		this.getVCat().setShowhidden(showhidden);
@@ -201,16 +197,35 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		// After all this handling, no parameters should be left
 		//
 
-		if (!singleParams.isEmpty()) {
-			throw new VCatException("Unknown parameter(s): '" + StringUtils.join(singleParams.keySet(), "', '") + "'");
+		if (!params.isEmpty()) {
+			throw new VCatException("Unknown parameter(s): '" + StringUtils.join(params.keySet(), "', '") + "'");
 		}
 
 	}
 
-	protected static String getAndRemove(Map<String, String> params, String key) {
-		String value = params.get(key);
-		params.remove(key);
-		return value;
+	protected static String getAndRemove(Map<String, String[]> params, String key) throws VCatException {
+		String[] values = params.get(key);
+		if (values == null || values.length == 0) {
+			return null;
+		} else if (values.length == 1) {
+			params.remove(key);
+			return values[0];
+		} else {
+			throw new VCatException("Parameter '" + key + "' may only be supplied once");
+		}
+	}
+
+	protected static String[] getAndRemoveMulti(Map<String, String[]> params, String key) throws VCatException {
+		String[] values = params.get(key);
+		if (values == null) {
+			return null;
+		} else if (values.length == 0) {
+			params.remove(key);
+			return null;
+		} else {
+			params.remove(key);
+			return values;
+		}
 	}
 
 	/**

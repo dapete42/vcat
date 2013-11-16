@@ -1,6 +1,7 @@
 package vcat.params;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import vcat.mediawiki.IWiki;
 
@@ -11,19 +12,17 @@ import vcat.mediawiki.IWiki;
  */
 public class VCatParams<W extends IWiki> implements Serializable {
 
-	private static final long serialVersionUID = 1489025067225330489L;
+	private static final long serialVersionUID = 254728898946893898L;
 
 	private Integer depth;
 
 	private Integer limit;
 
-	private int namespace = 0;
-
 	private Relation relation = Relation.Category;
 
 	private boolean showhidden = false;
 
-	private String title;
+	private Collection<TitleNamespaceParam> titleNamespaceParams;
 
 	private W wiki;
 
@@ -35,12 +34,8 @@ public class VCatParams<W extends IWiki> implements Serializable {
 		return this.limit;
 	}
 
-	public int getNamespace() {
-		return this.namespace;
-	}
-
-	public String getTitle() {
-		return this.title;
+	public Collection<TitleNamespaceParam> getTitleNamespaceParams() {
+		return this.titleNamespaceParams;
 	}
 
 	public W getWiki() {
@@ -63,10 +58,6 @@ public class VCatParams<W extends IWiki> implements Serializable {
 		this.limit = limit;
 	}
 
-	public void setNamespace(int namespace) {
-		this.namespace = namespace;
-	}
-
 	public void setRelation(Relation relation) {
 		this.relation = relation;
 	}
@@ -75,8 +66,8 @@ public class VCatParams<W extends IWiki> implements Serializable {
 		this.showhidden = showhidden;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setTitleNamespaceParams(Collection<TitleNamespaceParam> titleNamespaceParams) {
+		this.titleNamespaceParams = titleNamespaceParams;
 	}
 
 	public void setWiki(W wiki) {

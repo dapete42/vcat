@@ -23,10 +23,35 @@ import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
 import vcat.params.AbstractAllParams;
+import vcat.params.TitleNamespaceParam;
 import vcat.params.VCatParams;
 import vcat.params.Relation;
 
 public abstract class AbstractVCat<W extends IWiki> {
+
+	class Root extends TitleNamespaceParam {
+
+		private static final long serialVersionUID = -1206610398197602542L;
+
+		private final String fullTitle;
+
+		private final Node node;
+
+		public Root(Node node, String title, int namespace, String fullTitle) {
+			super(title, namespace);
+			this.fullTitle = fullTitle;
+			this.node = node;
+		}
+
+		public String getFullTitle() {
+			return this.fullTitle;
+		}
+
+		public Node getNode() {
+			return this.node;
+		}
+
+	}
 
 	private Log log = LogFactory.getLog(this.getClass());
 
@@ -43,9 +68,11 @@ public abstract class AbstractVCat<W extends IWiki> {
 		return this.all;
 	}
 
-	protected String getDefaultGraphLabel(String fullTitle) {
+	protected String getDefaultGraphLabel(Collection<Root> roots) {
 		final StringBuilder sb = new StringBuilder(this.all.getVCat().getWiki().getDisplayName());
-		sb.append(' ').append(fullTitle);
+		for (Root root : roots) {
+			sb.append(' ').append(root.getFullTitle());
+		}
 		return sb.toString();
 	}
 
@@ -68,28 +95,41 @@ public abstract class AbstractVCat<W extends IWiki> {
 		String fullTitle;
 
 		try {
+			HashSet<Node> allNodesFound = new HashSet<Node>();
 
-			fullTitle = this.all.getMetadata().fullTitle(vCatParams.getTitle(), vCatParams.getNamespace());
+			Collection<TitleNamespaceParam> titleNamespaceList = vCatParams.getTitleNamespaceParams();
+			ArrayList<Root> roots = new ArrayList<Root>(titleNamespaceList.size());
 
-			Node rootNode;
-			if (this.all.getVCat().getNamespace() == Metadata.NS_CATEGORY) {
-				// For categories, use the title without namespace as the name
-				rootNode = graph.node(vCatParams.getTitle());
-			} else {
-				// Otherwise use "ROOT" and set a label with the full title
-				rootNode = graph.node("ROOT");
-				rootNode.setLabel(fullTitle);
+			int n = 0;
+			for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
+				final String title = titleNamespace.getTitle();
+				final int namespace = titleNamespace.getNamespace();
+
+				fullTitle = this.all.getMetadata().fullTitle(title, namespace);
+
+				Node rootNode;
+				if (namespace == Metadata.NS_CATEGORY) {
+					// For categories, use the title without namespace as the name
+					rootNode = graph.node(title);
+				} else {
+					// Otherwise use "ROOT" with a number and set a label with the full title
+					rootNode = graph.node("ROOT" + n);
+					n++;
+					rootNode.setLabel(fullTitle);
+				}
+
+				roots.add(new Root(rootNode, title, namespace, fullTitle));
+				allNodesFound.add(rootNode);
 			}
 
-			boolean showhidden = all.getVCat().isShowhidden();
-
-			HashSet<Node> allNodesFound = new HashSet<Node>();
-			allNodesFound.add(rootNode);
+			boolean showhidden = vCatParams.isShowhidden();
 
 			ArrayList<Node> newNodes = new ArrayList<Node>();
 
-			this.renderGraphOuterFirstLoop(graph, newNodes, rootNode, allNodesFound, fullTitle,
-					categoryNamespacePrefixLength, showhidden);
+			for (Root root : roots) {
+				this.renderGraphOuterFirstLoop(graph, newNodes, root.getNode(), allNodesFound, root.getFullTitle(),
+						categoryNamespacePrefixLength, showhidden);
+			}
 
 			// Counting depth and storing various information to be used when it is exceeded
 			int curDepth = 0;
@@ -120,7 +160,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 				}
 			}
 
-			final StringBuilder graphLabel = new StringBuilder(this.getDefaultGraphLabel(fullTitle));
+			final StringBuilder graphLabel = new StringBuilder(this.getDefaultGraphLabel(roots));
 
 			Relation relation = this.all.getVCat().getRelation();
 			if (relation != Relation.Category) {
@@ -142,7 +182,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 				exceedGroup.setRank(this.renderGraphExceedRank());
 			}
 
-			renderGraphDefaultFormatting(graphLabel.toString(), graph, rootNode);
+			renderGraphDefaultFormatting(graphLabel.toString(), graph, roots);
 
 		} catch (ApiException e) {
 			throw new VCatException("Error creating graph", e);
@@ -150,14 +190,14 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 		long endMillis = System.currentTimeMillis();
 
-		log.info("Created category graph with " + graph.getNodeCount() + " nodes for '" + fullTitle
-				+ "'. Total run time: " + (endMillis - startMillis) + " ms.");
+		log.info("Created category graph with " + graph.getNodeCount() + " nodes. Total run time: "
+				+ (endMillis - startMillis) + " ms.");
 
 		return graph;
 
 	}
 
-	protected void renderGraphDefaultFormatting(String graphLabel, Graph graph, Node rootNode) {
+	protected void renderGraphDefaultFormatting(String graphLabel, Graph graph, Collection<Root> roots) {
 		graph.setFontname("DejaVu Sans");
 		graph.setFontsize(12);
 		graph.setLabel(graphLabel);
@@ -167,12 +207,14 @@ public abstract class AbstractVCat<W extends IWiki> {
 		graph.getDefaultNode().setFontsize(12);
 		graph.getDefaultNode().setShape("rect");
 
-		rootNode.setLabel(this.all.getVCat().getTitle());
-		rootNode.setStyle("bold");
-
 		Group groupMin = graph.group("rootGroup");
-		groupMin.addNode(rootNode);
 		groupMin.setRank(this.renderGraphRootRank());
+		for (Root root : roots) {
+			Node rootNode = root.getNode();
+			rootNode.setLabel(root.getTitle());
+			rootNode.setStyle("bold");
+			groupMin.addNode(rootNode);
+		}
 	}
 
 	protected abstract GroupRank renderGraphExceedRank();

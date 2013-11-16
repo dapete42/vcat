@@ -19,11 +19,13 @@ public class OutputFormatTest {
 	@Test
 	public void testValueOfIgnoreCase() {
 		for (OutputFormat format : OutputFormat.values()) {
-			// Get all enumeration values with upper/lower case of their name()
-			assertEquals(format, OutputFormat.valueOfIgnoreCase(format.name().toLowerCase()));
-			assertEquals(format, OutputFormat.valueOfIgnoreCase(format.name().toUpperCase()));
-			// Check invalid values are null
-			assertNull(OutputFormat.valueOfIgnoreCase(format.name() + "xxxxxxxx"));
+			for (String name : format.getParameterNames()) {
+				// Get all parameter names for all values with upper/lower case
+				assertEquals(format, OutputFormat.valueOfIgnoreCase(name.toLowerCase()));
+				assertEquals(format, OutputFormat.valueOfIgnoreCase(name.toUpperCase()));
+				// Check invalid values are null
+				assertNull(OutputFormat.valueOfIgnoreCase(name + "xxxxxxxx"));
+			}
 		}
 	}
 

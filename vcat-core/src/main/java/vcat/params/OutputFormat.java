@@ -8,35 +8,42 @@ package vcat.params;
 public enum OutputFormat {
 
 	/** Raw Graphviz source, which not passed through Graphviz. */
-	GraphvizRaw("gv", null, "text/plain; charset=UTF-8"),
+	GraphvizRaw("gv", null, "text/plain; charset=UTF-8", "dot", "gv"),
 	/** GIF image (force rendering with cairo). */
-	GIF("gif", "gif:cairo", "image/gif"),
+	GIF("gif", "gif:cairo", "image/gif", "gif"),
 	/** PDF. */
-	PDF("pdf", "pdf", "application/pdf"),
+	PDF("pdf", "pdf", "application/pdf", "pdf"),
 	/** PNG image (force rendering with cairo). */
-	PNG("png", "png:cairo", "image/png"),
+	PNG("png", "png:cairo", "image/png", "png"),
 	/** SVG image. */
-	SVG("svg", "svg", "image/svg+xml; charset=UTF-8");
+	SVG("svg", "svg", "image/svg+xml; charset=UTF-8", "svg");
 
 	public static OutputFormat valueOfIgnoreCase(String name) {
 		for (OutputFormat format : values()) {
-			if (format.name().equalsIgnoreCase(name)) {
-				return format;
+			if (format.parameterNames != null) {
+				for (int i = 0; i < format.parameterNames.length; i++) {
+					if (format.parameterNames[i].equalsIgnoreCase(name)) {
+						return format;
+					}
+				}
 			}
 		}
 		return null;
 	}
 
-	private String fileExtension;
+	private final String fileExtension;
 
-	private String graphvizTypeParameter;
+	private final String graphvizTypeParameter;
 
-	private String mimeType;
+	private final String mimeType;
 
-	OutputFormat(String fileExtension, String graphvizTypeParameter, String mimeType) {
+	private final String[] parameterNames;
+
+	OutputFormat(String fileExtension, String graphvizTypeParameter, String mimeType, String... parameterNames) {
 		this.fileExtension = fileExtension;
 		this.graphvizTypeParameter = graphvizTypeParameter;
 		this.mimeType = mimeType;
+		this.parameterNames = parameterNames;
 	}
 
 	/**
@@ -58,6 +65,13 @@ public enum OutputFormat {
 	 */
 	public String getMimeType() {
 		return this.mimeType;
+	}
+
+	/**
+	 * @return Names this format should be recognized by when calling {@link #valueOfIgnoreCase(String)}.
+	 */
+	public String[] getParameterNames() {
+		return this.parameterNames;
 	}
 
 }
