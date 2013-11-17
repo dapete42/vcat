@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -88,7 +89,7 @@ public class MainConfig {
 		Properties properties = new Properties();
 		try {
 			BufferedReader propertiesReader = new BufferedReader(new InputStreamReader(new FileInputStream(
-					propertiesFile), "UTF8"));
+					propertiesFile), StandardCharsets.UTF_8));
 			properties.load(propertiesReader);
 		} catch (IOException e) {
 			throw new VCatException("Error reading .properties file '" + propertiesFile.getAbsolutePath() + "'", e);
