@@ -6,7 +6,7 @@ import java.util.Set;
 
 import vcat.graph.internal.AbstractGraphPropertyUser;
 import vcat.graph.internal.GraphProperty;
-
+import vcat.graphviz.Graphviz;
 
 public class Group extends AbstractGraphPropertyUser {
 
@@ -48,7 +48,7 @@ public class Group extends AbstractGraphPropertyUser {
 		return this.nodes;
 	}
 
-	@GraphProperty("rank")
+	@GraphProperty(Graphviz.PROPERTY_RANK)
 	public GroupRank getRank() {
 		return this.rank;
 	}

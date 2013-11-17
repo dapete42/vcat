@@ -12,10 +12,10 @@ public class Metadata implements Serializable {
 	private static final long serialVersionUID = -4021889274400016225L;
 
 	/** ID of the article namespace. */
-	public final static int NS_ARTICLE = 0;
+	public final static int NamespaceArticle = 0;
 
 	/** ID of the category namespace. */
-	public final static int NS_CATEGORY = 14;
+	public final static int NamespaceCategory = 14;
 
 	/** A map of all namespace names of the MediaWiki installation. */
 	private final Map<String, Integer> allNamespacesInverse;

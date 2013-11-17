@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import vcat.graph.internal.AbstractDefaultEdgeNode;
 import vcat.graph.internal.GraphProperty;
+import vcat.graphviz.Graphviz;
 
 
 public class DefaultNode extends AbstractDefaultEdgeNode {
@@ -20,7 +21,7 @@ public class DefaultNode extends AbstractDefaultEdgeNode {
 		}
 	}
 
-	@GraphProperty("shape")
+	@GraphProperty(Graphviz.PROPERTY_SHAPE)
 	public String getShape() {
 		return this.shape;
 	}

@@ -31,7 +31,7 @@ import vcat.cache.CacheException;
  */
 public abstract class AbstractFileCache<K extends Serializable> {
 
-	private Log log = LogFactory.getLog(this.getClass());
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	/** The cache directory. */
 	protected final File cacheDirectory;

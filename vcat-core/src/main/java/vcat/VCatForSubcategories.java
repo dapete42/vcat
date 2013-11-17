@@ -85,8 +85,8 @@ public class VCatForSubcategories<W extends IWiki> extends AbstractVCat<W> {
 					// If we have not covered all edges with this, there is an unknown subtree hidden.
 					// The node needs a "..." node to show the graph is incomplete.
 					if (unlinkedEdgesRemaining > 0) {
-						Node exceedNode = graph.node(baseNode.getName() + "_more");
-						exceedNode.setLabel("…");
+						Node exceedNode = graph.node(baseNode.getName() + NODE_EXCEED_SUFFIX);
+						exceedNode.setLabel(NODE_EXCEED_LABEL);
 						// graph.edge(exceedNode, baseNode);
 						graph.edge(baseNode, exceedNode);
 						// Keep these excess nodes in the list of new nodes. This is OK because this is the last loop

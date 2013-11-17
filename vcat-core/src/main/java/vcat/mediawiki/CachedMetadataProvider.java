@@ -8,7 +8,7 @@ import vcat.cache.IMetadataCache;
 
 public class CachedMetadataProvider implements IMetadataProvider {
 
-	private Log log = LogFactory.getLog(this.getClass());
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	private final IMetadataCache metadataCache;
 

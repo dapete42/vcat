@@ -17,6 +17,7 @@ import vcat.graph.Group;
 import vcat.graph.GroupRank;
 import vcat.graph.Node;
 import vcat.graphviz.GraphWriter;
+import vcat.graphviz.Graphviz;
 import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.ICategoryProvider;
@@ -53,7 +54,29 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 	}
 
-	private Log log = LogFactory.getLog(this.getClass());
+	private final static String GRAPH_FONT = "DejaVu Sans";
+
+	private final static String GROUP_EXCEED = "exceed";
+
+	private final static String GROUP_ROOT = "rootGroup";
+
+	private final static String LABEL_DEPTH_PREFIX = "d:";
+
+	private final static String LABEL_HIDDEN = "hidden";
+
+	private final static String LABEL_REL_PREFIX = "rel=";
+
+	protected final static String NODE_EXCEED_LABEL = "…";
+
+	protected final static String NODE_EXCEED_SUFFIX = "_more";
+
+	private final static String ROOT_NODE_PREFIX = "ROOT";
+
+	private final static String TEMPFILE_PREFIX = "graph-temp-";
+
+	private final static String TEMPFILE_SUFFIX = ".gv";
+
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	protected final AbstractAllParams<W> all;
 
@@ -89,7 +112,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 		final Metadata metadata = this.all.getMetadata();
 		final VCatParams<W> vCatParams = this.all.getVCat();
 
-		final String categoryNamespacePrefix = metadata.getAuthoritativeName(Metadata.NS_CATEGORY) + ':';
+		final String categoryNamespacePrefix = metadata.getAuthoritativeName(Metadata.NamespaceCategory) + ':';
 		final int categoryNamespacePrefixLength = categoryNamespacePrefix.length();
 
 		String fullTitle;
@@ -108,12 +131,12 @@ public abstract class AbstractVCat<W extends IWiki> {
 				fullTitle = this.all.getMetadata().fullTitle(title, namespace);
 
 				Node rootNode;
-				if (namespace == Metadata.NS_CATEGORY) {
+				if (namespace == Metadata.NamespaceCategory) {
 					// For categories, use the title without namespace as the name
 					rootNode = graph.node(title);
 				} else {
 					// Otherwise use "ROOT" with a number and set a label with the full title
-					rootNode = graph.node("ROOT" + n);
+					rootNode = graph.node(ROOT_NODE_PREFIX + n);
 					n++;
 					rootNode.setLabel(fullTitle);
 				}
@@ -136,7 +159,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 			boolean exceedDepth = false;
 			Integer limit = vCatParams.getLimit();
 
-			while (!newNodes.isEmpty()) {
+			while (!newNodes.isEmpty() && !exceedDepth) {
 				curDepth++;
 
 				if (maxDepth != null && curDepth >= maxDepth) {
@@ -154,33 +177,32 @@ public abstract class AbstractVCat<W extends IWiki> {
 				if (limit != null && graph.getNodeCount() > limit && curDepth > 1) {
 					return renderGraphForDepth(curDepth - 1);
 				}
-
-				if (exceedDepth) {
-					break;
-				}
 			}
 
 			final StringBuilder graphLabel = new StringBuilder(this.getDefaultGraphLabel(roots));
 
 			Relation relation = this.all.getVCat().getRelation();
 			if (relation != Relation.Category) {
-				graphLabel.append(" rel=");
+				graphLabel.append(' ');
+				graphLabel.append(LABEL_REL_PREFIX);
 				graphLabel.append(relation.name());
 			}
 
 			if (showhidden) {
-				graphLabel.append(" hidden");
+				graphLabel.append(' ');
+				graphLabel.append(LABEL_HIDDEN);
 			}
-			
+
 			if (exceedDepth && !newNodes.isEmpty()) {
 				// We have gone below the depth. If there are actually any excess nodes, change graph title and group
 				// these nodes.
-				graphLabel.append(" d:");
+				graphLabel.append(' ');
+				graphLabel.append(LABEL_DEPTH_PREFIX);
 				graphLabel.append(maxDepth);
 
-				Group exceedGroup = graph.group("exceed");
+				Group exceedGroup = graph.group(GROUP_EXCEED);
 				for (Node node : newNodes) {
-					node.setStyle("dashed");
+					node.setStyle(Graphviz.STYLE_DASHED);
 					exceedGroup.addNode(node);
 				}
 				exceedGroup.setRank(this.renderGraphExceedRank());
@@ -194,29 +216,29 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 		long endMillis = System.currentTimeMillis();
 
-		log.info("Created category graph with " + graph.getNodeCount() + " nodes. Total run time: "
-				+ (endMillis - startMillis) + " ms.");
+		log.info(String.format("Created category graph with %d nodes. Total run time: %d ms.", graph.getNodeCount(),
+				endMillis - startMillis));
 
 		return graph;
 
 	}
 
 	protected void renderGraphDefaultFormatting(String graphLabel, Graph graph, Collection<Root> roots) {
-		graph.setFontname("DejaVu Sans");
+		graph.setFontname(GRAPH_FONT);
 		graph.setFontsize(12);
 		graph.setLabel(graphLabel);
 		graph.setSplines(true);
 
-		graph.getDefaultNode().setFontname("DejaVu Sans");
+		graph.getDefaultNode().setFontname(GRAPH_FONT);
 		graph.getDefaultNode().setFontsize(12);
-		graph.getDefaultNode().setShape("rect");
+		graph.getDefaultNode().setShape(Graphviz.SHAPE_RECT);
 
-		Group groupMin = graph.group("rootGroup");
+		Group groupMin = graph.group(GROUP_ROOT);
 		groupMin.setRank(this.renderGraphRootRank());
 		for (Root root : roots) {
 			Node rootNode = root.getNode();
 			rootNode.setLabel(root.getTitle());
-			rootNode.setStyle("bold");
+			rootNode.setStyle(Graphviz.STYLE_BOLD);
 			groupMin.addNode(rootNode);
 		}
 	}
@@ -241,12 +263,12 @@ public abstract class AbstractVCat<W extends IWiki> {
 			return;
 		}
 
-		// Prepara a temporary file
+		// Prepare a temporary file
 		File tmpFile;
 		try {
-			tmpFile = File.createTempFile("Graph-temp-", ".gv");
+			tmpFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX);
 		} catch (IOException e) {
-			throw new VCatException("Failed to create temporary file", e);
+			throw new VCatException("Error creating temporary file for graph", e);
 		}
 
 		Graph graph = this.renderGraph();

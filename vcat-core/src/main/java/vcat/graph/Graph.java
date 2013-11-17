@@ -9,7 +9,7 @@ import java.util.Set;
 
 import vcat.graph.internal.AbstractGraphPropertyUser;
 import vcat.graph.internal.GraphProperty;
-
+import vcat.graphviz.Graphviz;
 
 public class Graph extends AbstractGraphPropertyUser {
 
@@ -65,7 +65,7 @@ public class Graph extends AbstractGraphPropertyUser {
 	public boolean containsNode(String name) {
 		return this.nodeMap.containsKey(name);
 	}
-	
+
 	/**
 	 * Return and, if it does not exist yet, create an Edge between two Nodes in this Graph.
 	 * 
@@ -113,7 +113,7 @@ public class Graph extends AbstractGraphPropertyUser {
 		return edges;
 	}
 
-	@GraphProperty("fontname")
+	@GraphProperty(Graphviz.PROPERTY_FONTNAME)
 	public String getFontname() {
 		return this.fontname;
 	}
@@ -122,7 +122,7 @@ public class Graph extends AbstractGraphPropertyUser {
 		return this.fontsize;
 	}
 
-	@GraphProperty("fontsize")
+	@GraphProperty(Graphviz.PROPERTY_FONTSIZE)
 	public String getFontsizeString() {
 		if (this.fontsize == 0) {
 			return null;
@@ -135,7 +135,7 @@ public class Graph extends AbstractGraphPropertyUser {
 		return Collections.unmodifiableCollection(this.groupMap.values());
 	}
 
-	@GraphProperty("label")
+	@GraphProperty(Graphviz.PROPERTY_LABEL)
 	public String getLabel() {
 		return this.label;
 	}
@@ -143,15 +143,15 @@ public class Graph extends AbstractGraphPropertyUser {
 	public int getNodeCount() {
 		return this.nodeMap.size();
 	}
-	
+
 	public Collection<Node> getNodes() {
 		return Collections.unmodifiableCollection(this.nodeMap.values());
 	}
 
-	@GraphProperty("splines")
+	@GraphProperty(Graphviz.PROPERTY_SPLINES)
 	public String getSplinesString() {
 		if (this.splines) {
-			return "true";
+			return Graphviz.TRUE;
 		} else {
 			return null;
 		}

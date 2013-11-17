@@ -91,7 +91,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				throw new VCatException("Parameters 'title' and 'ns' may not be used together with 'category'.");
 			}
 			titles = categoryStrings;
-			ns = Integer.toString(Metadata.NS_CATEGORY);
+			ns = Integer.toString(Metadata.NamespaceCategory);
 		}
 
 		// 'title'
@@ -179,7 +179,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				break;
 			case Subcategory:
 				for (int namespace : namespaces) {
-					if (namespace != Metadata.NS_CATEGORY) {
+					if (namespace != Metadata.NamespaceCategory) {
 						throw new VCatException("Parameter 'rel=" + relationString
 								+ "' can only be used for categories");
 					}

@@ -62,7 +62,7 @@ public class QueuedGraphviz implements Graphviz {
 
 	}
 
-	private static final Log log = LogFactory.getLog(QueuedGraphviz.class);
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	private final ExecutorService executorService;
 

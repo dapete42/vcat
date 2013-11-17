@@ -23,33 +23,18 @@ import vcat.graph.Group;
 import vcat.graph.Node;
 
 /**
- * Write the contents of a {@link Graph} to a {@link Writer} as a Graphviz file (DOT file).
+ * Write the contents of a {@link Graph} to a {@link Writer} as a Graphviz file (<code>.gv</code>, formerly
+ * <code>.dot</code>).
  * 
  * @author Peter Schlömer
  */
 public class GraphWriter {
 
-	private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+	private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
-	private static String escapeIdentifier(String string) {
-		if (string.matches("[A-Za-z][A-Za-z0-9_]+")) {
-			return string;
-		} else {
-			return escapeString(string);
-		}
-	}
-
-	private static String escapeProperty(String string) {
-		if (string.matches("[A-Za-z0-9][A-Za-z0-9_]+")) {
-			return string;
-		} else {
-			return escapeString(string);
-		}
-	}
-
-	private static String escapeString(String string) {
+	private static String escape(String string) {
 		// Simple text strings do not have to be escaped
-		if (string.matches("[A-Za-z][A-Za-z0-9_]+")) {
+		if (Graphviz.PATTERN_IDENTIFIER.matcher(string).matches()) {
 			return string;
 		} else {
 			String output = string.replace("\\", "\\\\");
@@ -105,9 +90,10 @@ public class GraphWriter {
 				this.writer.write('=');
 				String value = property.getValue();
 				if (value == null) {
-					this.writer.write("\"\"");
+					this.writer.write('"');
+					this.writer.write('"');
 				} else {
-					this.writer.write(escapeProperty(value));
+					this.writer.write(escape(value));
 				}
 			}
 			this.writer.write(']');
@@ -117,39 +103,42 @@ public class GraphWriter {
 	private void writeDefaultEdge(DefaultEdge edge) throws IOException {
 		Map<String, String> properties = edge.properties();
 		if (!properties.isEmpty()) {
-			this.writer.write("edge");
+			this.writer.write(Graphviz.EDGE);
 			this.writer.write(' ');
 			this.writeBracketProperties(properties);
-			this.writer.write(";\n");
+			this.writer.write(';');
+			this.writer.write('\n');
 		}
 	}
 
 	private void writeDefaultNode(DefaultNode node) throws IOException {
 		Map<String, String> properties = node.properties();
 		if (!properties.isEmpty()) {
-			this.writer.write("node");
+			this.writer.write(Graphviz.NODE);
 			this.writer.write(' ');
 			this.writeBracketProperties(properties);
-			writer.write(";\n");
+			this.writer.write(';');
+			this.writer.write('\n');
 		}
 	}
 
 	private void writeEdge(Edge edge) throws IOException {
-		this.writer.write(escapeIdentifier(edge.getNodeFrom().getName()));
+		this.writer.write(escape(edge.getNodeFrom().getName()));
 		this.writer.write(" -> ");
-		this.writer.write(escapeIdentifier(edge.getNodeTo().getName()));
+		this.writer.write(escape(edge.getNodeTo().getName()));
 		Map<String, String> properties = edge.properties();
 		if (!properties.isEmpty()) {
 			this.writer.write(' ');
 			this.writeBracketProperties(properties);
 		}
-		this.writer.write(";\n");
+		this.writer.write(';');
+		this.writer.write('\n');
 	}
 
 	public void writeGraph(Graph graph) throws IOException {
 
 		this.writer.write("// Created by GraphWriter, ");
-		this.writer.write(dateFormat.format(new Date()));
+		this.writer.write(DATE_FORMAT.format(new Date()));
 		this.writer.write('\n');
 
 		this.writer.write("digraph cluster_vcat{\n");
@@ -195,10 +184,12 @@ public class GraphWriter {
 		writeDefaultNode(group.getDefaultNode());
 		writeDefaultEdge(group.getDefaultEdge());
 		for (Node node : group.getNodes()) {
-			this.writer.write(escapeIdentifier(node.getName()));
+			this.writer.write(escape(node.getName()));
 			this.writer.write(' ');
 		}
-		this.writer.write("\n}\n");
+		this.writer.write('\n');
+		this.writer.write('}');
+		this.writer.write('\n');
 	}
 
 	private void writeLineProperties(Map<String, String> properties) throws IOException {
@@ -213,9 +204,10 @@ public class GraphWriter {
 		this.writer.write(key);
 		this.writer.write('=');
 		if (value != null) {
-			this.writer.write(escapeProperty(value));
+			this.writer.write(escape(value));
 		}
-		this.writer.write(";\n");
+		this.writer.write(';');
+		this.writer.write('\n');
 	}
 
 	private void writeNode(Node node, boolean writeWithoutProperties) throws IOException {
@@ -226,12 +218,13 @@ public class GraphWriter {
 		}
 		// Write node line only if now there are properties, unless overriden by parameter
 		if (writeWithoutProperties || !properties.isEmpty()) {
-			this.writer.write(escapeString(node.getName()));
+			this.writer.write(escape(node.getName()));
 			if (!properties.isEmpty()) {
 				this.writer.write(' ');
 				this.writeBracketProperties(properties);
 			}
-			this.writer.write(";\n");
+			this.writer.write(';');
+			this.writer.write('\n');
 		}
 	}
 }

@@ -26,17 +26,17 @@ import vcat.util.CollectionHelper;
 public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetadataProvider {
 
 	/** Maximum number of titles parameters to use in one request. */
-	private final static int TITLES_MAX = 50;
+	private final static int TitlesMax = 50;
 
 	/** User-agent string to use */
-	private final String USER_AGENT = "VCat (http://tools.wmflabs.org/vcat/; " + this.getClass().getName()
+	private final String UserAgent = "VCat (http://tools.wmflabs.org/vcat/; " + this.getClass().getName()
 			+ "; dev@dapete.net)";
 
 	private DefaultHttpClient client;
 
 	public ApiClient(/* IWiki wiki */) {
 		this.client = new DefaultHttpClient();
-		this.client.getParams().setParameter("User-Agent", USER_AGENT);
+		this.client.getParams().setParameter("User-Agent", UserAgent);
 	}
 
 	protected JSONObject request(String apiUrl, Map<String, String> params) throws ApiException {
@@ -83,9 +83,9 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	private void requestCategoriesRecursive(String apiUrl, Collection<String> fullTitles,
 			final Map<String, Collection<String>> categoryMap, String clcontinue, String clshow) throws ApiException {
 
-		if (fullTitles.size() > TITLES_MAX) {
+		if (fullTitles.size() > TitlesMax) {
 
-			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TITLES_MAX)) {
+			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TitlesMax)) {
 				requestCategoriesRecursive(apiUrl, fullTitlesPart, categoryMap, clcontinue, clshow);
 			}
 

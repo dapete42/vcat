@@ -3,7 +3,7 @@ package vcat.graph;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import vcat.graph.internal.GraphProperty;
-
+import vcat.graphviz.Graphviz;
 
 public class Edge extends DefaultEdge {
 
@@ -29,7 +29,7 @@ public class Edge extends DefaultEdge {
 		}
 	}
 
-	@GraphProperty("label")
+	@GraphProperty(Graphviz.PROPERTY_LABEL)
 	public String getLabel() {
 		return this.label;
 	}

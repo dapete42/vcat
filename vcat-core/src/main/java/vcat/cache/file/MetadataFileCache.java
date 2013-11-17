@@ -14,7 +14,7 @@ import vcat.mediawiki.Metadata;
 
 public class MetadataFileCache extends StringFileCache implements IMetadataCache {
 
-	private Log log = LogFactory.getLog(this.getClass());
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	private final static String PREFIX = "Metadata-";
 

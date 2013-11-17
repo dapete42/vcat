@@ -16,9 +16,7 @@ import java.lang.annotation.Target;
 public @interface GraphProperty {
 
 	/**
-	 * The name the property should have in the Graphviz output.
-	 * 
-	 * @return Property name.
+	 * @return The name the property should have in the Graphviz output.
 	 */
 	String value();
 
