@@ -16,7 +16,7 @@ import vcat.mediawiki.Metadata;
 
 public class MetadataRedisCache extends StringRedisCache implements IMetadataCache {
 
-	private Log log = LogFactory.getLog(this.getClass());
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	public MetadataRedisCache(final JedisPool jedisPool, final String redisPrefix, final int maxAgeInSeconds) {
 		super(jedisPool, redisPrefix, maxAgeInSeconds);

@@ -14,7 +14,7 @@ import vcat.VCatException;
 
 public class MainConfig {
 
-	private static final Log log = LogFactory.getLog(MainConfig.class);
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	/** Default value for {@link #graphvizDir} */
 	private static final String DEFAULT_GRAPHVIZ_DIR = "/usr/bin";
