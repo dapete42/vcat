@@ -1,7 +1,6 @@
 package vcat.graph.internal;
 
 import vcat.graph.Graph;
-import vcat.graphviz.Graphviz;
 
 /**
  * Base class for all edges and nodes in a {@link Graph}.
@@ -34,7 +33,7 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 		return this.fontsize;
 	}
 
-	@GraphProperty(Graphviz.PROPERTY_FONTSIZE)
+	@GraphProperty(Graph.PROPERTY_FONTSIZE)
 	public String getFontsizeString() {
 		if (this.fontsize == 0) {
 			return null;
@@ -46,12 +45,12 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 	/**
 	 * @return URL in imagemap, PostScript and SVG files.
 	 */
-	@GraphProperty(Graphviz.PROPERTY_HREF)
+	@GraphProperty(Graph.PROPERTY_HREF)
 	public String getHref() {
 		return this.href;
 	}
 
-	@GraphProperty(Graphviz.PROPERTY_STYLE)
+	@GraphProperty(Graph.PROPERTY_STYLE)
 	public String getStyle() {
 		return this.style;
 	}

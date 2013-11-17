@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 
@@ -28,12 +29,12 @@ public class ApiFileCache extends StringFileCache implements IApiCache {
 				JSONObject result = new JSONObject(new JSONTokener(reader));
 				return result;
 			} catch (Exception e) {
-				throw new CacheException("Error while parsing JSON data from cache", e);
+				throw new CacheException(Messages.getString("ApiFileCache.Exception.ParseJSON"), e);
 			} finally {
 				try {
 					reader.close();
 				} catch (IOException e) {
-					throw new CacheException("Error closing reader after reading JSON data from cache", e);
+					throw new CacheException(Messages.getString("ApiFileCache.Exception.CloseJSON"), e);
 				}
 			}
 		} else {

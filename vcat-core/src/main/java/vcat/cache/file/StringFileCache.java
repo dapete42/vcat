@@ -13,7 +13,7 @@ public abstract class StringFileCache extends AbstractFileCache<String> {
 
 	@Override
 	protected String hashForKey(final String key) {
-		// Directly used bytes for hash instead of serializing
+		// Directly use bytes for hash instead of serializing
 		return this.hash(key.getBytes());
 	}
 

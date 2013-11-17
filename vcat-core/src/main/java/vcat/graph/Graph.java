@@ -6,12 +6,45 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import vcat.graph.internal.AbstractGraphPropertyUser;
 import vcat.graph.internal.GraphProperty;
-import vcat.graphviz.Graphviz;
 
 public class Graph extends AbstractGraphPropertyUser {
+
+	/**
+	 * Pattern do determine if a string can be used as an identifier in a graphviz file without quoting.
+	 */
+	public final static Pattern PATTERN_IDENTIFIER = Pattern.compile("[A-Za-z][A-Za-z0-9_]+");
+
+	public final static String EDGE = "edge";
+
+	public final static String NODE = "node";
+
+	public final static String PROPERTY_FONTNAME = "fontname";
+
+	public final static String PROPERTY_FONTSIZE = "fontsize";
+
+	public final static String PROPERTY_HREF = "href";
+
+	public final static String PROPERTY_LABEL = "label";
+
+	public final static String PROPERTY_RANK = "rank";
+
+	public final static String PROPERTY_SHAPE = "shape";
+
+	public final static String PROPERTY_SPLINES = "splines";
+
+	public final static String PROPERTY_STYLE = "style";
+
+	public final static String SHAPE_RECT = "rect";
+
+	public final static String STYLE_BOLD = "bold";
+
+	public final static String STYLE_DASHED = "dashed";
+
+	public final static String TRUE = "true";
 
 	public static Graph createSubGraph(Graph fullGraph, Node rootNode, int depth) {
 		Graph subGraph = new Graph();
@@ -113,7 +146,7 @@ public class Graph extends AbstractGraphPropertyUser {
 		return edges;
 	}
 
-	@GraphProperty(Graphviz.PROPERTY_FONTNAME)
+	@GraphProperty(PROPERTY_FONTNAME)
 	public String getFontname() {
 		return this.fontname;
 	}
@@ -122,7 +155,7 @@ public class Graph extends AbstractGraphPropertyUser {
 		return this.fontsize;
 	}
 
-	@GraphProperty(Graphviz.PROPERTY_FONTSIZE)
+	@GraphProperty(PROPERTY_FONTSIZE)
 	public String getFontsizeString() {
 		if (this.fontsize == 0) {
 			return null;
@@ -135,7 +168,7 @@ public class Graph extends AbstractGraphPropertyUser {
 		return Collections.unmodifiableCollection(this.groupMap.values());
 	}
 
-	@GraphProperty(Graphviz.PROPERTY_LABEL)
+	@GraphProperty(PROPERTY_LABEL)
 	public String getLabel() {
 		return this.label;
 	}
@@ -148,10 +181,10 @@ public class Graph extends AbstractGraphPropertyUser {
 		return Collections.unmodifiableCollection(this.nodeMap.values());
 	}
 
-	@GraphProperty(Graphviz.PROPERTY_SPLINES)
+	@GraphProperty(PROPERTY_SPLINES)
 	public String getSplinesString() {
 		if (this.splines) {
-			return Graphviz.TRUE;
+			return TRUE;
 		} else {
 			return null;
 		}

@@ -18,6 +18,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import vcat.Messages;
 import vcat.cache.CacheException;
 
 /**
@@ -60,8 +61,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	protected AbstractFileCache(File cacheDirectory, String prefix, String suffix, final int maxAgeInSeconds)
 			throws CacheException {
 		if (!cacheDirectory.exists() || !cacheDirectory.isDirectory() || !cacheDirectory.canWrite()) {
-			throw new CacheException("Cache directory '" + cacheDirectory.getAbsolutePath()
-					+ "' must exist, be a directory and be writable.");
+			throw new CacheException(String.format(Messages.getString("AbstractFileCache.Exception.DirMustExist"),
+					cacheDirectory.getAbsolutePath()));
 		}
 		this.cacheDirectory = cacheDirectory;
 		this.prefix = prefix;
@@ -75,11 +76,12 @@ public abstract class AbstractFileCache<K extends Serializable> {
 			if (file.delete()) {
 				clearedFiles++;
 			} else {
-				log.warn("Could not delete '" + file.getAbsolutePath() + "' when clearing cache");
+				log.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeleteClearing"),
+						file.getAbsolutePath()));
 			}
 		}
 		if (clearedFiles > 0) {
-			log.info("Cleared " + clearedFiles + " files from cache");
+			log.info(String.format(Messages.getString("AbstractFileCache.Info.Cleared"), clearedFiles));
 		}
 	}
 
@@ -94,7 +96,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
 			try {
 				inputStream = new FileInputStream(cacheFile);
 			} catch (FileNotFoundException e) {
-				throw new CacheException("Cache file '" + cacheFile.getAbsolutePath() + " not found");
+				throw new CacheException(String.format(Messages.getString("AbstractFileCache.Exception.FileNotFound"),
+						cacheFile.getAbsolutePath()));
 			}
 			return this.readValueFromStream(inputStream);
 		} else {
@@ -114,8 +117,9 @@ public abstract class AbstractFileCache<K extends Serializable> {
 			try {
 				return new FileInputStream(this.getCacheFile(key));
 			} catch (FileNotFoundException e) {
-				log.error("File not found even though it is in the cache. This should never happen.", e);
-				throw new CacheException("File not found even though it is in the cache. This should never happen.", e);
+				String message = Messages.getString("AbstractFileCache.Exception.FileNotFoundShouldNotHappen");
+				log.error(message, e);
+				throw new CacheException(message, e);
 			}
 		} else {
 			return null;
@@ -177,12 +181,13 @@ public abstract class AbstractFileCache<K extends Serializable> {
 				if (file.delete()) {
 					purgedFiles++;
 				} else {
-					log.warn("Could not delete '" + file.getAbsolutePath() + "' when purging cache");
+					log.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeletePurging"),
+							file.getAbsolutePath()));
 				}
 			}
 		}
 		if (purgedFiles > 0) {
-			log.info("Purged " + purgedFiles + " files from cache");
+			log.info(String.format(Messages.getString("AbstractFileCache.Info.Purged"), purgedFiles));
 		}
 	}
 
@@ -192,7 +197,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 			this.writeValueToStream(value, outputStream);
 			outputStream.close();
 		} catch (IOException e) {
-			throw new CacheException("Failed to write item to cache", e);
+			throw new CacheException(Messages.getString("AbstractFileCache.Exception.WriteFailed"), e);
 		}
 	}
 
@@ -207,7 +212,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 				try {
 					FileUtils.copyFile(file, cacheFile);
 				} catch (IOException e) {
-					throw new CacheException("Error moving temporary file to cache", e);
+					throw new CacheException(Messages.getString("AbstractFileCache.Exception.MoveFailed"), e);
 				} finally {
 					file.delete();
 				}
@@ -216,7 +221,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 			try {
 				FileUtils.copyFile(file, cacheFile);
 			} catch (IOException e) {
-				throw new CacheException("Error moving temporary file to cache", e);
+				throw new CacheException(Messages.getString("AbstractFileCache.Exception.MoveFailed"), e);
 			}
 		}
 	}
@@ -225,7 +230,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 		try {
 			return IOUtils.toByteArray(inputStream);
 		} catch (IOException e) {
-			throw new CacheException("I/O error reading cache item", e);
+			throw new CacheException(Messages.getString("AbstractFileCache.Exception.IOReading"), e);
 		}
 	}
 
@@ -237,7 +242,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 		try {
 			IOUtils.write(value, outputStream);
 		} catch (IOException e) {
-			throw new CacheException("I/O error writing cache item", e);
+			throw new CacheException(Messages.getString("AbstractFileCache.Exception.IOWriting"), e);
 		}
 	}
 

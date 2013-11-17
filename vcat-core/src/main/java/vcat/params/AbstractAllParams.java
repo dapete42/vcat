@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import vcat.Messages;
 import vcat.VCatException;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.IMetadataProvider;
@@ -35,7 +36,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 		String wikiString = getAndRemove(params, "wiki");
 		if (wikiString == null || wikiString.isEmpty()) {
-			throw new VCatException("Parameter 'wiki' missing.");
+			throw new VCatException(Messages.getString("AbstractAllParams.Exception.WikiMissing"));
 		}
 		W wiki = initWiki(wikiString);
 		this.getVCat().setWiki(wiki);
@@ -43,7 +44,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		try {
 			this.metadata = metadataProvider.requestMetadata(wiki);
 		} catch (ApiException e) {
-			throw new VCatException("Error retrieving metadata", e);
+			throw new VCatException(Messages.getString("AbstractAllParams.Exception.RetrievingMetadata"), e);
 		}
 
 		//
@@ -57,7 +58,8 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		if (formatString != null && !formatString.isEmpty()) {
 			format = OutputFormat.valueOfIgnoreCase(formatString);
 			if (format == null) {
-				throw new VCatException("Unknown value for parameter 'format': '" + formatString + "'");
+				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+						"format", formatString));
 			}
 		}
 
@@ -65,7 +67,8 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		if (algorithmString != null && !algorithmString.isEmpty()) {
 			algorithm = Algorithm.valueOfIgnoreCase(algorithmString);
 			if (algorithm == null) {
-				throw new VCatException("Unknown value for parameter 'algorithm': '" + algorithmString + "'");
+				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+						"algorithm", algorithmString));
 			}
 		}
 
@@ -88,20 +91,20 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		if (categoryStrings != null) {
 			// If set, convert it to 'title' and 'ns' parameters; the other parameter may not also be used
 			if (titles != null || ns != null) {
-				throw new VCatException("Parameters 'title' and 'ns' may not be used together with 'category'.");
+				throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleNsWithCategory"));
 			}
 			titles = categoryStrings;
-			ns = Integer.toString(Metadata.NamespaceCategory);
+			ns = Integer.toString(Metadata.NS_CATEGORY);
 		}
 
 		// 'title'
 		if (titles == null) {
-			throw new VCatException("Parameter 'title' or 'category' missing.");
+			throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleCategoryMissing"));
 		}
 		for (int i = 0; i < titles.length; i++) {
 			titles[i] = unescapeMediawikiTitle(titles[i]);
 			if (titles[i].isEmpty()) {
-				throw new VCatException("Parameter 'title' must not be empty.");
+				throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleEmpty"));
 			}
 		}
 
@@ -120,10 +123,12 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			try {
 				namespace = Integer.parseInt(ns);
 			} catch (NumberFormatException e) {
-				throw new VCatException("Parameter 'ns': '" + ns + "' is not a valid number.", e);
+				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
+						"ns", ns), e);
 			}
 			if (this.metadata.getAllNames(namespace).isEmpty()) {
-				throw new VCatException("Parameter 'ns': namespace " + namespace + " does not exist.");
+				throw new VCatException(String.format(
+						Messages.getString("AbstractAllParams.Exception.NamespaceDoesNotExist"), namespace));
 			}
 			for (int i = 0; i < titles.length; i++) {
 				namespaces[i] = namespace;
@@ -136,10 +141,12 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			try {
 				depth = Integer.parseInt(depthString);
 			} catch (NumberFormatException e) {
-				throw new VCatException("Parameter 'depth': '" + depthString + "' is not a valid number.", e);
+				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
+						"depth", depthString), e);
 			}
 			if (depth < 1) {
-				throw new VCatException("Parameter 'depth' must be greator than or equal to 1.");
+				throw new VCatException(String.format(
+						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), "depth", 1));
 			}
 		}
 
@@ -150,12 +157,15 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			try {
 				limit = Integer.parseInt(limitString);
 			} catch (NumberFormatException e) {
-				throw new VCatException("Parameter 'limit': '" + limitString + "' is not a valid number.", e);
+				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
+						"limit", limitString), e);
 			}
 			if (limit < 1) {
-				throw new VCatException("Parameter 'limit' must be greater than or equal to 1.");
+				throw new VCatException(String.format(
+						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), "limit", 1));
 			} else if (limit > maxLimit) {
-				throw new VCatException("Parameter 'depth' must be less than or equal to " + maxLimit + ".");
+				throw new VCatException(String.format(
+						Messages.getString("AbstractAllParams.Exception.MustBeLessThanOrEqual"), "limit", maxLimit));
 			}
 		}
 
@@ -166,7 +176,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		} else if ("1".equals(showhiddenString)) {
 			showhidden = true;
 		} else {
-			throw new VCatException("Parameter 'showhidden' must be '0' or '1'.");
+			throw new VCatException(Messages.getString("AbstractAllParams.Exception.ShowhiddenInvalid"));
 		}
 
 		// 'rel' - relation to use (categories, subcategories)
@@ -179,14 +189,15 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				break;
 			case Subcategory:
 				for (int namespace : namespaces) {
-					if (namespace != Metadata.NamespaceCategory) {
-						throw new VCatException("Parameter 'rel=" + relationString
-								+ "' can only be used for categories");
+					if (namespace != Metadata.NS_CATEGORY) {
+						throw new VCatException(String.format(
+								Messages.getString("AbstractAllParams.Exception.RelOnlyForCategories"), relationString));
 					}
 				}
 				break;
 			default:
-				throw new VCatException("Unknown value for parameter 'rel': '" + relationString + "'");
+				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+						"rel", relationString));
 			}
 		}
 
@@ -208,7 +219,8 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		//
 
 		if (!params.isEmpty()) {
-			throw new VCatException("Unknown parameter(s): '" + StringUtils.join(params.keySet(), "', '") + "'");
+			throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownParameters"),
+					'\'' + StringUtils.join(params.keySet(), "', '") + '\''));
 		}
 
 	}
@@ -224,7 +236,8 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			params.remove(key);
 			return values[0];
 		} else {
-			throw new VCatException("Parameter '" + key + "' may only be supplied once");
+			throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.ParameterRepeated"),
+					key));
 		}
 	}
 

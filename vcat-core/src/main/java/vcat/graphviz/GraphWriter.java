@@ -6,8 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import vcat.Messages;
 import vcat.graph.DefaultEdge;
 import vcat.graph.DefaultNode;
 import vcat.graph.Edge;
@@ -34,7 +35,7 @@ public class GraphWriter {
 
 	private static String escape(String string) {
 		// Simple text strings do not have to be escaped
-		if (Graphviz.PATTERN_IDENTIFIER.matcher(string).matches()) {
+		if (Graph.PATTERN_IDENTIFIER.matcher(string).matches()) {
 			return string;
 		} else {
 			String output = string.replace("\\", "\\\\");
@@ -48,18 +49,19 @@ public class GraphWriter {
 	public static void writeGraphToFile(Graph graph, File outputFile) throws GraphvizException {
 		Writer writer = null;
 		try {
-			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile, false), "UTF8"));
-		} catch (UnsupportedEncodingException e) {
-			throw new GraphvizException("UTF8 encoding must be supported to create Graphviz output files", e);
+			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile, false),
+					StandardCharsets.UTF_8));
 		} catch (FileNotFoundException e) {
-			throw new GraphvizException("Error opening file '" + outputFile.getAbsolutePath() + "' for output", e);
+			throw new GraphvizException(String.format(Messages.getString("GraphWriter.Exception.OpenFileForOutput"),
+					outputFile.getAbsolutePath()), e);
 		}
 
 		GraphWriter graphWriter = new GraphWriter(writer);
 		try {
 			graphWriter.writeGraph(graph);
 		} catch (IOException e) {
-			throw new GraphvizException("Error writing graph", e);
+			throw new GraphvizException(String.format(Messages.getString("GraphWriter.Exception.WriteGraph"),
+					outputFile.getAbsolutePath()), e);
 		}
 	}
 
@@ -103,7 +105,7 @@ public class GraphWriter {
 	private void writeDefaultEdge(DefaultEdge edge) throws IOException {
 		Map<String, String> properties = edge.properties();
 		if (!properties.isEmpty()) {
-			this.writer.write(Graphviz.EDGE);
+			this.writer.write(Graph.EDGE);
 			this.writer.write(' ');
 			this.writeBracketProperties(properties);
 			this.writer.write(';');
@@ -114,7 +116,7 @@ public class GraphWriter {
 	private void writeDefaultNode(DefaultNode node) throws IOException {
 		Map<String, String> properties = node.properties();
 		if (!properties.isEmpty()) {
-			this.writer.write(Graphviz.NODE);
+			this.writer.write(Graph.NODE);
 			this.writer.write(' ');
 			this.writeBracketProperties(properties);
 			this.writer.write(';');
@@ -137,9 +139,8 @@ public class GraphWriter {
 
 	public void writeGraph(Graph graph) throws IOException {
 
-		this.writer.write("// Created by GraphWriter, ");
-		this.writer.write(DATE_FORMAT.format(new Date()));
-		this.writer.write('\n');
+		this.writer
+				.write(String.format(Messages.getString("GraphWriter.Output.Header"), DATE_FORMAT.format(new Date())));
 
 		this.writer.write("digraph cluster_vcat{\n");
 

@@ -2,11 +2,13 @@ package vcat.mediawiki;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.json.JSONObject;
 
+import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 
@@ -29,12 +31,11 @@ public class CachedApiClient<W extends IWiki> extends ApiClient<W> {
 		requestStuff.append('&');
 		for (Entry<String, String> param : params.entrySet()) {
 			try {
-				requestStuff.append(URLEncoder.encode(param.getKey(), "UTF8"));
+				requestStuff.append(URLEncoder.encode(param.getKey(), StandardCharsets.UTF_8.name()));
 				requestStuff.append('&');
-				requestStuff.append(URLEncoder.encode(param.getValue(), "UTF8"));
+				requestStuff.append(URLEncoder.encode(param.getValue(), StandardCharsets.UTF_8.name()));
 			} catch (UnsupportedEncodingException e) {
-				throw new ApiException("This should never happen, URLEncoder.encode claims it does not support UTF-8",
-						e);
+				throw new ApiException(Messages.getString("Exception.UTF8"), e);
 			}
 		}
 		String cacheKey = requestStuff.toString();
@@ -44,14 +45,14 @@ public class CachedApiClient<W extends IWiki> extends ApiClient<W> {
 				try {
 					return this.cache.getJSONObject(cacheKey);
 				} catch (CacheException e) {
-					throw new ApiException("Error accessing API cache", e);
+					throw new ApiException(Messages.getString("CachedApiClient.Exception.AccessCache"), e);
 				}
 			} else {
 				JSONObject jsonObject = super.request(apiUrl, params);
 				try {
 					this.cache.put(cacheKey, jsonObject);
 				} catch (CacheException e) {
-					throw new ApiException("Error caching API result", e);
+					throw new ApiException(Messages.getString("CachedApiClient.Exception.CacheResult"), e);
 				}
 				return jsonObject;
 			}

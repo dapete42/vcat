@@ -3,6 +3,7 @@ package vcat.mediawiki;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.IMetadataCache;
 
@@ -26,7 +27,7 @@ public class CachedMetadataProvider implements IMetadataProvider {
 			this.metadataCache.purge();
 			metadata = this.metadataCache.getMetadata(wiki);
 		} catch (CacheException e) {
-			log.warn("Error retrieving metadata from cache", e);
+			log.warn(Messages.getString("CachedMetadataProvider.Warn.Retrieve"), e);
 		}
 
 		if (metadata == null) {
@@ -34,7 +35,7 @@ public class CachedMetadataProvider implements IMetadataProvider {
 				metadata = this.metadataProvider.requestMetadata(wiki);
 				this.metadataCache.put(wiki, metadata);
 			} catch (CacheException e) {
-				throw new ApiException("Error storing metadata in cache", e);
+				throw new ApiException(Messages.getString("CachedMetadataProvider.Warn.Store"), e);
 			}
 		}
 

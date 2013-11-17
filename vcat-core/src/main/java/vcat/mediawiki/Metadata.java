@@ -7,15 +7,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import vcat.Messages;
+
 public class Metadata implements Serializable {
 
 	private static final long serialVersionUID = -4021889274400016225L;
 
 	/** ID of the article namespace. */
-	public final static int NamespaceArticle = 0;
+	public final static int NS_ARTICLE = 0;
 
 	/** ID of the category namespace. */
-	public final static int NamespaceCategory = 14;
+	public final static int NS_CATEGORY = 14;
 
 	/** A map of all namespace names of the MediaWiki installation. */
 	private final Map<String, Integer> allNamespacesInverse;
@@ -35,7 +37,7 @@ public class Metadata implements Serializable {
 	public String fullTitle(final String title, final int namespace) throws ApiException {
 		String namespaceName = this.getAuthoritativeName(namespace);
 		if (namespaceName == null) {
-			throw new ApiException("Error while determining full article title: unknown namespace " + namespace);
+			throw new ApiException(String.format(Messages.getString("Metadata.Exception.ArticleTitle"), namespace));
 		} else if (namespaceName.isEmpty()) {
 			return title;
 		} else {

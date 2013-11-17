@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import vcat.Messages;
 import vcat.params.GraphvizParams;
 
 /**
@@ -24,14 +25,10 @@ public class GraphvizExternal implements Graphviz {
 
 	public GraphvizExternal(File programPath) {
 		if (!programPath.exists() || !programPath.isDirectory() || !programPath.canRead()) {
-			throw new InvalidParameterException("Program path '" + programPath.getAbsolutePath()
-					+ "' must exist, be a directory and be readable.");
+			throw new InvalidParameterException(String.format(
+					Messages.getString("GraphvizExternal.Exception.ProgramPath"), programPath.getAbsolutePath()));
 		}
 		this.programPath = programPath;
-		if (!this.programPath.exists() || !this.programPath.isDirectory() || !this.programPath.canRead()) {
-			throw new InvalidParameterException("Program path '" + this.programPath.getAbsolutePath()
-					+ "' must exist, be a directory and be readable.");
-		}
 	}
 
 	public List<String> buildCommandParts(final String command, GraphvizParams params, File inputFile, File outputFile) {
@@ -51,8 +48,8 @@ public class GraphvizExternal implements Graphviz {
 
 		final File programFile = new File(programPath, params.getAlgorithm().getProgram());
 		if (!programFile.exists() || !programFile.canExecute()) {
-			throw new InvalidParameterException("Program file '" + programFile.getAbsolutePath()
-					+ "' must exist and be executable. Is Graphviz installed?");
+			throw new InvalidParameterException(String.format(
+					Messages.getString("GraphvizExternal.Exception.ProgramFile"), programFile.getAbsolutePath()));
 		}
 
 		final String command = programFile.getAbsolutePath();
@@ -68,13 +65,15 @@ public class GraphvizExternal implements Graphviz {
 		try {
 			graphvizProcess = runtime.exec(commandArray);
 		} catch (IOException e) {
-			throw new GraphvizException("Error running graphviz executable '" + command + "'", e);
+			throw new GraphvizException(
+					String.format(Messages.getString("GraphvizExternal.Exception.Running"), command), e);
 		}
 		try {
 			// Close stdin
 			graphvizProcess.getOutputStream().close();
 		} catch (IOException e) {
-			throw new GraphvizException("Error running graphviz: cannot close program stdin", e);
+			throw new GraphvizException(String.format(Messages.getString("GraphvizExternal.Exception.Stdin"), command),
+					e);
 		}
 		boolean running = true;
 		int exitValue = 0;
@@ -95,13 +94,14 @@ public class GraphvizExternal implements Graphviz {
 		long endMillis = System.currentTimeMillis();
 
 		if (exitValue == 0) {
-			log.info("Graphviz run on input file '" + inputFile.getAbsolutePath() + "'. Total run time: "
-					+ (endMillis - startMillis) + " ms.");
+			log.info(String.format(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.getAbsolutePath(),
+					endMillis - startMillis));
 		} else {
-			log.error("Graphviz run on input file '" + inputFile.getAbsolutePath() + "' failed with exit code "
-					+ exitValue + ".");
+			log.error(String.format(Messages.getString("GraphvizExternal.Error.ExitCode"), inputFile.getAbsolutePath(),
+					exitValue));
 			outputFile.delete();
-			throw new GraphvizException("Error running graphviz: returned exit code " + exitValue);
+			throw new GraphvizException(String.format(Messages.getString("GraphvizExternal.Exception.ExitCode"),
+					exitValue));
 		}
 	}
 

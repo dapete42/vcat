@@ -29,11 +29,7 @@ public abstract class AbstractGraphPropertyUser {
 							properties.put(name, valueObject.toString());
 						}
 					}
-				} catch (IllegalAccessException e) {
-					// ignore
-				} catch (IllegalArgumentException e) {
-					// ignore
-				} catch (InvocationTargetException e) {
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 					// ignore
 				}
 			}

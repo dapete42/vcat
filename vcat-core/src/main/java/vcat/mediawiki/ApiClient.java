@@ -21,22 +21,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import vcat.Messages;
 import vcat.util.CollectionHelper;
 
 public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetadataProvider {
 
 	/** Maximum number of titles parameters to use in one request. */
-	private final static int TitlesMax = 50;
-
-	/** User-agent string to use */
-	private final String UserAgent = "VCat (http://tools.wmflabs.org/vcat/; " + this.getClass().getName()
-			+ "; dev@dapete.net)";
+	private final static int TITLES_MAX = 50;
 
 	private DefaultHttpClient client;
 
-	public ApiClient(/* IWiki wiki */) {
+	public ApiClient() {
 		this.client = new DefaultHttpClient();
-		this.client.getParams().setParameter("User-Agent", UserAgent);
+		this.client.getParams().setParameter("User-Agent", Messages.getString("ApiClient.UserAgent"));
 	}
 
 	protected JSONObject request(String apiUrl, Map<String, String> params) throws ApiException {
@@ -58,7 +55,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 				HttpEntity entity = response.getEntity();
 				content = entity.getContent();
 			} catch (IOException e) {
-				throw new ApiException("Error during HTTP access", e);
+				throw new ApiException(Messages.getString("ApiClient.Exception.HTTP"), e);
 			}
 			InputStreamReader reader = new InputStreamReader(content);
 			try {
@@ -66,7 +63,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 				reader.close();
 				return result;
 			} catch (Exception e) {
-				throw new ApiException("Error while parsing JSON response", e);
+				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 			}
 		}
 	}
@@ -83,9 +80,9 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	private void requestCategoriesRecursive(String apiUrl, Collection<String> fullTitles,
 			final Map<String, Collection<String>> categoryMap, String clcontinue, String clshow) throws ApiException {
 
-		if (fullTitles.size() > TitlesMax) {
+		if (fullTitles.size() > TITLES_MAX) {
 
-			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TitlesMax)) {
+			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TITLES_MAX)) {
 				requestCategoriesRecursive(apiUrl, fullTitlesPart, categoryMap, clcontinue, clshow);
 			}
 
@@ -131,7 +128,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 							clshow);
 				}
 			} catch (JSONException e) {
-				throw new ApiException("Error while parsing JSON response", e);
+				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 			}
 
 		}
@@ -174,7 +171,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 						result.getJSONObject("query-continue").getJSONObject("categorymembers").getString("cmcontinue"));
 			}
 		} catch (JSONException e) {
-			throw new ApiException("Error while parsing JSON response", e);
+			throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 		}
 
 	}
@@ -223,7 +220,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			}
 
 		} catch (JSONException e) {
-			throw new ApiException("Error while decoding JSON response", e);
+			throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 		}
 
 		return new Metadata(wiki, articlepath, authoritativeNamespaces, allNamespacesInverse);

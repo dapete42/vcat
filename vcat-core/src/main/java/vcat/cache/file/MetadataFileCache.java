@@ -7,6 +7,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.IMetadataCache;
 import vcat.mediawiki.IWiki;
@@ -36,14 +37,14 @@ public class MetadataFileCache extends StringFileCache implements IMetadataCache
 				} else {
 					// Wrong type
 					this.remove(key);
-					String message = "Error while deserializing cached file to Metadata; removing from cache";
+					String message = Messages.getString("MetadataFileCache.Error.Deserialize");
 					log.error(message);
 					throw new CacheException(message);
 				}
 			} catch (SerializationException e) {
 				// Error during deserializing
 				this.remove(key);
-				String message = "Error while deserializing cached file to Metadata; removing from cache";
+				String message = Messages.getString("MetadataFileCache.Error.Deserialize");
 				log.warn(message, e);
 				throw new CacheException(message, e);
 			}

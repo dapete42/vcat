@@ -17,7 +17,6 @@ import vcat.graph.Group;
 import vcat.graph.GroupRank;
 import vcat.graph.Node;
 import vcat.graphviz.GraphWriter;
-import vcat.graphviz.Graphviz;
 import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.ICategoryProvider;
@@ -112,7 +111,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 		final Metadata metadata = this.all.getMetadata();
 		final VCatParams<W> vCatParams = this.all.getVCat();
 
-		final String categoryNamespacePrefix = metadata.getAuthoritativeName(Metadata.NamespaceCategory) + ':';
+		final String categoryNamespacePrefix = metadata.getAuthoritativeName(Metadata.NS_CATEGORY) + ':';
 		final int categoryNamespacePrefixLength = categoryNamespacePrefix.length();
 
 		String fullTitle;
@@ -131,7 +130,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 				fullTitle = this.all.getMetadata().fullTitle(title, namespace);
 
 				Node rootNode;
-				if (namespace == Metadata.NamespaceCategory) {
+				if (namespace == Metadata.NS_CATEGORY) {
 					// For categories, use the title without namespace as the name
 					rootNode = graph.node(title);
 				} else {
@@ -202,7 +201,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 				Group exceedGroup = graph.group(GROUP_EXCEED);
 				for (Node node : newNodes) {
-					node.setStyle(Graphviz.STYLE_DASHED);
+					node.setStyle(Graph.STYLE_DASHED);
 					exceedGroup.addNode(node);
 				}
 				exceedGroup.setRank(this.renderGraphExceedRank());
@@ -211,13 +210,13 @@ public abstract class AbstractVCat<W extends IWiki> {
 			renderGraphDefaultFormatting(graphLabel.toString(), graph, roots);
 
 		} catch (ApiException e) {
-			throw new VCatException("Error creating graph", e);
+			throw new VCatException(Messages.getString("AbstractVCat.Exception.CreatingGraph"), e);
 		}
 
 		long endMillis = System.currentTimeMillis();
 
-		log.info(String.format("Created category graph with %d nodes. Total run time: %d ms.", graph.getNodeCount(),
-				endMillis - startMillis));
+		log.info(String.format(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(), endMillis
+				- startMillis));
 
 		return graph;
 
@@ -231,14 +230,14 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 		graph.getDefaultNode().setFontname(GRAPH_FONT);
 		graph.getDefaultNode().setFontsize(12);
-		graph.getDefaultNode().setShape(Graphviz.SHAPE_RECT);
+		graph.getDefaultNode().setShape(Graph.SHAPE_RECT);
 
 		Group groupMin = graph.group(GROUP_ROOT);
 		groupMin.setRank(this.renderGraphRootRank());
 		for (Root root : roots) {
 			Node rootNode = root.getNode();
 			rootNode.setLabel(root.getTitle());
-			rootNode.setStyle(Graphviz.STYLE_BOLD);
+			rootNode.setStyle(Graph.STYLE_BOLD);
 			groupMin.addNode(rootNode);
 		}
 	}
@@ -268,7 +267,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 		try {
 			tmpFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX);
 		} catch (IOException e) {
-			throw new VCatException("Error creating temporary file for graph", e);
+			throw new VCatException(Messages.getString("AbstractVCat.Exception.CreatingTempFile"), e);
 		}
 
 		Graph graph = this.renderGraph();

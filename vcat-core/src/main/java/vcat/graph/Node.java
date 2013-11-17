@@ -2,8 +2,8 @@ package vcat.graph;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import vcat.Messages;
 import vcat.graph.internal.GraphProperty;
-import vcat.graphviz.Graphviz;
 
 public class Node extends DefaultNode {
 
@@ -13,7 +13,7 @@ public class Node extends DefaultNode {
 
 	public Node(String name) {
 		if (name == null) {
-			throw new NullPointerException("Node name must not be null");
+			throw new NullPointerException(Messages.getString("Node.Exception.NameNull"));
 		}
 		this.name = name;
 	}
@@ -33,7 +33,7 @@ public class Node extends DefaultNode {
 		}
 	}
 
-	@GraphProperty(Graphviz.PROPERTY_LABEL)
+	@GraphProperty(Graph.PROPERTY_LABEL)
 	public String getLabel() {
 		return this.label;
 	}
