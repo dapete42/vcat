@@ -168,6 +168,10 @@ public abstract class AbstractVCat<W extends IWiki> {
 				graphLabel.append(relation.name());
 			}
 
+			if (showhidden) {
+				graphLabel.append(" hidden");
+			}
+			
 			if (exceedDepth && !newNodes.isEmpty()) {
 				// We have gone below the depth. If there are actually any excess nodes, change graph title and group
 				// these nodes.

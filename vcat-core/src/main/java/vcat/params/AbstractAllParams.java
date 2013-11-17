@@ -34,7 +34,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		HashMap<String, String[]> params = new HashMap<String, String[]>(requestParams);
 
 		String wikiString = getAndRemove(params, "wiki");
-		if (wikiString == null) {
+		if (wikiString == null || wikiString.isEmpty()) {
 			throw new VCatException("Parameter 'wiki' missing.");
 		}
 		W wiki = initWiki(wikiString);
@@ -54,7 +54,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		String algorithmString = getAndRemove(params, "algorithm");
 
 		OutputFormat format = OutputFormat.PNG;
-		if (formatString != null) {
+		if (formatString != null && !formatString.isEmpty()) {
 			format = OutputFormat.valueOfIgnoreCase(formatString);
 			if (format == null) {
 				throw new VCatException("Unknown value for parameter 'format': '" + formatString + "'");
@@ -62,7 +62,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		}
 
 		Algorithm algorithm = Algorithm.DOT;
-		if (algorithmString != null) {
+		if (algorithmString != null && !algorithmString.isEmpty()) {
 			algorithm = Algorithm.valueOfIgnoreCase(algorithmString);
 			if (algorithm == null) {
 				throw new VCatException("Unknown value for parameter 'algorithm': '" + algorithmString + "'");
@@ -100,6 +100,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		}
 		for (int i = 0; i < titles.length; i++) {
 			titles[i] = unescapeMediawikiTitle(titles[i]);
+			if (titles[i].isEmpty()) {
+				throw new VCatException("Parameter 'title' must not be empty.");
+			}
 		}
 
 		// 'ns' (namespace)
@@ -157,7 +160,14 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		}
 
 		// 'showhidden'
-		boolean showhidden = (showhiddenString != null);
+		boolean showhidden;
+		if (showhiddenString == null || "0".equals(showhiddenString)) {
+			showhidden = false;
+		} else if ("1".equals(showhiddenString)) {
+			showhidden = true;
+		} else {
+			throw new VCatException("Parameter 'showhidden' must be '0' or '1'.");
+		}
 
 		// 'rel' - relation to use (categories, subcategories)
 		Relation relation = Relation.Category;
@@ -205,8 +215,11 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 	protected static String getAndRemove(Map<String, String[]> params, String key) throws VCatException {
 		String[] values = params.get(key);
-		if (values == null || values.length == 0) {
+		if (values == null) {
 			return null;
+		} else if (values.length == 0) {
+			params.remove(key);
+			return "";
 		} else if (values.length == 1) {
 			params.remove(key);
 			return values[0];
@@ -221,7 +234,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			return null;
 		} else if (values.length == 0) {
 			params.remove(key);
-			return null;
+			return values;
 		} else {
 			params.remove(key);
 			return values;
