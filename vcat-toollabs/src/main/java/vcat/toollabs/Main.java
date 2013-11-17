@@ -78,13 +78,13 @@ public class Main {
 		poolConfig.setTestOnBorrow(true);
 		poolConfig.setTestOnReturn(true);
 		poolConfig.setTestWhileIdle(true);
-		// Allow some more concurrent connections 
+		// Allow some more concurrent connections
 		poolConfig.setMaxActive(16);
-		// We expect low traffic most of the time, so don't keep many idle connections open 
+		// We expect low traffic most of the time, so don't keep many idle connections open
 		poolConfig.setMaxIdle(1);
 		// Keep one spare idle connection
 		poolConfig.setMinIdle(1);
-		
+
 		// Pool of Redis connections
 		jedisPool = new JedisPool(poolConfig, config.redisServerHostname, config.redisServerPort);
 
