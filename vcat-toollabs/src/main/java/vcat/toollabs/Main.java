@@ -36,7 +36,6 @@ import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
-import vcat.redis.Messages;
 import vcat.redis.SimplePubSub;
 import vcat.redis.cache.ApiRedisCache;
 import vcat.redis.cache.MetadataRedisCache;
