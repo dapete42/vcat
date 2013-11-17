@@ -1,11 +1,11 @@
-package vcat.cache.redis;
+package vcat.redis;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 public class Messages {
 
-	private static final String BUNDLE_NAME = "vcat.cache.redis.messages";
+	private static final String BUNDLE_NAME = "vcat.redis.messages";
 
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 

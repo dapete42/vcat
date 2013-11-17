@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisException;
 
@@ -30,8 +29,6 @@ import vcat.VCatRenderer;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
-import vcat.cache.redis.ApiRedisCache;
-import vcat.cache.redis.MetadataRedisCache;
 import vcat.graphviz.GraphvizException;
 import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
@@ -39,6 +36,10 @@ import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
+import vcat.redis.Messages;
+import vcat.redis.SimplePubSub;
+import vcat.redis.cache.ApiRedisCache;
+import vcat.redis.cache.MetadataRedisCache;
 import vcat.toollabs.params.AllParamsToollabs;
 import vcat.toollabs.util.ThreadHelper;
 
@@ -120,7 +121,7 @@ public class Main {
 		final ThreadFactory tf = tfb.build();
 		executorService = Executors.newCachedThreadPool(tf);
 
-		final JedisPubSub jedisSubscribe = new JedisPubSub() {
+		final SimplePubSub jedisSubscribe = new SimplePubSub() {
 
 			@Override
 			public void onMessage(final String channel, final String message) {
@@ -138,26 +139,6 @@ public class Main {
 					log.info("Received Redis request '" + message + '\'');
 					renderJson(message, vCatRenderer, metadataProvider, apiCache);
 				}
-			}
-
-			@Override
-			public void onSubscribe(final String channel, final int subscribedChannels) {
-			}
-
-			@Override
-			public void onPUnsubscribe(final String pattern, final int subscribedChannels) {
-			}
-
-			@Override
-			public void onPMessage(final String pattern, final String channel, final String message) {
-			}
-
-			@Override
-			public void onPSubscribe(final String pattern, final int subscribedChannels) {
-			}
-
-			@Override
-			public void onUnsubscribe(final String channel, final int subscribedChannels) {
 			}
 
 		};

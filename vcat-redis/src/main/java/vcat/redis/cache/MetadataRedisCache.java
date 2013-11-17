@@ -1,4 +1,4 @@
-package vcat.cache.redis;
+package vcat.redis.cache;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
@@ -13,6 +13,7 @@ import vcat.cache.CacheException;
 import vcat.cache.IMetadataCache;
 import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
+import vcat.redis.Messages;
 
 public class MetadataRedisCache extends StringRedisCache implements IMetadataCache {
 

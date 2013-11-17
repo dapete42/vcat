@@ -1,4 +1,4 @@
-package vcat.cache.redis;
+package vcat.redis.cache;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +9,7 @@ import redis.clients.jedis.Transaction;
 
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
+import vcat.redis.Messages;
 
 public class ApiRedisCache extends StringRedisCache implements IApiCache {
 

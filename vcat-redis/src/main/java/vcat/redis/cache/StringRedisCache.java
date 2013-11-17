@@ -1,4 +1,4 @@
-package vcat.cache.redis;
+package vcat.redis.cache;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
