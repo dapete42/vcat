@@ -32,9 +32,9 @@ import vcat.params.AllParams;
 
 public class VCatServlet extends HttpServlet {
 
-	private static final long serialVersionUID = 7874314791561296530L;
+	private static final long serialVersionUID = -8091085002046525690L;
 
-	private static final Log log = LogFactory.getLog(VCatServlet.class);
+	private final Log log = LogFactory.getLog(this.getClass());
 
 	private static int PURGE = 600;
 
@@ -78,7 +78,7 @@ public class VCatServlet extends HttpServlet {
 
 			// Content-disposition (for file name)
 			String filename = resultFile.getName();
-			resp.setHeader("Content-disposition", "filename=\"" + filename + "\"");
+			resp.setHeader("Content-disposition", "filename=\"" + filename + '"');
 
 			// Serve file to browser
 			try (FileInputStream renderedInput = new FileInputStream(resultFile);
@@ -86,8 +86,8 @@ public class VCatServlet extends HttpServlet {
 				IOUtils.copy(renderedInput, output);
 			}
 
-			log.info("File sent: '" + resultFile.getAbsolutePath() + "' sent as '" + contentType + "', " + length
-					+ " bytes");
+			log.info(String.format(Messages.getString("VCatServlet.Info.FileSent"), resultFile.getAbsolutePath(),
+					contentType, length));
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
@@ -95,7 +95,7 @@ public class VCatServlet extends HttpServlet {
 
 	@Override
 	public String getServletInfo() {
-		return "vCat Servlet";
+		return Messages.getString("VCatServlet.ServletInfo");
 	}
 
 	@Override
