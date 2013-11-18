@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import vcat.VCatException;
+import vcat.toollabs.Messages;
 
 public class ToollabsConnectionBuilder {
 
@@ -24,7 +25,7 @@ public class ToollabsConnectionBuilder {
 		try {
 			return DriverManager.getConnection(jdbcUrl, this.jdbcUser, this.jdbcPassword);
 		} catch (SQLException e) {
-			throw new VCatException("Error connecting to database URL '" + jdbcUrl + '\'', e);
+			throw new VCatException(String.format(Messages.getString("Exception.Database"), jdbcUrl), e);
 		}
 	}
 

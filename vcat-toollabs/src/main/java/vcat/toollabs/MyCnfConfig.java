@@ -33,14 +33,15 @@ public class MyCnfConfig {
 					StandardCharsets.UTF_8));
 			properties.load(propertiesReader);
 		} catch (IOException e) {
-			throw new VCatException("Error reading my.cnf file '" + myCnfFile.getAbsolutePath() + "'", e);
+			throw new VCatException(String.format(Messages.getString("MyCnfConfig.Exception.ErrorReadingMyCnf"),
+					myCnfFile.getAbsolutePath()), e);
 		}
 
 		int errors = 0;
 
 		this.user = properties.getProperty("user");
 		if (this.user == null || this.user.isEmpty()) {
-			log.error("Property user missing or empty");
+			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"), "user"));
 			errors++;
 		}
 		if (this.user.startsWith("'") && this.user.endsWith("'")) {
@@ -49,7 +50,7 @@ public class MyCnfConfig {
 
 		this.password = properties.getProperty("password");
 		if (this.password == null || this.password.isEmpty()) {
-			log.error("Property password missing or empty");
+			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"), "password"));
 			errors++;
 		}
 		if (this.password.startsWith("'") && this.password.endsWith("'")) {
@@ -58,5 +59,4 @@ public class MyCnfConfig {
 
 		return errors == 0;
 	}
-
 }

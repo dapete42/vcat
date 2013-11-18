@@ -68,7 +68,7 @@ public class Main {
 		try {
 			connection = DriverManager.getConnection(config.jdbcUrl, configMyCnf.user, configMyCnf.password);
 		} catch (SQLException e) {
-			throw new VCatException("Error connecting to database url '" + config.jdbcUrl + '\'', e);
+			throw new VCatException(String.format(Messages.getString("Exception.Database"), config.jdbcUrl), e);
 		}
 		toollabsMetainfo = new ToollabsWikiProvider(connection);
 
@@ -128,24 +128,24 @@ public class Main {
 			public void onMessage(final String channel, final String message) {
 				if (config.redisChannelControl.equals(channel)) {
 					if ("stop".equalsIgnoreCase(message)) {
-						log.info("Received STOP command on Redis control channel");
+						log.info(Messages.getString("Main.Info.ControlStop"));
 						// Set flag so listening connectin is not re-established
 						running = false;
 						// Unsubscribing causes the main program to continue running
 						this.unsubscribe();
 					} else {
-						log.warn("Received invalid command '" + message + "' on Redis control channel");
+						log.warn(String.format(Messages.getString("Main.Warn.CrontolInvalidCommand"), message));
 					}
 				} else if (config.redisChannelRequest.equals(channel)) {
-					log.info("Received Redis request '" + message + '\'');
+					log.info(String.format(Messages.getString("Main.Info.RequestReceived"), message));
 					renderJson(message, vCatRenderer, metadataProvider, apiCache);
 				}
 			}
 
 		};
 
-		log.info("Start listening to Redis control channel '" + config.redisChannelControl + '\'');
-		log.info("Start listening to Redis request channel '" + config.redisChannelRequest + '\'');
+		log.info(String.format(Messages.getString("Main.Info.ControlListen"), config.redisChannelControl));
+		log.info(String.format(Messages.getString("Main.Info.RequestListen"), config.redisChannelRequest));
 
 		while (running) {
 			Jedis jedis = null;
@@ -155,7 +155,7 @@ public class Main {
 			} catch (JedisException je) {
 				// Most likely the connection has been lost. Resource is broken.
 				jedisPool.returnBrokenResource(jedis);
-				log.warn("Jedis error, re-establishing connection", je);
+				log.warn(Messages.getString("Main.Warn.JedisConnection"), je);
 				ThreadHelper.sleep(1000);
 			}
 		}
@@ -164,13 +164,14 @@ public class Main {
 
 	private static boolean initConfig(final String[] args) throws VCatException {
 		if (args.length != 1) {
-			log.error("This program expects the name of a .properties file as a command line parameter");
+			log.error(Messages.getString("Main.Error.ParameterMissing"));
 			return false;
 		}
 
 		File propertiesFile = new File(args[0]);
 		if (!propertiesFile.exists() || !propertiesFile.isFile() || !propertiesFile.canRead()) {
-			log.error(".properties file '" + propertiesFile.getAbsolutePath() + "' must exist and be a readable file");
+			log.error(String.format(Messages.getString("Main.Error.PropertiesNotFound"),
+					propertiesFile.getAbsolutePath()));
 			return false;
 		}
 
@@ -192,7 +193,7 @@ public class Main {
 				parameterMap.put(jsonArrayName, parameterArray);
 			}
 		} catch (JSONException e) {
-			throw new VCatException("Error parsing json", e);
+			throw new VCatException(Messages.getString("Main.Exception.Json"), e);
 		}
 	}
 
@@ -222,7 +223,8 @@ public class Main {
 
 			final String jsonString = jedis.get(jsonRequestKey);
 			if (jsonString == null) {
-				throw new VCatException("Redis request data not found: " + jsonRequestKey);
+				throw new VCatException(String.format(Messages.getString("Main.Exception.RequestDataNotFound"),
+						jsonRequestKey));
 			}
 
 			final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
@@ -240,7 +242,8 @@ public class Main {
 
 				@Override
 				public void run() {
-					log.info("Started thread '" + Thread.currentThread().getName() + "' for job '" + jedisKey + '\'');
+					log.info(String.format(Messages.getString("Main.Info.ThreadStart"), Thread.currentThread()
+							.getName(), jedisKey));
 
 					// Get Jedis connection from pool
 					final Jedis jedis = jedisPool.getResource();
@@ -296,10 +299,9 @@ public class Main {
 
 						// If nobody received the message, something was wrong
 						if (receivers == 0) {
-							log.error("Response for job '" + jedisKey
-									+ "' was sent to Redis response channel, but nobody was listening");
+							log.error(String.format(Messages.getString("Main.Error.ResponseNobodyListening"), jedisKey));
 						} else {
-							log.info("Response for job '" + jedisKey + "' was sent to Redis response channel");
+							log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jedisKey));
 						}
 
 						// Clean up request
@@ -313,7 +315,8 @@ public class Main {
 						jedisPool.returnResource(jedis);
 					}
 
-					log.info("Finished thread '" + Thread.currentThread().getName() + "' for job '" + jedisKey + '\'');
+					log.info(String.format(Messages.getString("Main.Info.ThreadFinish"), Thread.currentThread()
+							.getName(), jedisKey));
 
 				}
 

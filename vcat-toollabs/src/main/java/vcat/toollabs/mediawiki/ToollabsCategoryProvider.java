@@ -15,6 +15,7 @@ import vcat.mediawiki.ApiException;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.Metadata;
+import vcat.toollabs.Messages;
 import vcat.toollabs.ToollabsWiki;
 import vcat.util.CollectionHelper;
 
@@ -53,14 +54,15 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		try {
 			metadata = metadataProvider.requestMetadata(wiki);
 		} catch (ApiException e) {
-			throw new ApiException("Could not retrieve metadata for wiki", e);
+			throw new ApiException(String.format(
+					Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
 		}
 
 		Connection connection;
 		try {
 			connection = this.connectionBuilder.buildConnection(dbname);
 		} catch (VCatException e) {
-			throw new ApiException("Could not get connection for requestCategories", e);
+			throw new ApiException(Messages.getString("ToollabsCategoryProvider.Exception.ConnectionCategories"), e);
 		}
 
 		// Get namespaces from full titles and store the truncated titles and full titles by namespace
@@ -117,7 +119,8 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 					}
 					rs.close();
 				} catch (SQLException e) {
-					throw new ApiException("Error reading categories from Tool Labs database '" + dbname + '\'', e);
+					throw new ApiException(String.format(
+							Messages.getString("ToollabsCategoryProvider.Exception.ReadingCategories"), dbname), e);
 				}
 			}
 		}
@@ -142,14 +145,16 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		try {
 			metadata = this.metadataProvider.requestMetadata(wiki);
 		} catch (ApiException e) {
-			throw new ApiException("Could not retrieve metadata for wiki", e);
+			throw new ApiException(String.format(
+					Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
 		}
 
 		Connection connection;
 		try {
 			connection = this.connectionBuilder.buildConnection(dbname);
 		} catch (VCatException e) {
-			throw new ApiException("Could not get connection for requestCategories", e);
+			throw new ApiException(Messages.getString("ToollabsCategoryProvider.Exception.ConnectionCategorymembers"),
+					e);
 		}
 
 		final ArrayList<String> result = new ArrayList<String>();
@@ -168,7 +173,8 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 			}
 			rs.close();
 		} catch (SQLException e) {
-			throw new ApiException("Error reading category members from Tool Labs database '" + dbname + '\'', e);
+			throw new ApiException(String.format(
+					Messages.getString("ToollabsCategoryProvider.Exception.ReadingCategorymembers"), dbname), e);
 		}
 
 		try {
