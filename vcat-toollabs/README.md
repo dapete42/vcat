@@ -21,10 +21,9 @@ out):
 	# Purge metadata after (seconds)
 	#purge.metadata=86400
 	
-	# JDBC URL and login information for MySQL/MariaDB access to wiki table
+	# JDBC URL for MySQL/MariaDB access to wiki table
 	jdbc.url=jdbc:mysql://enwiki.labsdb:3306/meta_p
-	jdbc.user=username_for_db
-	jdbc.password=password_for_db
+	# Username and password are read from replica.my.cnf in user's home directory
 	
 	# Redis server information
 	redis.server.hostname=localhost

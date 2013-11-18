@@ -40,10 +40,6 @@ public class MainConfig {
 
 	public String jdbcUrl;
 
-	public String jdbcUser;
-
-	public String jdbcPassword;
-
 	public int purge;
 
 	public int purgeMetadata;
@@ -125,18 +121,6 @@ public class MainConfig {
 		this.jdbcUrl = properties.getProperty("jdbc.url");
 		if (this.jdbcUrl == null || this.jdbcUrl.isEmpty()) {
 			log.error("Property jdbc.url missing or empty");
-			errors++;
-		}
-
-		this.jdbcUser = properties.getProperty("jdbc.user");
-		if (this.jdbcUser == null || this.jdbcUser.isEmpty()) {
-			log.error("Property jdbc.user missing or empty");
-			errors++;
-		}
-
-		this.jdbcPassword = properties.getProperty("jdbc.password");
-		if (this.jdbcPassword == null || this.jdbcPassword.isEmpty()) {
-			log.error("Property jdbc.password missing or empty");
 			errors++;
 		}
 

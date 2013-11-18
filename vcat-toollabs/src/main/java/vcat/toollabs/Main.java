@@ -48,6 +48,8 @@ public class Main {
 
 	private static final MainConfig config = new MainConfig();
 
+	private static final MyCnfConfig configMyCnf = new MyCnfConfig();
+
 	private static ExecutorService executorService;
 
 	private static JedisPool jedisPool;
@@ -64,7 +66,7 @@ public class Main {
 
 		final Connection connection;
 		try {
-			connection = DriverManager.getConnection(config.jdbcUrl, config.jdbcUser, config.jdbcPassword);
+			connection = DriverManager.getConnection(config.jdbcUrl, configMyCnf.user, configMyCnf.password);
 		} catch (SQLException e) {
 			throw new VCatException("Error connecting to database url '" + config.jdbcUrl + '\'', e);
 		}
@@ -172,7 +174,7 @@ public class Main {
 			return false;
 		}
 
-		return config.readFromPropertyFile(propertiesFile);
+		return config.readFromPropertyFile(propertiesFile) && configMyCnf.readFromMyCnf();
 	}
 
 	private static void fillParametersFromJson(final HashMap<String, String[]> parameterMap, final String jsonString)
