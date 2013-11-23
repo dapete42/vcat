@@ -5,18 +5,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import vcat.VCatException;
 
 public class ToollabsWikiProvider {
 
-	private final Connection connection;
+	private final ComboPooledDataSource cpds;
 
-	public ToollabsWikiProvider(final Connection connection) {
-		this.connection = connection;
+	public ToollabsWikiProvider(final ComboPooledDataSource cpds) {
+		this.cpds = cpds;
 	}
 
 	public ToollabsWiki fromDbname(final String dbnameParam) throws VCatException {
+		Connection connection = null;
 		try {
+			connection = cpds.getConnection();
 			final PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?");
 			statement.setString(1, dbnameParam);
 			ResultSet rs = statement.executeQuery();
@@ -33,6 +37,12 @@ public class ToollabsWikiProvider {
 		} catch (SQLException e) {
 			throw new VCatException(String.format(Messages.getString("ToollabsWikiProvider.Exception.ReadingMetaInfo"),
 					dbnameParam), e);
+		} finally {
+			try {
+				connection.close();
+			} catch (Exception e) {
+				// ignore
+			}
 		}
 	}
 

@@ -1,9 +1,6 @@
 package vcat.toollabs;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,6 +14,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -68,13 +66,15 @@ public class Main {
 			return;
 		}
 
-		final Connection connection;
-		try {
-			connection = DriverManager.getConnection(config.jdbcUrl, configMyCnf.user, configMyCnf.password);
-		} catch (SQLException e) {
-			throw new VCatException(String.format(Messages.getString("Exception.Database"), config.jdbcUrl), e);
-		}
-		toollabsMetainfo = new ToollabsWikiProvider(connection);
+		ComboPooledDataSource cpds = new ComboPooledDataSource();
+		cpds.setJdbcUrl(config.jdbcUrl);
+		cpds.setUser(configMyCnf.user);
+		cpds.setPassword(configMyCnf.password);
+		cpds.setInitialPoolSize(1);
+		cpds.setMinPoolSize(1);
+		cpds.setMaxPoolSize(10);
+		cpds.setAcquireIncrement(1);
+		toollabsMetainfo = new ToollabsWikiProvider(cpds);
 
 		final String redisApiCacheKeyPrefix = config.redisSecret + '-' + "cache-api-";
 		final String redisMetadataCacheKeyPrefix = config.redisSecret + '-' + "cache-metadata-";
@@ -168,6 +168,8 @@ public class Main {
 				ThreadHelper.sleep(1000);
 			}
 		}
+
+		cpds.close();
 
 	}
 
