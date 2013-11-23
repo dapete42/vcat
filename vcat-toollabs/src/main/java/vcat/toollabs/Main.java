@@ -46,6 +46,10 @@ public class Main {
 
 	private static final Log log = LogFactory.getLog(Main.class);
 
+	private static final String COMMAND_PING = "ping";
+
+	private static final String COMMAND_STOP = "stop";
+
 	private static final MainConfig config = new MainConfig();
 
 	private static final MyCnfConfig configMyCnf = new MyCnfConfig();
@@ -127,13 +131,18 @@ public class Main {
 			@Override
 			public void onMessage(final String channel, final String message) {
 				if (config.redisChannelControl.equals(channel)) {
-					if ("stop".equalsIgnoreCase(message)) {
+					switch (message) {
+					case COMMAND_PING:
+						// Do nothing,
+						break;
+					case COMMAND_STOP:
 						log.info(Messages.getString("Main.Info.ControlStop"));
-						// Set flag so listening connectin is not re-established
+						// Set flag so listening connection is not re-established
 						running = false;
-						// Unsubscribing causes the main program to continue running
+						// Unsubscribing causes execution of the main program to continue
 						this.unsubscribe();
-					} else {
+						break;
+					default:
 						log.warn(String.format(Messages.getString("Main.Warn.CrontolInvalidCommand"), message));
 					}
 				} else if (config.redisChannelRequest.equals(channel)) {
