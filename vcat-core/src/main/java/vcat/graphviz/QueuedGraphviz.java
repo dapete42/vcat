@@ -139,6 +139,10 @@ public class QueuedGraphviz implements Graphviz {
 			} else {
 				// If the job is not queued or running yet, it needs to be added to ths list and a new job started.
 				this.jobs.put(job, 1);
+				// Create new lock
+				lock = new Object();
+				this.jobLocks.put(job, lock);
+
 				this.executorService.execute(new Runnable() {
 
 					@Override
@@ -147,10 +151,8 @@ public class QueuedGraphviz implements Graphviz {
 					}
 
 				});
+				
 				log.info(String.format(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode()));
-				// Create new lock
-				lock = new Object();
-				this.jobLocks.put(job, lock);
 			}
 		}
 
