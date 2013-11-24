@@ -131,19 +131,16 @@ public class Main {
 			@Override
 			public void onMessage(final String channel, final String message) {
 				if (config.redisChannelControl.equals(channel)) {
-					switch (message) {
-					case COMMAND_PING:
+					if (COMMAND_PING.equalsIgnoreCase(message)) {
 						// Do nothing,
-						break;
-					case COMMAND_STOP:
+					} else if (COMMAND_STOP.equalsIgnoreCase(message)) {
 						log.info(Messages.getString("Main.Info.ControlStop"));
 						// Set flag so listening connection is not re-established
 						running = false;
 						// Unsubscribing causes execution of the main program to continue
 						this.unsubscribe();
-						break;
-					default:
-						log.warn(String.format(Messages.getString("Main.Warn.CrontolInvalidCommand"), message));
+					} else {
+						log.warn(String.format(Messages.getString("Main.Warn.ControlInvalidCommand"), message));
 					}
 				} else if (config.redisChannelRequest.equals(channel)) {
 					log.info(String.format(Messages.getString("Main.Info.RequestReceived"), message));
