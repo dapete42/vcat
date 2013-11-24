@@ -1,11 +1,15 @@
 package vcat.toollabs;
 
 import java.io.File;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -46,6 +50,8 @@ public class Main {
 
 	private static final String COMMAND_PING = "ping";
 
+	private static final String COMMAND_STATS = "stats";
+
 	private static final String COMMAND_STOP = "stop";
 
 	private static final MainConfig config = new MainConfig();
@@ -55,6 +61,10 @@ public class Main {
 	private static ExecutorService executorService;
 
 	private static JedisPool jedisPool;
+
+	private static final long KB = 1024;
+
+	private static final long MB = KB * KB;
 
 	private static boolean running = true;
 
@@ -66,7 +76,8 @@ public class Main {
 			return;
 		}
 
-		ComboPooledDataSource cpds = new ComboPooledDataSource();
+		// Pool for database connections
+		final ComboPooledDataSource cpds = new ComboPooledDataSource();
 		cpds.setJdbcUrl(config.jdbcUrl);
 		cpds.setUser(configMyCnf.user);
 		cpds.setPassword(configMyCnf.password);
@@ -80,7 +91,7 @@ public class Main {
 		final String redisMetadataCacheKeyPrefix = config.redisSecret + '-' + "cache-metadata-";
 
 		// Conservative configuration for Redis connection pool - check connections as often as possible
-		JedisPoolConfig poolConfig = new JedisPoolConfig();
+		final JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setTestOnBorrow(true);
 		poolConfig.setTestOnReturn(true);
 		poolConfig.setTestWhileIdle(true);
@@ -128,11 +139,38 @@ public class Main {
 
 		final SimplePubSub jedisSubscribe = new SimplePubSub() {
 
+			private Date lastRequestDate = null;
+
 			@Override
 			public void onMessage(final String channel, final String message) {
 				if (config.redisChannelControl.equals(channel)) {
 					if (COMMAND_PING.equalsIgnoreCase(message)) {
-						// Do nothing,
+						// Do nothing
+					} else if (COMMAND_STATS.equalsIgnoreCase(message)) {
+						log.info(Messages.getString("Main.Info.ControlStats"));
+						final String lastRequestString;
+						if (lastRequestDate == null) {
+							lastRequestString = Messages.getString("Main.Info.StatsNever");
+						} else {
+							lastRequestString = SimpleDateFormat.getDateTimeInstance().format(this.lastRequestDate);
+						}
+						final Runtime r = Runtime.getRuntime();
+						final long maxMemory = r.maxMemory() / MB;
+						final long totalMemory = r.totalMemory() / MB;
+						final long freeMemory = r.freeMemory() / MB;
+						final int jdbcPoolMaxConnections = cpds.getMaxPoolSize();
+						int jdbcPoolOpenConnections = -1;
+						int jdbcPoolBusyConnections = -1;
+						try {
+							jdbcPoolOpenConnections = cpds.getNumConnections();
+							jdbcPoolBusyConnections = cpds.getNumBusyConnections();
+						} catch (SQLException e) {
+							log.error(e);
+						}
+						final long fileCacheSize = FileUtils.sizeOfDirectory(cacheDir);
+						log.info(String.format(Messages.getString("Main.Info.Stats"), lastRequestString, maxMemory,
+								totalMemory, freeMemory, jdbcPoolMaxConnections, jdbcPoolOpenConnections,
+								jdbcPoolBusyConnections, fileCacheSize));
 					} else if (COMMAND_STOP.equalsIgnoreCase(message)) {
 						log.info(Messages.getString("Main.Info.ControlStop"));
 						// Set flag so listening connection is not re-established
@@ -143,6 +181,7 @@ public class Main {
 						log.warn(String.format(Messages.getString("Main.Warn.ControlInvalidCommand"), message));
 					}
 				} else if (config.redisChannelRequest.equals(channel)) {
+					this.lastRequestDate = new Date();
 					log.info(String.format(Messages.getString("Main.Info.RequestReceived"), message));
 					renderJson(message, vCatRenderer, metadataProvider, apiCache);
 				}
