@@ -206,16 +206,10 @@ public abstract class AbstractFileCache<K extends Serializable> {
 		// Delete file in cache, if it exists
 		cacheFile.delete();
 		if (move) {
-			// Try to use rename to move the tempoary file to the cache
-			if (!file.renameTo(cacheFile)) {
-				// If this fails, we need to first copy, then delete
-				try {
-					FileUtils.copyFile(file, cacheFile);
-				} catch (IOException e) {
-					throw new CacheException(Messages.getString("AbstractFileCache.Exception.MoveFailed"), e);
-				} finally {
-					file.delete();
-				}
+			try {
+				FileUtils.moveFile(file, cacheFile);
+			} catch (IOException e) {
+				throw new CacheException(Messages.getString("AbstractFileCache.Exception.MoveFailed"), e);
 			}
 		} else {
 			try {
