@@ -58,18 +58,18 @@ public class VCatRenderer<W extends IWiki> {
 		}
 	}
 
-	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final ICategoryProvider<W> categoryProvider)
+	public VCatRenderer(final Graphviz graphviz, final File cacheDir, final ICategoryProvider<W> categoryProvider)
 			throws VCatException {
-		this(graphviz, tmpDir, categoryProvider, 600);
+		this(graphviz, cacheDir, categoryProvider, 600);
 	}
 
-	public VCatRenderer(final Graphviz graphviz, final File tmpDir, final ICategoryProvider<W> categoryProvider,
+	public VCatRenderer(final Graphviz graphviz, final File cacheDir, final ICategoryProvider<W> categoryProvider,
 			final int purge) throws VCatException {
 		this.graphviz = graphviz;
 		this.purge = purge;
 
-		File graphCacheDir = new File(tmpDir, "graphFile");
-		File renderedFileCacheDir = new File(tmpDir, "renderedFile");
+		File graphCacheDir = new File(cacheDir, "graphFile");
+		File renderedFileCacheDir = new File(cacheDir, "renderedFile");
 
 		mkdirsWithError(graphCacheDir);
 		mkdirsWithError(renderedFileCacheDir);
@@ -85,24 +85,31 @@ public class VCatRenderer<W extends IWiki> {
 		this.purge();
 	}
 
-	private File createGraphFile(AbstractAllParams<W> all) throws CacheException, VCatException, GraphvizException {
+	private File createGraphFile(AbstractAllParams<W> all, File tmpDir) throws CacheException, VCatException,
+			GraphvizException {
 		final AbstractVCat<W> vCat = this.vCatFactory.createInstance(all);
-		vCat.renderToCache(this.graphCache);
+		vCat.renderToCache(this.graphCache, tmpDir);
 		File graphFile = this.graphCache.getCacheFile(all.getVCat());
 		return graphFile;
 	}
 
-	private File createRenderedFile(AbstractAllParams<W> all) throws CacheException, VCatException, GraphvizException {
+	private File createRenderedFile(AbstractAllParams<W> all, File tmpDir) throws CacheException, VCatException,
+			GraphvizException {
 		CombinedParams<W> combinedParams = all.getCombined();
 		if (!this.renderedCache.containsKey(combinedParams)) {
-			File graphFile = this.createGraphFile(all);
+			File graphFile = this.createGraphFile(all, tmpDir);
 			// Parameters may have changed when creating the graph file, due to the handling of limit parameters, so we
 			// have to check again
 			if (!this.renderedCache.containsKey(combinedParams)) {
 				File tmpFile;
 				try {
-					tmpFile = File.createTempFile("RenderedFile-temp-", '.' + combinedParams.getGraphviz()
-							.getOutputFormat().getFileExtension());
+					final String prefix = "RenderedFile-temp-";
+					final String suffix = '.' + combinedParams.getGraphviz().getOutputFormat().getFileExtension();
+					if (tmpDir == null) {
+						tmpFile = File.createTempFile(prefix, suffix);
+					} else {
+						tmpFile = File.createTempFile(prefix, suffix, tmpDir);
+					}
 				} catch (IOException e) {
 					throw new GraphvizException("Failed to create temporary file", e);
 				}
@@ -130,6 +137,10 @@ public class VCatRenderer<W extends IWiki> {
 	}
 
 	public RenderedFileInfo render(AbstractAllParams<W> all) throws VCatException {
+		return this.render(all, null);
+	}
+
+	public RenderedFileInfo render(AbstractAllParams<W> all, File tmpDir) throws VCatException {
 		try {
 			// Purge caches
 			this.purge();
@@ -137,9 +148,9 @@ public class VCatRenderer<W extends IWiki> {
 			// Get and, if necessary, create result file
 			final File resultFile;
 			if (all.getGraphviz().getOutputFormat() == OutputFormat.GraphvizRaw) {
-				resultFile = createGraphFile(all);
+				resultFile = createGraphFile(all, tmpDir);
 			} else {
-				resultFile = createRenderedFile(all);
+				resultFile = createRenderedFile(all, tmpDir);
 			}
 
 			return new RenderedFileInfo(resultFile, all.getGraphviz().getOutputFormat().getMimeType());

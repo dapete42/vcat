@@ -68,6 +68,8 @@ public class Main {
 
 	private static boolean running = true;
 
+	private static File tempDir;
+
 	private static ToollabsWikiProvider toollabsMetainfo;
 
 	public static void main(final String[] args) throws CacheException, GraphvizException, VCatException {
@@ -110,8 +112,10 @@ public class Main {
 		final IMetadataCache metadataCache = new MetadataRedisCache(jedisPool, redisMetadataCacheKeyPrefix,
 				config.purgeMetadata);
 
-		// For other caches, use this directory
+		// For cache of Graphviz files and rendered images, use this directory
 		final File cacheDir = new File(config.cacheDir);
+		// Temporary directory for Graphviz files and rendered images
+		tempDir = new File(config.tempDir);
 
 		// Call external executables, but use a QueuedGraphviz to limit number of concurrent processes.
 		final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File(config.graphvizDir)),
@@ -141,6 +145,8 @@ public class Main {
 
 			private Date lastRequestDate = null;
 
+			private long requests = 0;
+
 			@Override
 			public void onMessage(final String channel, final String message) {
 				if (config.redisChannelControl.equals(channel)) {
@@ -168,8 +174,8 @@ public class Main {
 							log.error(e);
 						}
 						final long fileCacheSize = FileUtils.sizeOfDirectory(cacheDir);
-						log.info(String.format(Messages.getString("Main.Info.Stats"), lastRequestString, maxMemory,
-								totalMemory, freeMemory, jdbcPoolMaxConnections, jdbcPoolOpenConnections,
+						log.info(String.format(Messages.getString("Main.Info.Stats"), this.requests, lastRequestString,
+								maxMemory, totalMemory, freeMemory, jdbcPoolMaxConnections, jdbcPoolOpenConnections,
 								jdbcPoolBusyConnections, fileCacheSize));
 					} else if (COMMAND_STOP.equalsIgnoreCase(message)) {
 						log.info(Messages.getString("Main.Info.ControlStop"));
@@ -182,6 +188,7 @@ public class Main {
 					}
 				} else if (config.redisChannelRequest.equals(channel)) {
 					this.lastRequestDate = new Date();
+					this.requests++;
 					log.info(String.format(Messages.getString("Main.Info.RequestReceived"), message));
 					renderJson(message, vCatRenderer, metadataProvider, apiCache);
 				}
@@ -301,7 +308,7 @@ public class Main {
 						try {
 							final AllParamsToollabs all = new AllParamsToollabs(parameterMap, metadataProvider,
 									toollabsMetainfo);
-							renderedFileInfo = vCatRenderer.render(all);
+							renderedFileInfo = vCatRenderer.render(all, tempDir);
 						} catch (VCatException e) {
 							handleError(jedis, jedisKey, e);
 							jedis.del(jsonRequestKey);

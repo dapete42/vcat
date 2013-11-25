@@ -255,6 +255,11 @@ public abstract class AbstractVCat<W extends IWiki> {
 	protected abstract GroupRank renderGraphRootRank();
 
 	public void renderToCache(GraphFileCache<W> cache) throws CacheException, VCatException, GraphvizException {
+		this.renderToCache(cache, null);
+	}
+
+	public void renderToCache(GraphFileCache<W> cache, File tmpDir) throws CacheException, VCatException,
+			GraphvizException {
 		VCatParams<W> vCatParams = this.all.getVCat();
 
 		// Check if already in cache; nothing to do in that case
@@ -265,7 +270,11 @@ public abstract class AbstractVCat<W extends IWiki> {
 		// Prepare a temporary file
 		File tmpFile;
 		try {
-			tmpFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX);
+			if (tmpDir == null) {
+				tmpFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX);
+			} else {
+				tmpFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX, tmpDir);
+			}
 		} catch (IOException e) {
 			throw new VCatException(Messages.getString("AbstractVCat.Exception.CreatingTempFile"), e);
 		}

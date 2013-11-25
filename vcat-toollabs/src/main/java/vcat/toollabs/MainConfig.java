@@ -34,6 +34,8 @@ public class MainConfig {
 
 	public String cacheDir;
 
+	public String tempDir;
+
 	public String graphvizDir;
 
 	public int graphvizProcesses;
@@ -96,7 +98,13 @@ public class MainConfig {
 
 		this.cacheDir = properties.getProperty("cache.dir");
 		if (this.cacheDir == null || this.cacheDir.isEmpty()) {
-			log.error("Property cache.dir missing or empty");
+			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"), "cache.dir"));
+			errors++;
+		}
+
+		this.tempDir = properties.getProperty("temp.dir");
+		if (this.tempDir == null || this.tempDir.isEmpty()) {
+			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"), "temp.dir"));
 			errors++;
 		}
 

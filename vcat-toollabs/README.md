@@ -11,6 +11,9 @@ out):
 	# Cache directory for Graphviz and image files
 	cache.dir=/tmp/vcat-cache
 	
+	# Temporary directory for Graphviz and image files
+	temp.dir=/tmp/vcat-temp
+	
 	# Directory with Graphviz binaries (dot, fdp)
 	#graphviz.dir=/usr/bin
 	# Maximum number of concurrent processes running Graphviz (0=unlimited)
