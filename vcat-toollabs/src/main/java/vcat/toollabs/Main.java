@@ -83,10 +83,14 @@ public class Main {
 		cpds.setJdbcUrl(config.jdbcUrl);
 		cpds.setUser(configMyCnf.user);
 		cpds.setPassword(configMyCnf.password);
+		// Stay small and close connections quickly - this is only used for metadata for now, so it's not used much
 		cpds.setInitialPoolSize(1);
-		cpds.setMinPoolSize(1);
+		cpds.setMinPoolSize(0);
 		cpds.setMaxPoolSize(10);
 		cpds.setAcquireIncrement(1);
+		cpds.setMaxIdleTime(600);
+		cpds.setMaxConnectionAge(3600);
+
 		toollabsMetainfo = new ToollabsWikiProvider(cpds);
 
 		final String redisApiCacheKeyPrefix = config.redisSecret + '-' + "cache-api-";
