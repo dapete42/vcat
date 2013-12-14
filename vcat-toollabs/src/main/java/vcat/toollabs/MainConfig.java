@@ -54,33 +54,9 @@ public class MainConfig {
 
 	public String redisChannelResponse;
 
-	private String redisKeyRequestSuffix;
-
-	private String redisKeyResponseErrorSuffix;
-
-	private String redisKeyResponseHeadersSuffix;
-
-	private String redisKeyResponseSuffix;
-
 	public String redisServerHostname;
 
 	public int redisServerPort;
-
-	public String buildRedisKeyRequest(final String jedisKey) {
-		return this.redisSecret + '-' + jedisKey + this.redisKeyRequestSuffix;
-	}
-
-	public String buildRedisKeyResponse(final String jedisKey) {
-		return this.redisSecret + '-' + jedisKey + this.redisKeyResponseSuffix;
-	}
-
-	public String buildRedisKeyResponseError(final String jedisKey) {
-		return this.redisSecret + '-' + jedisKey + this.redisKeyResponseErrorSuffix;
-	}
-
-	public String buildRedisKeyResponseHeaders(final String jedisKey) {
-		return this.redisSecret + '-' + jedisKey + this.redisKeyResponseHeadersSuffix;
-	}
 
 	public boolean readFromPropertyFile(final File propertiesFile) throws VCatException {
 
@@ -210,32 +186,6 @@ public class MainConfig {
 			errors++;
 		} else {
 			this.redisChannelResponse = this.redisSecret + redisChannelResponseSuffix;
-		}
-
-		this.redisKeyRequestSuffix = properties.getProperty("redis.key.request.suffix");
-		if (this.redisKeyRequestSuffix == null || this.redisKeyRequestSuffix.isEmpty()) {
-			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"), "redis.key.requests.suffix"));
-			errors++;
-		}
-
-		this.redisKeyResponseErrorSuffix = properties.getProperty("redis.key.response.error.suffix");
-		if (this.redisKeyResponseErrorSuffix == null || this.redisKeyResponseErrorSuffix.isEmpty()) {
-			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"),
-					"redis.key.response.error.suffix"));
-			errors++;
-		}
-
-		this.redisKeyResponseHeadersSuffix = properties.getProperty("redis.key.response.headers.suffix");
-		if (this.redisKeyResponseHeadersSuffix == null || this.redisKeyResponseHeadersSuffix.isEmpty()) {
-			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"),
-					"redis.key.response.headers.suffix"));
-			errors++;
-		}
-
-		this.redisKeyResponseSuffix = properties.getProperty("redis.key.response.suffix");
-		if (this.redisKeyResponseSuffix == null || this.redisKeyResponseSuffix.isEmpty()) {
-			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"), "redis.key.response.suffix"));
-			errors++;
 		}
 
 		return errors == 0;

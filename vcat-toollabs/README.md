@@ -39,9 +39,3 @@ out):
 	redis.channel.control.suffix=-control
 	redis.channel.request.suffix=-requests
 	redis.channel.response.suffix=-responses
-	
-	# Redis key suffixes
-	redis.key.request.suffix=-request
-	redis.key.response.suffix=-response
-	redis.key.response.error.suffix=-response-error
-	redis.key.response.headers.suffix=-response-headers

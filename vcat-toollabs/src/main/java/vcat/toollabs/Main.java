@@ -23,7 +23,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Transaction;
 import redis.clients.jedis.exceptions.JedisException;
 
 import vcat.VCatException;
@@ -236,14 +235,13 @@ public class Main {
 		return config.readFromPropertyFile(propertiesFile) && configMyCnf.readFromMyCnf();
 	}
 
-	private static void fillParametersFromJson(final HashMap<String, String[]> parameterMap, final String jsonString)
-			throws VCatException {
+	private static void fillParametersFromJson(final HashMap<String, String[]> parameterMap,
+			final JSONObject jsonParameters) throws VCatException {
 		try {
-			final JSONObject json = new JSONObject(new JSONTokener(jsonString));
-			JSONArray jsonArrayNames = json.names();
+			JSONArray jsonArrayNames = jsonParameters.names();
 			for (int i = 0; i < jsonArrayNames.length(); i++) {
 				final String jsonArrayName = jsonArrayNames.getString(i);
-				final JSONArray jsonArray = json.getJSONArray(jsonArrayName);
+				final JSONArray jsonArray = jsonParameters.getJSONArray(jsonArrayName);
 				final String[] parameterArray = new String[jsonArray.length()];
 				for (int j = 0; j < jsonArray.length(); j++) {
 					parameterArray[j] = jsonArray.getString(j);
@@ -255,135 +253,130 @@ public class Main {
 		}
 	}
 
-	private static void handleError(final Jedis jedis, final String jedisKey, final Exception e) {
-		// There has been an error, but is is handled gracefully; so a warning is enough
+	private static void handleError(final Jedis jedis, final String requestKey, final Exception e) {
+		// There has been an error, but it is handled gracefully; so a warning is enough
 		log.warn(e);
 		e.printStackTrace();
-		jedis.del(config.buildRedisKeyRequest(jedisKey));
-		Transaction t = jedis.multi();
-		t.set(config.buildRedisKeyResponseError(jedisKey), e.getMessage());
-		t.expire(jedisKey, 60);
-		t.publish(config.redisChannelResponse, jedisKey);
-		t.exec();
+		JSONObject json = new JSONObject();
+		json.put("key", requestKey);
+		json.put("status", "error");
+		json.put("error", e.getMessage());
+		e.getMessage();
+		jedis.publish(config.redisChannelResponse, json.toString());
 	}
 
-	private static void renderJson(final String jedisKey, final VCatRenderer<ToollabsWiki> vCatRenderer,
+	private static void renderJson(final String jsonString, final VCatRenderer<ToollabsWiki> vCatRenderer,
 			final IMetadataProvider metadataProvider, final IApiCache apiCache) {
+
+		// Get Jedis connection from pool
+		final Jedis jedis = jedisPool.getResource();
 
 		try {
 
-			final String jsonRequestKey = config.buildRedisKeyRequest(jedisKey);
-			final String jsonResponseHeadersKey = config.buildRedisKeyResponseHeaders(jedisKey);
-			final String responseKey = config.buildRedisKeyResponse(jedisKey);
+			final JSONObject jsonRequest = new JSONObject(new JSONTokener(jsonString));
+			final String requestKey = jsonRequest.getString("key");
 
-			// Get Jedis connection from pool
-			final Jedis jedis = jedisPool.getResource();
-
-			final String jsonString = jedis.get(jsonRequestKey);
-			if (jsonString == null) {
-				throw new VCatException(String.format(Messages.getString("Main.Exception.RequestDataNotFound"),
-						jsonRequestKey));
-			}
-
-			final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
 			try {
-				fillParametersFromJson(parameterMap, jsonString);
-			} catch (VCatException e) {
-				handleError(jedis, jedisKey, e);
-				return;
-			}
 
-			// Return Jedis connection to pool
-			jedisPool.returnResource(jedis);
-
-			executorService.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					log.info(String.format(Messages.getString("Main.Info.ThreadStart"), Thread.currentThread()
-							.getName(), jedisKey));
-
-					// Get Jedis connection from pool
-					final Jedis jedis = jedisPool.getResource();
-
-					try {
-
-						VCatRenderer<ToollabsWiki>.RenderedFileInfo renderedFileInfo;
-						try {
-							final AllParamsToollabs all = new AllParamsToollabs(parameterMap, metadataProvider,
-									toollabsMetainfo);
-							renderedFileInfo = vCatRenderer.render(all, tempDir);
-						} catch (VCatException e) {
-							handleError(jedis, jedisKey, e);
-							jedis.del(jsonRequestKey);
-							return;
-						}
-
-						JSONObject json = new JSONObject();
-						try {
-							// Content-type, as returned from rendering process
-							final String contentType = renderedFileInfo.getMimeType();
-							json.put("Content-type", contentType);
-							// Content-length, using length of temporary output file already written
-							final long length = renderedFileInfo.getFile().length();
-							if (length < Integer.MAX_VALUE) {
-								json.put("Content-length", Long.toString(length));
-							}
-							// Content-disposition, to determine filename of returned contents
-							final String filename = renderedFileInfo.getFile().getName();
-							json.put("Content-disposition", "filename=\"" + filename + "\"");
-							// Control caching behaviour
-							// Although we have our own cache, let proxys and browsers also cache for a while. Half of
-							// our own purging interval seems fitting (so updates are still possible).
-							final String cacheControl = "max-age=" + (config.purge / 2);
-							json.put("Cache-Control", cacheControl);
-						} catch (JSONException e) {
-							handleError(jedis, jedisKey, e);
-							return;
-						}
-
-						Transaction t = jedis.multi();
-						// Set return values
-						t.set(jsonResponseHeadersKey, json.toString());
-						t.set(responseKey, renderedFileInfo.getFile().getAbsolutePath());
-						// Values last for 60 seconds
-						t.expire(jsonResponseHeadersKey, 60);
-						t.expire(responseKey, 60);
-
-						t.exec();
-
-						// Notify client that response is ready
-						long receivers = jedis.publish(config.redisChannelResponse, jedisKey);
-
-						// If nobody received the message, something was wrong
-						if (receivers == 0) {
-							log.error(String.format(Messages.getString("Main.Error.ResponseNobodyListening"), jedisKey));
-						} else {
-							log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jedisKey));
-						}
-
-						// Clean up request
-						jedis.del(jsonRequestKey);
-
-					} catch (Exception e) {
-						// All exceptions are caught so client is informed of error, if possible
-						handleError(jedis, jedisKey, e);
-					} finally {
-						// Return Jedis connection to pool
-						jedisPool.returnResource(jedis);
-					}
-
-					log.info(String.format(Messages.getString("Main.Info.ThreadFinish"), Thread.currentThread()
-							.getName(), jedisKey));
-
+				final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
+				try {
+					fillParametersFromJson(parameterMap, jsonRequest.getJSONObject("parameters"));
+				} catch (VCatException e) {
+					handleError(jedis, requestKey, e);
+					return;
 				}
 
-			});
+				// Return Jedis connection to pool
+				jedisPool.returnResource(jedis);
+
+				executorService.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						log.info(String.format(Messages.getString("Main.Info.ThreadStart"), Thread.currentThread()
+								.getName(), requestKey));
+
+						// Get Jedis connection from pool
+						final Jedis jedis = jedisPool.getResource();
+
+						try {
+
+							VCatRenderer<ToollabsWiki>.RenderedFileInfo renderedFileInfo;
+							try {
+								final AllParamsToollabs all = new AllParamsToollabs(parameterMap, metadataProvider,
+										toollabsMetainfo);
+								renderedFileInfo = vCatRenderer.render(all, tempDir);
+							} catch (VCatException e) {
+								handleError(jedis, requestKey, e);
+								return;
+							}
+
+							JSONObject jsonResponseHeaders = new JSONObject();
+							try {
+								// Content-type, as returned from rendering process
+								final String contentType = renderedFileInfo.getMimeType();
+								jsonResponseHeaders.put("Content-type", contentType);
+								// Content-length, using length of temporary output file already written
+								final long length = renderedFileInfo.getFile().length();
+								if (length < Integer.MAX_VALUE) {
+									jsonResponseHeaders.put("Content-length", Long.toString(length));
+								}
+								// Content-disposition, to determine filename of returned contents
+								final String filename = renderedFileInfo.getFile().getName();
+								jsonResponseHeaders.put("Content-disposition", "filename=\"" + filename + "\"");
+								// Control caching behaviour
+								// Although we have our own cache, let proxys and browsers also cache for a while. Half
+								// of
+								// our own purging interval seems fitting (so updates are still possible).
+								final String cacheControl = "max-age=" + (config.purge / 2);
+								jsonResponseHeaders.put("Cache-Control", cacheControl);
+							} catch (JSONException e) {
+								handleError(jedis, requestKey, e);
+								return;
+							}
+
+							JSONObject jsonResponse = new JSONObject();
+							jsonResponse.put("key", requestKey);
+							jsonResponse.put("headers", jsonResponseHeaders);
+							jsonResponse.put("filename", renderedFileInfo.getFile().getAbsolutePath());
+
+							// Send response
+							String jsonResponseString = jsonResponse.toString();
+							long receivers = jedis.publish(config.redisChannelResponse, jsonResponseString);
+
+							// If nobody received the message, something was wrong
+							if (receivers == 0) {
+								log.error(String.format(Messages.getString("Main.Error.ResponseNobodyListening"),
+										requestKey));
+							} else {
+								log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonResponseString));
+							}
+
+						} catch (Exception e) {
+							// All exceptions are caught so client is informed of error, if possible
+							handleError(jedis, requestKey, e);
+						} finally {
+							// Return Jedis connection to pool
+							jedisPool.returnResource(jedis);
+						}
+
+						log.info(String.format(Messages.getString("Main.Info.ThreadFinish"), Thread.currentThread()
+								.getName(), requestKey));
+
+					}
+
+				});
+
+			} catch (Exception e) {
+				// All exceptions are caught to prevent the daemon from crashing
+				handleError(jedis, requestKey, e);
+			}
 
 		} catch (Exception e) {
 			// All exceptions are caught to prevent the daemon from crashing
-			Jedis jedis = jedisPool.getResource();
-			handleError(jedis, jedisKey, e);
+		}
+
+		finally {
 			jedisPool.returnResource(jedis);
 		}
 
