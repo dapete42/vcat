@@ -257,12 +257,13 @@ public class Main {
 		// There has been an error, but it is handled gracefully; so a warning is enough
 		log.warn(e);
 		e.printStackTrace();
-		JSONObject json = new JSONObject();
+		final JSONObject json = new JSONObject();
 		json.put("key", requestKey);
 		json.put("status", "error");
 		json.put("error", e.getMessage());
-		e.getMessage();
+		final String jsonString = json.toString();
 		jedis.publish(config.redisChannelResponse, json.toString());
+		log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonString));
 	}
 
 	private static void renderJson(final String jsonString, final VCatRenderer<ToollabsWiki> vCatRenderer,
@@ -344,12 +345,12 @@ public class Main {
 							String jsonResponseString = jsonResponse.toString();
 							long receivers = jedis.publish(config.redisChannelResponse, jsonResponseString);
 
+							log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonResponseString));
+
 							// If nobody received the message, something was wrong
 							if (receivers == 0) {
 								log.error(String.format(Messages.getString("Main.Error.ResponseNobodyListening"),
 										requestKey));
-							} else {
-								log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonResponseString));
 							}
 
 						} catch (Exception e) {
