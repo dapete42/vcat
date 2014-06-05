@@ -101,7 +101,7 @@ public class Main {
 		poolConfig.setTestOnReturn(true);
 		poolConfig.setTestWhileIdle(true);
 		// Allow some more concurrent connections
-		poolConfig.setMaxActive(16);
+		poolConfig.setMaxTotal(16);
 		// We expect low traffic most of the time, so don't keep many idle connections open
 		poolConfig.setMaxIdle(1);
 		// Keep one spare idle connection
