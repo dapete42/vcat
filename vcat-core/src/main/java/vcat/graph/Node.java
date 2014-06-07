@@ -7,8 +7,6 @@ import vcat.graph.internal.GraphProperty;
 
 public class Node extends DefaultNode {
 
-	private String href;
-
 	private String label;
 
 	private final String name;

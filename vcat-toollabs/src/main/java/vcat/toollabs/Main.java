@@ -193,7 +193,7 @@ public class Main {
 					this.lastRequestDate = new Date();
 					this.requests++;
 					log.info(String.format(Messages.getString("Main.Info.RequestReceived"), message));
-					renderJson(message, vCatRenderer, metadataProvider, apiCache);
+					renderJson(message, vCatRenderer, metadataProvider);
 				}
 			}
 
@@ -267,7 +267,7 @@ public class Main {
 	}
 
 	private static void renderJson(final String jsonString, final VCatRenderer<ToollabsWiki> vCatRenderer,
-			final IMetadataProvider metadataProvider, final IApiCache apiCache) {
+			final IMetadataProvider metadataProvider) {
 
 		// Get Jedis connection from pool
 		final Jedis jedis = jedisPool.getResource();

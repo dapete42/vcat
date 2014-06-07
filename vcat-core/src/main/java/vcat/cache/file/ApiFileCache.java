@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -24,18 +25,13 @@ public class ApiFileCache extends StringFileCache implements IApiCache {
 	@Override
 	public synchronized JSONObject getJSONObject(String key) throws CacheException {
 		if (this.containsKey(key)) {
-			InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key));
-			try {
+			try (InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key))) {
 				JSONObject result = new JSONObject(new JSONTokener(reader));
 				return result;
-			} catch (Exception e) {
+			} catch (JSONException e) {
 				throw new CacheException(Messages.getString("ApiFileCache.Exception.ParseJSON"), e);
-			} finally {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					throw new CacheException(Messages.getString("ApiFileCache.Exception.CloseJSON"), e);
-				}
+			} catch (IOException e) {
+				throw new CacheException(Messages.getString("ApiFileCache.Exception.CloseJSON"), e);
 			}
 		} else {
 			return null;

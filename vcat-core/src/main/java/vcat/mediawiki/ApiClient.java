@@ -4,7 +4,6 @@ import in.yuvi.http.fluent.Http;
 import in.yuvi.http.fluent.Http.HttpRequestBuilder;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,24 +44,19 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		/*
 		 * API Etiquette: There should always be only one concurrent HTTP access; at least for Wikimedia-run wikis,
 		 * doing more at the same time may lead to being blocked. It is probably nice to do this for any wiki, anyway.
+		 * See https://www.mediawiki.org/wiki/API:Etiquette for more information on Wikimedia API etiquette.
 		 */
 		synchronized (ApiClient.class) {
-			InputStream content;
-			try {
-				HttpResponse response = builder.asResponse();
-				HttpEntity entity = response.getEntity();
-				content = entity.getContent();
+
+			try (final InputStreamReader reader = new InputStreamReader(builder.asResponse().getEntity().getContent())) {
+				return new JSONObject(new JSONTokener(reader));
 			} catch (IOException e) {
+				// IOException will be thrown for all HTTP problems
 				throw new ApiException(Messages.getString("ApiClient.Exception.HTTP"), e);
-			}
-			InputStreamReader reader = new InputStreamReader(content);
-			try {
-				JSONObject result = new JSONObject(new JSONTokener(reader));
-				reader.close();
-				return result;
-			} catch (Exception e) {
+			} catch (JSONException e) {
 				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 			}
+
 		}
 	}
 
@@ -226,7 +218,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 		}
 
-		return new Metadata(wiki, articlepath, server, authoritativeNamespaces, allNamespacesInverse);
+		return new Metadata(articlepath, server, authoritativeNamespaces, allNamespacesInverse);
 
 	}
 }

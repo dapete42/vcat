@@ -140,39 +140,43 @@ public class VCatRenderer<W extends IWiki> {
 			} catch (IOException e) {
 				throw new GraphvizException("Failed to create temporary file", e);
 			}
-			try {
-				// Reader for the image map (<map> element) fragment
-				InputStreamReader imagemapReader = new InputStreamReader(new FileInputStream(imagemapRawFile),
-						StandardCharsets.UTF_8);
-				// Input stream for the image file
-				FileInputStream imageInputStream = new FileInputStream(imageRawFile);
-				// Output stream and writer for the temp file
-				FileOutputStream outputStream = new FileOutputStream(tmpFile, false);
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-				// Base64 encoder for the data: URI
-				Base64OutputStream base64Stream = new Base64OutputStream(outputStream, true, -1, null);
+			try (FileOutputStream outputStream = new FileOutputStream(tmpFile, false);
+					BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream,
+							StandardCharsets.UTF_8));
+					Base64OutputStream base64Stream = new Base64OutputStream(outputStream, true, -1, null)) {
 
 				writer.write("<!DOCTYPE html>\n");
 				writer.write("<html><head><title></title></head><body>");
 
-				// Include image map in HTML
-				IOUtils.copy(imagemapReader, writer);
+				// Reader for the image map (<map> element) fragment
+				try (InputStreamReader imagemapReader = new InputStreamReader(new FileInputStream(imagemapRawFile),
+						StandardCharsets.UTF_8)) {
+					// Include image map in HTML
+					IOUtils.copy(imagemapReader, writer);
+				}
 
 				writer.write("<img src=\"data:");
 				writer.write(originalOutputFormat.getMimeType());
 				writer.write(";base64,");
-				writer.flush();
 
-				// Include image in base64 encoding
-				IOUtils.copy(imageInputStream, base64Stream);
-				base64Stream.flush();
+				// Input stream for the image file
+				try (FileInputStream imageInputStream = new FileInputStream(imageRawFile)) {
+
+					// Base64 encoder for the data: URI, writing to the output file
+
+					// Flush the wirter to make sure we can write to outputStream directly
+					writer.flush();
+
+					IOUtils.copy(imageInputStream, base64Stream);
+
+					// Flush the base64 stream to make sure we can use the writer again.
+					base64Stream.flush();
+
+				}
 
 				writer.write("\" usemap=\"#cluster_vcat\"/>");
 
 				writer.write("</body></html>");
-
-				imagemapReader.close();
-				writer.close();
 
 			} catch (IOException e) {
 				tmpFile.delete();

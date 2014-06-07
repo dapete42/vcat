@@ -10,8 +10,6 @@ import vcat.toollabs.ToollabsWikiProvider;
 
 public class AllParamsToollabs extends AbstractAllParams<ToollabsWiki> {
 
-	private static final long serialVersionUID = 4087487010842153626L;
-
 	private final ToollabsWikiProvider toollabsMetainfo;
 
 	public AllParamsToollabs(final Map<String, String[]> requestParams, final IMetadataProvider metadataProvider,

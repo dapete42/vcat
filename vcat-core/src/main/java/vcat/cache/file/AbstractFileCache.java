@@ -192,10 +192,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	}
 
 	public synchronized void put(K key, byte[] value) throws CacheException {
-		try {
-			FileOutputStream outputStream = new FileOutputStream(this.getCacheFile(key));
+		try (FileOutputStream outputStream = new FileOutputStream(this.getCacheFile(key))) {
 			this.writeValueToStream(value, outputStream);
-			outputStream.close();
 		} catch (IOException e) {
 			throw new CacheException(Messages.getString("AbstractFileCache.Exception.WriteFailed"), e);
 		}

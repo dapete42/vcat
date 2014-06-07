@@ -58,13 +58,6 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 					Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
 		}
 
-		Connection connection;
-		try {
-			connection = this.connectionBuilder.buildConnection(dbname);
-		} catch (VCatException e) {
-			throw new ApiException(Messages.getString("ToollabsCategoryProvider.Exception.ConnectionCategories"), e);
-		}
-
 		// Get namespaces from full titles and store the truncated titles and full titles by namespace
 		final HashMap<Integer, ArrayList<String>> titlesByNamespace = new HashMap<Integer, ArrayList<String>>();
 		for (String fullTitle : fullTitles) {
@@ -85,50 +78,53 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 
 			for (final Collection<String> titles : CollectionHelper.splitCollectionInParts(allTitles, 100)) {
 
-				try {
-					StringBuilder sql = new StringBuilder(
-							"SELECT page_title, cl_to FROM categorylinks INNER JOIN page ON page_id=cl_from"
-									+ " WHERE page_namespace=? AND page_title IN "
-									+ preparedStatementInArguments(titles.size()));
-					if (!showhidden) {
-						sql.append(" AND NOT EXISTS (SELECT * FROM page_props WHERE pp_page=page_id AND pp_propname='hiddencat');");
-					}
-					final PreparedStatement statement = connection.prepareStatement(sql.toString());
-					statement.setInt(1, namespace);
-					int i = 2;
-					for (String title : titles) {
-						statement.setString(i, title);
-						i++;
-					}
-					ResultSet rs = statement.executeQuery();
-					while (rs.next()) {
-						// We need the page_title because we get results for different pages
-						final String page_title = rs.getString("page_title");
-						final String cl_to = rs.getString("cl_to");
-						// This is the full title we got the categories for
-						final String fullTitle = metadata.fullTitle(page_title, namespace);
-						// This is the full title of the categories themselves
-						final String categoryFullTitle = metadata.fullTitle(cl_to, Metadata.NS_CATEGORY);
-						// Put title in results at correct fullTitle key
-						Collection<String> categoryFullTitles = result.get(fullTitle);
-						if (categoryFullTitles == null) {
-							categoryFullTitles = new ArrayList<String>(1);
-							result.put(fullTitle, categoryFullTitles);
+				try (Connection connection = this.connectionBuilder.buildConnection(dbname)) {
+					try {
+						StringBuilder sql = new StringBuilder(
+								"SELECT page_title, cl_to FROM categorylinks INNER JOIN page ON page_id=cl_from"
+										+ " WHERE page_namespace=? AND page_title IN "
+										+ preparedStatementInArguments(titles.size()));
+						if (!showhidden) {
+							sql.append(" AND NOT EXISTS (SELECT * FROM page_props WHERE pp_page=page_id AND pp_propname='hiddencat');");
 						}
-						categoryFullTitles.add(categoryFullTitle);
+						final PreparedStatement statement = connection.prepareStatement(sql.toString());
+						statement.setInt(1, namespace);
+						int i = 2;
+						for (String title : titles) {
+							statement.setString(i, title);
+							i++;
+						}
+						try (ResultSet rs = statement.executeQuery()) {
+							while (rs.next()) {
+								// We need the page_title because we get results for different pages
+								final String page_title = rs.getString("page_title");
+								final String cl_to = rs.getString("cl_to");
+								// This is the full title we got the categories for
+								final String fullTitle = metadata.fullTitle(page_title, namespace);
+								// This is the full title of the categories themselves
+								final String categoryFullTitle = metadata.fullTitle(cl_to, Metadata.NS_CATEGORY);
+								// Put title in results at correct fullTitle key
+								Collection<String> categoryFullTitles = result.get(fullTitle);
+								if (categoryFullTitles == null) {
+									categoryFullTitles = new ArrayList<String>(1);
+									result.put(fullTitle, categoryFullTitles);
+								}
+								categoryFullTitles.add(categoryFullTitle);
+							}
+						}
+					} catch (SQLException e) {
+						throw new ApiException(String.format(
+								Messages.getString("ToollabsCategoryProvider.Exception.ReadingCategories"), dbname), e);
 					}
-					rs.close();
-				} catch (SQLException e) {
-					throw new ApiException(String.format(
-							Messages.getString("ToollabsCategoryProvider.Exception.ReadingCategories"), dbname), e);
-				}
-			}
-		}
 
-		try {
-			connection.close();
-		} catch (SQLException e) {
-			// ignore
+				} catch (VCatException e) {
+					throw new ApiException(
+							Messages.getString("ToollabsCategoryProvider.Exception.ConnectionCategories"), e);
+				} catch (SQLException e) {
+					// Ignore, can only happen when closing the connection.
+				}
+
+			}
 		}
 
 		return result;
@@ -149,38 +145,33 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 					Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
 		}
 
-		Connection connection;
-		try {
-			connection = this.connectionBuilder.buildConnection(dbname);
-		} catch (VCatException e) {
-			throw new ApiException(Messages.getString("ToollabsCategoryProvider.Exception.ConnectionCategorymembers"),
-					e);
-		}
-
 		final ArrayList<String> result = new ArrayList<String>();
 
 		final String title = metadata.titleWithoutNamespace(fullTitle);
 
-		try {
-			final PreparedStatement statement = connection
-					.prepareStatement("SELECT page_title, page_namespace FROM page INNER JOIN categorylinks ON cl_from=page_id WHERE cl_to=?");
-			statement.setString(1, title);
-			ResultSet rs = statement.executeQuery();
-			while (rs.next()) {
-				final String page_title = rs.getString("page_title");
-				final int page_namespace = rs.getInt("page_namespace");
-				result.add(metadata.fullTitle(page_title, page_namespace));
-			}
-			rs.close();
-		} catch (SQLException e) {
-			throw new ApiException(String.format(
-					Messages.getString("ToollabsCategoryProvider.Exception.ReadingCategorymembers"), dbname), e);
-		}
+		try (Connection connection = this.connectionBuilder.buildConnection(dbname)) {
 
-		try {
-			connection.close();
+			try {
+				final PreparedStatement statement = connection
+						.prepareStatement("SELECT page_title, page_namespace FROM page INNER JOIN categorylinks ON cl_from=page_id WHERE cl_to=?");
+				statement.setString(1, title);
+				try (ResultSet rs = statement.executeQuery()) {
+					while (rs.next()) {
+						final String page_title = rs.getString("page_title");
+						final int page_namespace = rs.getInt("page_namespace");
+						result.add(metadata.fullTitle(page_title, page_namespace));
+					}
+				}
+			} catch (SQLException e) {
+				throw new ApiException(String.format(
+						Messages.getString("ToollabsCategoryProvider.Exception.ReadingCategorymembers"), dbname), e);
+			}
+
+		} catch (VCatException e) {
+			throw new ApiException(Messages.getString("ToollabsCategoryProvider.Exception.ConnectionCategorymembers"),
+					e);
 		} catch (SQLException e) {
-			// ignore
+			// Ignore, can only happen when closing the connection.
 		}
 
 		return result;

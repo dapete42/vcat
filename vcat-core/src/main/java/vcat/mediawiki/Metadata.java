@@ -31,7 +31,7 @@ public class Metadata implements Serializable {
 	/** The server the wiki is running on (start of URL). */
 	protected final String server;
 
-	protected Metadata(final IWiki wiki, final String articlepath, final String server,
+	protected Metadata(final String articlepath, final String server,
 			final Map<Integer, String> authoritativeNamespaces, final Map<String, Integer> allNamespacesInverse)
 			throws ApiException {
 		this.articlepath = articlepath;
