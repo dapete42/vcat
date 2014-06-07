@@ -161,16 +161,15 @@ public class GraphWriter {
 		this.writeDefaultNode(graph.getDefaultNode());
 		this.writeDefaultEdge(graph.getDefaultEdge());
 
-		for (Node node : graph.getNodes()) {
-			this.writeNode(node, nodesWithoutEdges.contains(node));
-		}
-
 		for (Group group : graph.getGroups()) {
 			this.writeGroup(group);
 		}
 
-		for (Edge edge : graph.getEdges()) {
-			this.writeEdge(edge);
+		for (Node node : graph.getNodes()) {
+			this.writeNode(node, true);
+			for (Edge edge : graph.getEdgesFrom(node)) {
+				this.writeEdge(edge);
+			}
 		}
 
 		this.writer.write('}');
