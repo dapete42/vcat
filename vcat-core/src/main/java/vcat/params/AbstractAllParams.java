@@ -32,7 +32,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			throws VCatException {
 
 		// Get a copy of the parameters we can modify
-		HashMap<String, String[]> params = new HashMap<String, String[]>(requestParams);
+		final HashMap<String, String[]> params = new HashMap<String, String[]>(requestParams);
 
 		String wikiString = getAndRemove(params, "wiki");
 		if (wikiString == null || wikiString.isEmpty()) {
@@ -86,6 +86,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		String limitString = getAndRemove(params, "limit");
 		String showhiddenString = getAndRemove(params, "showhidden");
 		String relationString = getAndRemove(params, "rel");
+		String linkString = getAndRemove(params, "link");
 
 		// 'category'
 		if (categoryStrings != null) {
@@ -201,6 +202,16 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			}
 		}
 
+		// 'link' - whether to include links, and if yes, where they lead
+		Link link = Link.None;
+		if (linkString != null) {
+			link = Link.valueOfIgnoreCase(linkString);
+			if (link == null) {
+				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+						"link", linkString));
+			}
+		}
+
 		// Build TitleNamespaceParams
 		ArrayList<TitleNamespaceParam> titleNamespaceList = new ArrayList<TitleNamespaceParam>(titles.length);
 		for (int i = 0; i < titles.length; i++) {
@@ -213,6 +224,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		this.getVCat().setLimit(limit);
 		this.getVCat().setShowhidden(showhidden);
 		this.getVCat().setRelation(relation);
+		this.getVCat().setLink(link);
 
 		//
 		// After all this handling, no parameters should be left

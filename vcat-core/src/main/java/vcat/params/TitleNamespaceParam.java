@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class TitleNamespaceParam implements Serializable {
 
-	private static final long serialVersionUID = -5233638242636432181L;
+	private static final long serialVersionUID = -8613491816971451993L;
 
 	private final int namespace;
 

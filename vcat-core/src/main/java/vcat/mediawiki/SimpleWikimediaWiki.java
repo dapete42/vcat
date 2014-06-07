@@ -2,7 +2,7 @@ package vcat.mediawiki;
 
 public class SimpleWikimediaWiki implements IWiki {
 
-	private static final long serialVersionUID = -8656795250098981777L;
+	private static final long serialVersionUID = -7792081905551487036L;
 
 	private final String host;
 

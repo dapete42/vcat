@@ -7,6 +7,8 @@ import vcat.graph.internal.GraphProperty;
 
 public class Node extends DefaultNode {
 
+	private String href;
+
 	private String label;
 
 	private final String name;
@@ -33,6 +35,11 @@ public class Node extends DefaultNode {
 		}
 	}
 
+	@GraphProperty(Graph.PROPERTY_HREF)
+	public String getHref() {
+		return this.href;
+	}
+
 	@GraphProperty(Graph.PROPERTY_LABEL)
 	public String getLabel() {
 		return this.label;
@@ -45,6 +52,10 @@ public class Node extends DefaultNode {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(197, 1117).append(this.name).toHashCode();
+	}
+
+	public void setHref(String href) {
+		this.href = href;
 	}
 
 	public void setLabel(String label) {

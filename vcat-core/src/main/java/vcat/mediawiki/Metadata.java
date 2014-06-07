@@ -11,7 +11,7 @@ import vcat.Messages;
 
 public class Metadata implements Serializable {
 
-	private static final long serialVersionUID = -4021889274400016225L;
+	private static final long serialVersionUID = -3086995448506417630L;
 
 	/** ID of the article namespace. */
 	public final static int NS_ARTICLE = 0;
@@ -22,14 +22,20 @@ public class Metadata implements Serializable {
 	/** A map of all namespace names of the MediaWiki installation. */
 	private final Map<String, Integer> allNamespacesInverse;
 
-	protected String articlepath;
+	/** The path on the server to access wiki pages (contains <code>$1</code> as a placeholder for the page title). */
+	protected final String articlepath;
 
 	/** A map of the authoritative namespace names of the MediaWiki installation. */
 	private final Map<Integer, String> authoritativeNamespaces;
 
-	protected Metadata(final IWiki wiki, final String articlepath, final Map<Integer, String> authoritativeNamespaces,
-			final Map<String, Integer> allNamespacesInverse) throws ApiException {
+	/** The server the wiki is running on (start of URL). */
+	protected final String server;
+
+	protected Metadata(final IWiki wiki, final String articlepath, final String server,
+			final Map<Integer, String> authoritativeNamespaces, final Map<String, Integer> allNamespacesInverse)
+			throws ApiException {
 		this.articlepath = articlepath;
+		this.server = server;
 		this.authoritativeNamespaces = authoritativeNamespaces;
 		this.allNamespacesInverse = allNamespacesInverse;
 	}
@@ -69,6 +75,10 @@ public class Metadata implements Serializable {
 
 	public int getId(String namespaceName) {
 		return this.allNamespacesInverse.get(namespaceName);
+	}
+
+	public String getServer() {
+		return this.server;
 	}
 
 	public int namespaceFromTitle(String title) {

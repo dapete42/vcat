@@ -7,16 +7,23 @@ package vcat.params;
  */
 public enum OutputFormat {
 
-	/** Raw Graphviz source, which not passed through Graphviz. */
-	GraphvizRaw("gv", null, "text/plain; charset=UTF-8", "dot", "gv"),
+	/** Image map fragment (<code>&lt;map&gt;</code> element). For internal use only. */
+	_Imagemap("cmapx", "cmapx", null, null),
+	/** HTML page with image map and GIF image. For internal use only. */
+	_HTMLGIF("gif.html", null, "text/html; charset=UTF-8", null),
+	/** HTML page with image map and PNG image. For internal use only. */
+	_HTMLPNG("png.html", null, "text/html; charset=UTF-8", null),
+
+	/** Raw Graphviz source, not passed through Graphviz. */
+	GraphvizRaw("gv", null, "text/plain; charset=UTF-8", null, "dot", "gv"),
 	/** GIF image (force rendering with cairo). */
-	GIF("gif", "gif:cairo", "image/gif", "gif"),
+	GIF("gif", "gif:cairo", "image/gif", OutputFormat._HTMLGIF),
 	/** PDF. */
-	PDF("pdf", "pdf", "application/pdf", "pdf"),
+	PDF("pdf", "pdf", "application/pdf", null, "pdf"),
 	/** PNG image (force rendering with cairo). */
-	PNG("png", "png:cairo", "image/png", "png"),
+	PNG("png", "png:cairo", "image/png", OutputFormat._HTMLPNG, "png"),
 	/** SVG image. */
-	SVG("svg", "svg", "image/svg+xml; charset=UTF-8", "svg");
+	SVG("svg", "svg", "image/svg+xml; charset=UTF-8", null, "svg");
 
 	public static OutputFormat valueOfIgnoreCase(String name) {
 		for (OutputFormat format : values()) {
@@ -35,14 +42,31 @@ public enum OutputFormat {
 
 	private final String graphvizTypeParameter;
 
+	private final OutputFormat imageMapOutputFormat;
+
 	private final String mimeType;
 
 	private final String[] parameterNames;
 
-	OutputFormat(String fileExtension, String graphvizTypeParameter, String mimeType, String... parameterNames) {
+	/**
+	 * @param fileExtension
+	 *            File extension for the output format.
+	 * @param graphvizTypeParameter
+	 *            Type parameter to pass when calling the graphviz command line tool.
+	 * @param mimeType
+	 *            MIME type for the output format.
+	 * @param imageMapOutputFormat
+	 *            If not null, this output format has a special output format when links are included; this is used to
+	 *            create an image map and an HTML page containing it.
+	 * @param parameterNames
+	 *            Names this format should be recognized by when calling {@link #valueOfIgnoreCase(String)}.
+	 */
+	OutputFormat(String fileExtension, String graphvizTypeParameter, String mimeType,
+			OutputFormat imageMapOutputFormat, String... parameterNames) {
 		this.fileExtension = fileExtension;
 		this.graphvizTypeParameter = graphvizTypeParameter;
 		this.mimeType = mimeType;
+		this.imageMapOutputFormat = imageMapOutputFormat;
 		this.parameterNames = parameterNames;
 	}
 
@@ -54,10 +78,18 @@ public enum OutputFormat {
 	}
 
 	/**
-	 * @return Type parameter to pass when calling the graphviz command line too.
+	 * @return Type parameter to pass when calling the graphviz command line tool.
 	 */
 	public String getGraphvizTypeParameter() {
 		return this.graphvizTypeParameter;
+	}
+
+	/**
+	 * @return Output format to use when creating an image map page to support links in static images, null if not
+	 *         applicable.
+	 */
+	public OutputFormat getImageMapOutputFormat() {
+		return this.imageMapOutputFormat;
 	}
 
 	/**
@@ -72,6 +104,13 @@ public enum OutputFormat {
 	 */
 	public String[] getParameterNames() {
 		return this.parameterNames;
+	}
+
+	/**
+	 * @return Whether to use another output format when creating an image map page to support links in static images.
+	 */
+	public boolean hasImageMapOutputFormat() {
+		return this.getImageMapOutputFormat() != null;
 	}
 
 }

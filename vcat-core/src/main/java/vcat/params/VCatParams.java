@@ -18,6 +18,8 @@ public class VCatParams<W extends IWiki> implements Serializable {
 
 	private Integer limit;
 
+	private Link link = Link.None;
+
 	private Relation relation = Relation.Category;
 
 	private boolean showhidden = false;
@@ -34,16 +36,20 @@ public class VCatParams<W extends IWiki> implements Serializable {
 		return this.limit;
 	}
 
+	public Link getLink() {
+		return this.link;
+	}
+
+	public Relation getRelation() {
+		return this.relation;
+	}
+
 	public Collection<TitleNamespaceParam> getTitleNamespaceParams() {
 		return this.titleNamespaceParams;
 	}
 
 	public W getWiki() {
 		return this.wiki;
-	}
-
-	public Relation getRelation() {
-		return this.relation;
 	}
 
 	public boolean isShowhidden() {
@@ -56,6 +62,10 @@ public class VCatParams<W extends IWiki> implements Serializable {
 
 	public void setLimit(Integer limit) {
 		this.limit = limit;
+	}
+
+	public void setLink(Link link) {
+		this.link = link;
 	}
 
 	public void setRelation(Relation relation) {

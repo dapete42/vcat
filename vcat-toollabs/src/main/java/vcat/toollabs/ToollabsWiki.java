@@ -28,13 +28,13 @@ public class ToollabsWiki implements IWiki {
 	}
 
 	@Override
-	public String getName() {
-		return this.dbname;
+	public String getDisplayName() {
+		return this.name + " (" + this.dbname + ')';
 	}
 
 	@Override
-	public String getDisplayName() {
-		return this.name + " (" + this.dbname + ')';
+	public String getName() {
+		return this.dbname;
 	}
 
 }

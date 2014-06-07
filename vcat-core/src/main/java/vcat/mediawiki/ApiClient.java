@@ -186,6 +186,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		JSONObject json = this.request(wiki.getApiUrl(), params);
 
 		String articlepath;
+		String server;
 		final Map<Integer, String> authoritativeNamespaces = new HashMap<Integer, String>();
 		final Map<String, Integer> allNamespacesInverse = new HashMap<String, Integer>();
 
@@ -193,6 +194,8 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			JSONObject query = json.getJSONObject("query");
 
 			articlepath = query.getJSONObject("general").getString("articlepath");
+
+			server = query.getJSONObject("general").getString("server");
 
 			JSONObject namespaces = query.getJSONObject("namespaces");
 			for (String nsIdString : JSONObject.getNames(namespaces)) {
@@ -223,7 +226,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 		}
 
-		return new Metadata(wiki, articlepath, authoritativeNamespaces, allNamespacesInverse);
+		return new Metadata(wiki, articlepath, server, authoritativeNamespaces, allNamespacesInverse);
 
 	}
 }

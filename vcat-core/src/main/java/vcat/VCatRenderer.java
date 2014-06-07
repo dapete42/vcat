@@ -1,7 +1,16 @@
 package vcat;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.codec.binary.Base64OutputStream;
+import org.apache.commons.io.IOUtils;
 
 import vcat.VCatException;
 import vcat.cache.CacheException;
@@ -12,9 +21,10 @@ import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IWiki;
 import vcat.params.AbstractAllParams;
-import vcat.params.CombinedParams;
+import vcat.params.Link;
 import vcat.params.OutputFormat;
 import vcat.params.VCatFactory;
+import vcat.params.VCatParams;
 
 public class VCatRenderer<W extends IWiki> {
 
@@ -87,24 +97,108 @@ public class VCatRenderer<W extends IWiki> {
 
 	private File createGraphFile(AbstractAllParams<W> all, File tmpDir) throws CacheException, VCatException,
 			GraphvizException {
-		final AbstractVCat<W> vCat = this.vCatFactory.createInstance(all);
-		vCat.renderToCache(this.graphCache, tmpDir);
-		File graphFile = this.graphCache.getCacheFile(all.getVCat());
+		final VCatParams<W> vCatParams = all.getVCat();
+		if (!this.graphCache.containsKey(vCatParams)) {
+			final AbstractVCat<W> vCat = this.vCatFactory.createInstance(all);
+			vCat.renderToCache(this.graphCache, tmpDir);
+		}
+		File graphFile = this.graphCache.getCacheFile(vCatParams);
 		return graphFile;
+	}
+
+	private File createImagemapHtmlFile(AbstractAllParams<W> all, File tmpDir) throws CacheException, VCatException,
+			GraphvizException {
+
+		// Change to alternative output format for further processing
+		final OutputFormat originalOutputFormat = all.getGraphviz().getOutputFormat();
+		final OutputFormat newOutputFormat = originalOutputFormat.getImageMapOutputFormat();
+		all.getGraphviz().setOutputFormat(newOutputFormat);
+
+		if (!this.renderedCache.containsKey(all.getCombined())) {
+
+			// Render in original output format
+			all.getGraphviz().setOutputFormat(originalOutputFormat);
+			final File imageRawFile = this.createRenderedFile(all, tmpDir);
+
+			// Render as image map
+			all.getGraphviz().setOutputFormat(OutputFormat._Imagemap);
+			final File imagemapRawFile = this.createRenderedFile(all, tmpDir);
+
+			// Restore new output format
+			all.getGraphviz().setOutputFormat(newOutputFormat);
+
+			// This has to be embedded in another file
+			File tmpFile;
+			try {
+				final String prefix = "RenderedFile-temp-";
+				final String suffix = '.' + all.getGraphviz().getOutputFormat().getFileExtension();
+				if (tmpDir == null) {
+					tmpFile = File.createTempFile(prefix, suffix);
+				} else {
+					tmpFile = File.createTempFile(prefix, suffix, tmpDir);
+				}
+			} catch (IOException e) {
+				throw new GraphvizException("Failed to create temporary file", e);
+			}
+			try {
+				// Reader for the image map (<map> element) fragment
+				InputStreamReader imagemapReader = new InputStreamReader(new FileInputStream(imagemapRawFile),
+						StandardCharsets.UTF_8);
+				// Input stream for the image file
+				FileInputStream imageInputStream = new FileInputStream(imageRawFile);
+				// Output stream and writer for the temp file
+				FileOutputStream outputStream = new FileOutputStream(tmpFile, false);
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+				// Base64 encoder for the data: URI
+				Base64OutputStream base64Stream = new Base64OutputStream(outputStream, true, -1, null);
+
+				writer.write("<!DOCTYPE html>\n");
+				writer.write("<html><head><title></title></head><body>");
+
+				// Include image map in HTML
+				IOUtils.copy(imagemapReader, writer);
+
+				writer.write("<img src=\"data:");
+				writer.write(originalOutputFormat.getMimeType());
+				writer.write(";base64,");
+				writer.flush();
+
+				// Include image in base64 encoding
+				IOUtils.copy(imageInputStream, base64Stream);
+				base64Stream.flush();
+
+				writer.write("\" usemap=\"#cluster_vcat\"/>");
+
+				writer.write("</body></html>");
+
+				imagemapReader.close();
+				writer.close();
+
+			} catch (IOException e) {
+				tmpFile.delete();
+				throw new VCatException("Failed to create temporary file", e);
+			}
+			try {
+				this.renderedCache.putFile(all.getCombined(), tmpFile, true);
+			} catch (CacheException e) {
+				tmpFile.delete();
+				throw e;
+			}
+		}
+		return renderedCache.getCacheFile(all.getCombined());
 	}
 
 	private File createRenderedFile(AbstractAllParams<W> all, File tmpDir) throws CacheException, VCatException,
 			GraphvizException {
-		CombinedParams<W> combinedParams = all.getCombined();
-		if (!this.renderedCache.containsKey(combinedParams)) {
-			File graphFile = this.createGraphFile(all, tmpDir);
+		if (!this.renderedCache.containsKey(all.getCombined())) {
+			final File graphFile = this.createGraphFile(all, tmpDir);
 			// Parameters may have changed when creating the graph file, due to the handling of limit parameters, so we
 			// have to check again
-			if (!this.renderedCache.containsKey(combinedParams)) {
+			if (!this.renderedCache.containsKey(all.getCombined())) {
 				File tmpFile;
 				try {
 					final String prefix = "RenderedFile-temp-";
-					final String suffix = '.' + combinedParams.getGraphviz().getOutputFormat().getFileExtension();
+					final String suffix = '.' + all.getCombined().getGraphviz().getOutputFormat().getFileExtension();
 					if (tmpDir == null) {
 						tmpFile = File.createTempFile(prefix, suffix);
 					} else {
@@ -114,13 +208,13 @@ public class VCatRenderer<W extends IWiki> {
 					throw new GraphvizException("Failed to create temporary file", e);
 				}
 				try {
-					graphviz.render(graphFile, tmpFile, combinedParams.getGraphviz());
+					graphviz.render(graphFile, tmpFile, all.getCombined().getGraphviz());
 				} catch (GraphvizException e) {
 					tmpFile.delete();
 					throw e;
 				}
 				try {
-					this.renderedCache.putFile(combinedParams, tmpFile, true);
+					this.renderedCache.putFile(all.getCombined(), tmpFile, true);
 				} catch (CacheException e) {
 					tmpFile.delete();
 					throw e;
@@ -128,7 +222,7 @@ public class VCatRenderer<W extends IWiki> {
 
 			}
 		}
-		return renderedCache.getCacheFile(combinedParams);
+		return renderedCache.getCacheFile(all.getCombined());
 	}
 
 	public void purge() {
@@ -147,9 +241,15 @@ public class VCatRenderer<W extends IWiki> {
 
 			// Get and, if necessary, create result file
 			final File resultFile;
-			if (all.getGraphviz().getOutputFormat() == OutputFormat.GraphvizRaw) {
+			final OutputFormat outputFormat = all.getGraphviz().getOutputFormat();
+			if (outputFormat == OutputFormat.GraphvizRaw) {
+				// GraphvizRaw returns just the graph file
 				resultFile = createGraphFile(all, tmpDir);
+			} else if (all.getVCat().getLink() != Link.None && outputFormat.hasImageMapOutputFormat()) {
+				// If links are requested, some formats want to be shown in an HTML page with an image map
+				resultFile = createImagemapHtmlFile(all, tmpDir);
 			} else {
+				// Everything else returns the rendered file
 				resultFile = createRenderedFile(all, tmpDir);
 			}
 
