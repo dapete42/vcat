@@ -35,11 +35,6 @@ public class Node extends DefaultNode {
 		}
 	}
 
-	@GraphProperty(Graph.PROPERTY_HREF)
-	public String getHref() {
-		return this.href;
-	}
-
 	@GraphProperty(Graph.PROPERTY_LABEL)
 	public String getLabel() {
 		return this.label;
