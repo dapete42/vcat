@@ -140,10 +140,10 @@ public class VCatRenderer<W extends IWiki> {
 			} catch (IOException e) {
 				throw new GraphvizException("Failed to create temporary file", e);
 			}
+
 			try (FileOutputStream outputStream = new FileOutputStream(tmpFile, false);
 					BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream,
-							StandardCharsets.UTF_8));
-					Base64OutputStream base64Stream = new Base64OutputStream(outputStream, true, -1, null)) {
+							StandardCharsets.UTF_8));) {
 
 				writer.write("<!DOCTYPE html>\n");
 				writer.write("<html><head><title></title></head><body>");
@@ -166,10 +166,10 @@ public class VCatRenderer<W extends IWiki> {
 
 					// Flush the wirter to make sure we can write to outputStream directly
 					writer.flush();
-
+					Base64OutputStream base64Stream = new Base64OutputStream(outputStream, true, -1, null);
 					IOUtils.copy(imageInputStream, base64Stream);
-
-					// Flush the base64 stream to make sure we can use the writer again.
+					// Flush the base64 stream to make sure we can use the writer again. We cannot close it because that
+					// would close the outputStream too.
 					base64Stream.flush();
 
 				}
