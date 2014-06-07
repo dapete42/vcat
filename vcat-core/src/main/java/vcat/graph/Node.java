@@ -49,10 +49,6 @@ public class Node extends DefaultNode {
 		return new HashCodeBuilder(197, 1117).append(this.name).toHashCode();
 	}
 
-	public void setHref(String href) {
-		this.href = href;
-	}
-
 	public void setLabel(String label) {
 		this.label = label;
 	}
