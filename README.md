@@ -11,8 +11,7 @@ It replaces a similar tool written in PHP, Catgraph.
 Projects
 --------
 
-It consists of four projects, all of which are Eclipse projects as well as
-Maven artifacts. These are:
+It consists of five projects:
 
 * vcat-core: The core library to evaluate parameters, get the necessary
   category information from the wiki and render it into an image.
@@ -22,7 +21,10 @@ Maven artifacts. These are:
   library) to store the API and metadata caches.
 * vcat-webapp: A Java Servlet version of vCat which expects parameters as GET
   or POST parameters and directly returns the rendered file.
-* vcat-toollabs: A deamon version of vCat for use on Tool Labs.
+* vcat-toollabs: A deamon version of vCat for use on Tool Labs
+  (http://tools.wmflabs.org/).
+
+Each of these are set up as Eclipse projects as well as Maven submodules.
 
 Licensing
 ---------
