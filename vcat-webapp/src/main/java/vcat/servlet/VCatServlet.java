@@ -40,8 +40,6 @@ public class VCatServlet extends HttpServlet {
 
 	private static int PURGE_METADATA = 86400;
 
-	private static final File TMP_DIR = new File("/tmp/vcat");
-
 	private ICategoryProvider<SimpleWikimediaWiki> categoryProvider;
 
 	private IMetadataProvider metadataProvider;
@@ -100,14 +98,19 @@ public class VCatServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
+		final File cacheDir = new File(Config.getString(Config.CONFIG_CACHEDIR));
+		final File apiDir = new File(cacheDir, "api");
+		final File metadataDir = new File(cacheDir, "metadata");
+		apiDir.mkdirs();
+		metadataDir.mkdirs();
 		try {
 			final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File("/usr/bin")), 1);
-			final IApiCache apiCache = new ApiFileCache(new File(TMP_DIR, "api"), PURGE);
+			final IApiCache apiCache = new ApiFileCache(apiDir, PURGE);
 			final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<SimpleWikimediaWiki>(apiCache);
 			this.categoryProvider = apiClient;
-			final IMetadataCache metadataCache = new MetadataFileCache(new File(TMP_DIR, "metadata"), PURGE_METADATA);
+			final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, PURGE_METADATA);
 			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-			this.vCatRenderer = new VCatRenderer<SimpleWikimediaWiki>(graphviz, TMP_DIR, this.categoryProvider, PURGE);
+			this.vCatRenderer = new VCatRenderer<SimpleWikimediaWiki>(graphviz, cacheDir, this.categoryProvider, PURGE);
 		} catch (CacheException | VCatException e) {
 			throw new ServletException(e);
 		}
