@@ -17,7 +17,7 @@ public enum OutputFormat {
 	/** Raw Graphviz source, not passed through Graphviz. */
 	GraphvizRaw("gv", null, "text/plain; charset=UTF-8", null, "dot", "gv"),
 	/** GIF image (force rendering with cairo). */
-	GIF("gif", "gif:cairo", "image/gif", OutputFormat._HTMLGIF),
+	GIF("gif", "gif:cairo", "image/gif", OutputFormat._HTMLGIF, "gif"),
 	/** PDF. */
 	PDF("pdf", "pdf", "application/pdf", null, "pdf"),
 	/** PNG image (force rendering with cairo). */
