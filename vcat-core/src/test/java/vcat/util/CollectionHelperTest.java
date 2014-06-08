@@ -27,7 +27,7 @@ public class CollectionHelperTest {
 		assertEquals(0, CollectionHelper.splitCollectionInParts(new ArrayList<String>(), 100).size());
 
 		// Some test data
-		ArrayList<String> testData = new ArrayList<String>(10);
+		ArrayList<String> testData = new ArrayList<>(10);
 		testData.add("test0");
 		testData.add("test1");
 		testData.add("test2");

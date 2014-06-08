@@ -20,7 +20,7 @@ public class CombinedParams<W extends IWiki> implements Serializable {
 	private GraphvizParams graphvizParams;
 
 	protected CombinedParams() {
-		this.vCatParams = new VCatParams<W>();
+		this.vCatParams = new VCatParams<>();
 		this.graphvizParams = new GraphvizParams();
 	}
 

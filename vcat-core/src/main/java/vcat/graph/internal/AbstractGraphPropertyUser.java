@@ -17,7 +17,7 @@ public abstract class AbstractGraphPropertyUser {
 	 *         annotation.
 	 */
 	public Map<String, String> properties() {
-		Map<String, String> properties = new HashMap<String, String>();
+		Map<String, String> properties = new HashMap<>();
 		for (Method method : this.getClass().getMethods()) {
 			if (method.isAnnotationPresent(GraphProperty.class)) {
 				Object valueObject;

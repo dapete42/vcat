@@ -15,7 +15,7 @@ public class Group extends AbstractGraphPropertyUser {
 
 	private final String name;
 
-	private final Set<Node> nodes = new HashSet<Node>();
+	private final Set<Node> nodes = new HashSet<>();
 
 	private GroupRank rank = GroupRank.none;
 

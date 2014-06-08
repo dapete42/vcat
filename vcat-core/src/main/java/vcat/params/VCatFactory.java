@@ -20,9 +20,9 @@ public class VCatFactory<W extends IWiki> {
 		final Relation relation = all.getVCat().getRelation();
 		switch (relation) {
 		case Category:
-			return new VCatForCategories<W>(all, this.categoryProvider);
+			return new VCatForCategories<>(all, this.categoryProvider);
 		case Subcategory:
-			return new VCatForSubcategories<W>(all, this.categoryProvider);
+			return new VCatForSubcategories<>(all, this.categoryProvider);
 		default:
 			throw new VCatException(String.format(Messages.getString("VCatFactory.Exception.RelationTypeNotSupported"),
 					relation.name()));

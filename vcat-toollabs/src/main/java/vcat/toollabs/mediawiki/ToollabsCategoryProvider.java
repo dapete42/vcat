@@ -59,19 +59,19 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		}
 
 		// Get namespaces from full titles and store the truncated titles and full titles by namespace
-		final HashMap<Integer, ArrayList<String>> titlesByNamespace = new HashMap<Integer, ArrayList<String>>();
+		final HashMap<Integer, ArrayList<String>> titlesByNamespace = new HashMap<>();
 		for (String fullTitle : fullTitles) {
 			final String title = metadata.titleWithoutNamespace(fullTitle);
 			final int namespace = metadata.namespaceFromTitle(fullTitle);
 			ArrayList<String> list = titlesByNamespace.get(namespace);
 			if (list == null) {
-				list = new ArrayList<String>(1);
+				list = new ArrayList<>(1);
 				titlesByNamespace.put(namespace, list);
 			}
 			list.add(title);
 		}
 
-		final HashMap<String, Collection<String>> result = new HashMap<String, Collection<String>>(fullTitles.size());
+		final HashMap<String, Collection<String>> result = new HashMap<>(fullTitles.size());
 
 		for (int namespace : titlesByNamespace.keySet()) {
 			final ArrayList<String> allTitles = titlesByNamespace.get(namespace);
@@ -106,7 +106,7 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 								// Put title in results at correct fullTitle key
 								Collection<String> categoryFullTitles = result.get(fullTitle);
 								if (categoryFullTitles == null) {
-									categoryFullTitles = new ArrayList<String>(1);
+									categoryFullTitles = new ArrayList<>(1);
 									result.put(fullTitle, categoryFullTitles);
 								}
 								categoryFullTitles.add(categoryFullTitle);
@@ -145,7 +145,7 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 					Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
 		}
 
-		final ArrayList<String> result = new ArrayList<String>();
+		final ArrayList<String> result = new ArrayList<>();
 
 		final String title = metadata.titleWithoutNamespace(fullTitle);
 

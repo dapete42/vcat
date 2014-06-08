@@ -48,7 +48,7 @@ public abstract class GraphvizJNILoader {
 			return true;
 		} else {
 			// Build a list of all locations. Search custom locations first, then default ones.
-			ArrayList<String> locations = new ArrayList<String>(customLocations);
+			ArrayList<String> locations = new ArrayList<>(customLocations);
 			locations.addAll(Arrays.asList(defaultLocations));
 			loadLoop: for (String location : locations) {
 				try {

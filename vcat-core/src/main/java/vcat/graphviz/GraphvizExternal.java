@@ -32,7 +32,7 @@ public class GraphvizExternal implements Graphviz {
 	}
 
 	public List<String> buildCommandParts(final String command, GraphvizParams params, File inputFile, File outputFile) {
-		ArrayList<String> commandParts = new ArrayList<String>(4);
+		ArrayList<String> commandParts = new ArrayList<>(4);
 		commandParts.add(command);
 		commandParts.add("-T" + params.getOutputFormat().getGraphvizTypeParameter());
 		commandParts.add("-o" + outputFile.getAbsolutePath());

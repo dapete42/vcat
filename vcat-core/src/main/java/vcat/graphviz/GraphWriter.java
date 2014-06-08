@@ -148,7 +148,7 @@ public class GraphWriter {
 		this.writer.write("charset=\"UTF-8\";\n");
 
 		// Create a Set of nodes that have no edges; they have to be included even if they do not have any properties
-		Set<Node> nodesWithoutEdges = new HashSet<Node>();
+		Set<Node> nodesWithoutEdges = new HashSet<>();
 		// Assume no node as edges; then remove those that have from the list
 		nodesWithoutEdges.addAll(graph.getNodes());
 		for (Edge edge : graph.getEdges()) {

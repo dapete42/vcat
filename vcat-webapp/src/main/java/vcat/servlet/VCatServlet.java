@@ -107,11 +107,11 @@ public class VCatServlet extends HttpServlet {
 		try {
 			final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File("/usr/bin")), 1);
 			final IApiCache apiCache = new ApiFileCache(apiDir, PURGE);
-			final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<SimpleWikimediaWiki>(apiCache);
+			final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<>(apiCache);
 			this.categoryProvider = apiClient;
 			final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, PURGE_METADATA);
 			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-			this.vCatRenderer = new VCatRenderer<SimpleWikimediaWiki>(graphviz, cacheDir, this.categoryProvider, PURGE);
+			this.vCatRenderer = new VCatRenderer<>(graphviz, cacheDir, this.categoryProvider, PURGE);
 		} catch (CacheException | VCatException e) {
 			throw new ServletException(e);
 		}

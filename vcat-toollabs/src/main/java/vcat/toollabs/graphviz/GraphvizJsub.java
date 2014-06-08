@@ -15,7 +15,7 @@ import vcat.params.GraphvizParams;
  */
 public class GraphvizJsub extends GraphvizExternal {
 
-	private final ArrayList<String> jsubCommandParts = new ArrayList<String>();
+	private final ArrayList<String> jsubCommandParts = new ArrayList<>();
 
 	/** Job memory in Megabytes */
 	private final int mem;
@@ -45,7 +45,7 @@ public class GraphvizJsub extends GraphvizExternal {
 	@Override
 	public List<String> buildCommandParts(String command, GraphvizParams params, File inputFile, File outputFile) {
 		final List<String> originalCommandParts = super.buildCommandParts(command, params, inputFile, outputFile);
-		final ArrayList<String> commandParts = new ArrayList<String>(this.jsubCommandParts.size()
+		final ArrayList<String> commandParts = new ArrayList<>(this.jsubCommandParts.size()
 				+ originalCommandParts.size());
 		commandParts.addAll(this.jsubCommandParts);
 		commandParts.addAll(originalCommandParts);

@@ -85,9 +85,9 @@ public class VCatRenderer<W extends IWiki> {
 		mkdirsWithError(renderedFileCacheDir);
 
 		try {
-			this.graphCache = new GraphFileCache<W>(graphCacheDir, this.purge);
-			this.renderedCache = new RenderedFileCache<W>(renderedFileCacheDir, this.purge);
-			this.vCatFactory = new VCatFactory<W>(categoryProvider);
+			this.graphCache = new GraphFileCache<>(graphCacheDir, this.purge);
+			this.renderedCache = new RenderedFileCache<>(renderedFileCacheDir, this.purge);
+			this.vCatFactory = new VCatFactory<>(categoryProvider);
 		} catch (CacheException e) {
 			throw new VCatException("Error while setting up caches", e);
 		}

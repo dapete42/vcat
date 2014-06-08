@@ -72,7 +72,7 @@ public class QueuedGraphviz implements Graphviz {
 	 * {@link Graphviz#render(File, File, GraphvizParams) Graphviz.render} (on the {@link Graphviz} instance passed in
 	 * the constructor), it will be saved in this Map and later thrown by {@link #render(File, File, GraphvizParams)}.
 	 */
-	private final Map<Job, Exception> jobExceptions = new HashMap<Job, Exception>();
+	private final Map<Job, Exception> jobExceptions = new HashMap<>();
 
 	/**
 	 * Map of all jobs. The value is an object we use to lockthe number number of calls to
@@ -82,16 +82,16 @@ public class QueuedGraphviz implements Graphviz {
 	 * This is also used to synchronize all operations on this Map or any of these other Collections to make the code
 	 * thread-safe.
 	 */
-	private final Map<Job, Integer> jobs = new HashMap<Job, Integer>();
+	private final Map<Job, Integer> jobs = new HashMap<>();
 
 	/** Map of lock objects for each job. */
-	private final Map<Job, Object> jobLocks = new HashMap<Job, Object>();
+	private final Map<Job, Object> jobLocks = new HashMap<>();
 
 	/**
 	 * Set of finished Jobs. Jobs are added to this when their Runnable instance has finished. This causes calls to
 	 * {@link #render(File, File, GraphvizParams)} currently waiting for this Job to continue.
 	 */
-	private final Set<Job> jobsFinished = new HashSet<Job>();
+	private final Set<Job> jobsFinished = new HashSet<>();
 
 	/** Graphviz renderer used for actual rendering */
 	private final Graphviz otherGraphviz;
@@ -151,7 +151,7 @@ public class QueuedGraphviz implements Graphviz {
 					}
 
 				});
-				
+
 				log.info(String.format(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode()));
 			}
 		}

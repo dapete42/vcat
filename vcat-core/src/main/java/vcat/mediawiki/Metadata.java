@@ -52,7 +52,7 @@ public class Metadata implements Serializable {
 	}
 
 	public Set<String> getAllNames(int namespace) {
-		Set<String> allNames = new HashSet<String>();
+		Set<String> allNames = new HashSet<>();
 		for (Entry<String, Integer> entry : allNamespacesInverse.entrySet()) {
 			if (namespace == entry.getValue()) {
 				allNames.add(entry.getKey());

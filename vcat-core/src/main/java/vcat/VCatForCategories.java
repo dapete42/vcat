@@ -57,7 +57,7 @@ public class VCatForCategories<W extends IWiki> extends AbstractVCat<W> {
 			boolean showhidden, boolean exceedDepth) throws ApiException {
 
 		// Create a list of the full titles (including namespace) of the categories in the current loop iteration
-		ArrayList<String> curFullTitles = new ArrayList<String>(curNodes.size());
+		ArrayList<String> curFullTitles = new ArrayList<>(curNodes.size());
 		for (Node curNode : curNodes) {
 			curFullTitles.add(categoryNamespacePrefix + curNode.getName());
 		}

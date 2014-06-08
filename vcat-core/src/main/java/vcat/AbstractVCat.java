@@ -117,10 +117,10 @@ public abstract class AbstractVCat<W extends IWiki> {
 		String fullTitle;
 
 		try {
-			HashSet<Node> allNodesFound = new HashSet<Node>();
+			HashSet<Node> allNodesFound = new HashSet<>();
 
 			Collection<TitleNamespaceParam> titleNamespaceList = vCatParams.getTitleNamespaceParams();
-			ArrayList<Root> roots = new ArrayList<Root>(titleNamespaceList.size());
+			ArrayList<Root> roots = new ArrayList<>(titleNamespaceList.size());
 
 			int n = 0;
 			for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
@@ -147,7 +147,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 			boolean showhidden = vCatParams.isShowhidden();
 
-			ArrayList<Node> newNodes = new ArrayList<Node>();
+			ArrayList<Node> newNodes = new ArrayList<>();
 
 			for (Root root : roots) {
 				this.renderGraphOuterFirstLoop(graph, newNodes, root.getNode(), allNodesFound, root.getFullTitle(),
@@ -169,7 +169,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 				// The new nodes from the last loop iteration are now the current ones. Move them and prepare a new list
 				// of new nodes.
 				Collection<Node> curNodes = newNodes;
-				newNodes = new ArrayList<Node>();
+				newNodes = new ArrayList<>();
 
 				this.renderGraphOuterLoop(graph, newNodes, curNodes, allNodesFound, categoryNamespacePrefix,
 						categoryNamespacePrefixLength, showhidden, exceedDepth);

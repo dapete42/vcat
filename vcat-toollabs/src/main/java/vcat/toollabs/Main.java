@@ -124,7 +124,7 @@ public class Main {
 		final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File(config.graphvizDir)),
 				config.graphvizProcesses);
 
-		final CachedApiClient<ToollabsWiki> apiClient = new CachedApiClient<ToollabsWiki>(apiCache);
+		final CachedApiClient<ToollabsWiki> apiClient = new CachedApiClient<>(apiCache);
 
 		final IMetadataProvider metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
 
@@ -135,8 +135,8 @@ public class Main {
 		// metadataProvider);
 
 		// Create renderer
-		final VCatRenderer<ToollabsWiki> vCatRenderer = new VCatRenderer<ToollabsWiki>(graphviz, cacheDir,
-				categoryProvider, config.purge);
+		final VCatRenderer<ToollabsWiki> vCatRenderer = new VCatRenderer<>(graphviz, cacheDir, categoryProvider,
+				config.purge);
 
 		// Executor service for threads
 		final ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
@@ -279,7 +279,7 @@ public class Main {
 
 			try {
 
-				final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
+				final HashMap<String, String[]> parameterMap = new HashMap<>();
 				try {
 					fillParametersFromJson(parameterMap, jsonRequest.getJSONObject("parameters"));
 				} catch (VCatException e) {

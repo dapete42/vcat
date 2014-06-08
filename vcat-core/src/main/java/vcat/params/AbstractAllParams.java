@@ -27,13 +27,13 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 	private static final int MAX_LIMIT = 500;
 
-	private final CombinedParams<W> combinedParams = new CombinedParams<W>();
+	private final CombinedParams<W> combinedParams = new CombinedParams<>();
 
 	private Metadata metadata;
 
 	private String renderUrl;
 
-	private final Map<String, String[]> requestParams = new HashMap<String, String[]>();
+	private final Map<String, String[]> requestParams = new HashMap<>();
 
 	protected void init(final Map<String, String[]> requestParams, final String renderUrl,
 			final IMetadataProvider metadataProvider) throws VCatException {
@@ -46,7 +46,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		this.requestParams.putAll(requestParams);
 
 		// Get a copy of the parameters we can modify
-		final HashMap<String, String[]> params = new HashMap<String, String[]>(requestParams);
+		final HashMap<String, String[]> params = new HashMap<>(requestParams);
 
 		String wikiString = getAndRemove(params, "wiki");
 		if (wikiString == null || wikiString.isEmpty()) {
@@ -227,7 +227,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		}
 
 		// Build TitleNamespaceParams
-		ArrayList<TitleNamespaceParam> titleNamespaceList = new ArrayList<TitleNamespaceParam>(titles.length);
+		ArrayList<TitleNamespaceParam> titleNamespaceList = new ArrayList<>(titles.length);
 		for (int i = 0; i < titles.length; i++) {
 			titleNamespaceList.add(new TitleNamespaceParam(titles[i], namespaces[i]));
 		}

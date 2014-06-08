@@ -63,7 +63,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	@Override
 	public Map<String, Collection<String>> requestCategories(W wiki, Collection<String> fullTitles, boolean showhidden)
 			throws ApiException {
-		HashMap<String, Collection<String>> categorySet = new HashMap<String, Collection<String>>();
+		HashMap<String, Collection<String>> categorySet = new HashMap<>();
 		String clshow = showhidden ? null : "!hidden";
 		this.requestCategoriesRecursive(wiki.getApiUrl(), fullTitles, categorySet, null, clshow);
 		return categorySet;
@@ -81,7 +81,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		} else {
 
 			// Set query properties
-			HashMap<String, String> params = new HashMap<String, String>();
+			HashMap<String, String> params = new HashMap<>();
 			params.put("prop", "categories");
 			params.put("cllimit", "max");
 			params.put("titles", StringUtils.join(fullTitles, '|'));
@@ -103,7 +103,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 						String pagesDataTitle = pagesData.getString("title");
 						Collection<String> categories = categoryMap.get(pagesDataTitle);
 						if (categories == null) {
-							categories = new ArrayList<String>(jsonCategories.length());
+							categories = new ArrayList<>(jsonCategories.length());
 							categoryMap.put(pagesDataTitle, categories);
 						}
 						for (int i = 0; i < jsonCategories.length(); i++) {
@@ -128,7 +128,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 
 	@Override
 	public List<String> requestCategorymembers(final IWiki wiki, final String fullTitle) throws ApiException {
-		List<String> categories = new ArrayList<String>();
+		List<String> categories = new ArrayList<>();
 		this.requestCategorymembersRecursive(wiki.getApiUrl(), fullTitle, categories, null);
 		return categories;
 	}
@@ -137,7 +137,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			final List<String> categories, final String cmcontinue) throws ApiException {
 
 		// Set query properties
-		HashMap<String, String> params = new HashMap<String, String>();
+		HashMap<String, String> params = new HashMap<>();
 		params.put("list", "categorymembers");
 		params.put("cmlimit", "max");
 		params.put("cmtitle", fullTitle);
@@ -171,7 +171,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	@Override
 	public Metadata requestMetadata(final IWiki wiki) throws ApiException {
 		// Set query properties
-		HashMap<String, String> params = new HashMap<String, String>();
+		HashMap<String, String> params = new HashMap<>();
 		params.put("meta", "siteinfo");
 		params.put("siprop", "general|namespaces|namespacealiases");
 
@@ -179,8 +179,8 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 
 		String articlepath;
 		String server;
-		final Map<Integer, String> authoritativeNamespaces = new HashMap<Integer, String>();
-		final Map<String, Integer> allNamespacesInverse = new HashMap<String, Integer>();
+		final Map<Integer, String> authoritativeNamespaces = new HashMap<>();
+		final Map<String, Integer> allNamespacesInverse = new HashMap<>();
 
 		try {
 			JSONObject query = json.getJSONObject("query");

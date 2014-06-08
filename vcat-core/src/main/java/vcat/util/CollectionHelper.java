@@ -21,17 +21,17 @@ public class CollectionHelper {
 
 		if (numberOfItems < 1) {
 			// Number of items < 1 does not split
-			collections = new ArrayList<Collection<T>>(1);
+			collections = new ArrayList<>(1);
 			collections.add(collection);
 			return collections;
 		} else if (collection == null) {
 			// Null becomes an empty list
-			return new ArrayList<Collection<T>>();
+			return new ArrayList<>();
 		}
 
 		int collectionSize = collection.size();
 
-		collections = new ArrayList<Collection<T>>(collectionSize / numberOfItems + 1);
+		collections = new ArrayList<>(collectionSize / numberOfItems + 1);
 		ArrayList<T> currentCollection = null;
 		long i = 0;
 		for (T item : collection) {
@@ -39,7 +39,7 @@ public class CollectionHelper {
 				if (currentCollection != null) {
 					collections.add(currentCollection);
 				}
-				currentCollection = new ArrayList<T>(numberOfItems);
+				currentCollection = new ArrayList<>(numberOfItems);
 			}
 			currentCollection.add(item);
 			i++;

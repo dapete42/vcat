@@ -55,7 +55,7 @@ public class Graph extends AbstractGraphPropertyUser {
 
 	public static void createSubgraphRecursive(Graph subGraph, Graph fullGraph, Set<Node> nodes, int depth) {
 		if (depth > 0) {
-			HashSet<Node> nextNodes = new HashSet<Node>();
+			HashSet<Node> nextNodes = new HashSet<>();
 			for (Node node : nodes) {
 				subGraph.nodeMap.put(node.getName(), node);
 				for (Edge edge : fullGraph.getEdgesFrom(node)) {
@@ -81,15 +81,15 @@ public class Graph extends AbstractGraphPropertyUser {
 
 	private final DefaultNode defaultNode = new DefaultNode();
 
-	private final Set<Edge> edgeSet = new HashSet<Edge>();
+	private final Set<Edge> edgeSet = new HashSet<>();
 
 	private String fontname;
 
 	private int fontsize;
 
-	private final Map<String, Group> groupMap = new HashMap<String, Group>();
+	private final Map<String, Group> groupMap = new HashMap<>();
 
-	private final Map<String, Node> nodeMap = new HashMap<String, Node>();
+	private final Map<String, Node> nodeMap = new HashMap<>();
 
 	private boolean splines = false;
 
@@ -127,7 +127,7 @@ public class Graph extends AbstractGraphPropertyUser {
 	}
 
 	public Set<Edge> getEdgesFrom(Node node) {
-		Set<Edge> edges = new HashSet<Edge>();
+		Set<Edge> edges = new HashSet<>();
 		for (Edge edge : this.edgeSet) {
 			if (edge.getNodeFrom().equals(node)) {
 				edges.add(edge);
@@ -137,7 +137,7 @@ public class Graph extends AbstractGraphPropertyUser {
 	}
 
 	public Set<Edge> getEdgesTo(Node node) {
-		Set<Edge> edges = new HashSet<Edge>();
+		Set<Edge> edges = new HashSet<>();
 		for (Edge edge : this.edgeSet) {
 			if (edge.getNodeTo().equals(node)) {
 				edges.add(edge);
