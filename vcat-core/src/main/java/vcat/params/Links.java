@@ -9,8 +9,9 @@ public enum Links {
 
 	/** No links in graph. */
 	None,
-	/** Include links to another vCat graph, starting from the node. */
-	Graph,
+// TODO Disabled, does not work yet.
+//	/** Include links to another vCat graph, starting from the node. */
+//	Graph,
 	/** Include links to wiki article for node. */
 	Wiki;
 

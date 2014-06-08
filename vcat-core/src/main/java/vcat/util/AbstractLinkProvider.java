@@ -32,8 +32,9 @@ public abstract class AbstractLinkProvider {
 	 */
 	public static AbstractLinkProvider fromParams(final AbstractAllParams<?> all) {
 		switch (all.getVCat().getLinks()) {
-		case Graph:
-			return new VCatLinkProvider(all);
+// TODO Disabled, does not work yet.
+//		case Graph:
+//			return new VCatLinkProvider(all);
 		case Wiki:
 			return new WikiLinkProvider(all);
 		default:
