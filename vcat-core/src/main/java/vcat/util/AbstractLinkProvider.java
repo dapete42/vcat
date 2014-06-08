@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import vcat.graph.Node;
-import vcat.mediawiki.IWiki;
 import vcat.params.AbstractAllParams;
 
 /**
@@ -14,13 +13,16 @@ import vcat.params.AbstractAllParams;
  */
 public abstract class AbstractLinkProvider {
 
-	protected static String escapeMediawikiTitleForUrl(final String title) {
+	protected static String escapeForUrl(final String string) {
 		try {
-			// Replace blanks by '_', then encode as URL, but allow ':' to remain as is
-			return URLEncoder.encode(title.replace(' ', '_'), "UTF8").replaceAll("%3A", ":");
+			return URLEncoder.encode(string.replace(' ', '_'), "UTF8");
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
+	}
+
+	protected static String escapeMediawikiTitleForUrl(final String title) {
+		return escapeForUrl(title).replaceAll("%3A", ":");
 	}
 
 	/**
@@ -28,13 +30,12 @@ public abstract class AbstractLinkProvider {
 	 *            Parameters.
 	 * @return Link provider fitting for the requested parameters.
 	 */
-	public static AbstractLinkProvider fromParams(final AbstractAllParams<? extends IWiki> all) {
-		switch (all.getVCat().getLink()) {
-		// TODO Links to vCat graphs do not work yet.
-		// case Graph:
-		// return new VCatLinkProvider();
+	public static AbstractLinkProvider fromParams(final AbstractAllParams<?> all) {
+		switch (all.getVCat().getLinks()) {
+		case Graph:
+			return new VCatLinkProvider(all);
 		case Wiki:
-			return new WikiLinkProvider(all.getMetadata());
+			return new WikiLinkProvider(all);
 		default:
 			return new EmptyLinkProvider();
 		}

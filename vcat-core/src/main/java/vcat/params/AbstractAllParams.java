@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.collect.ImmutableMap;
+
 import vcat.Messages;
 import vcat.VCatException;
 import vcat.mediawiki.ApiException;
@@ -28,8 +30,19 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 	private Metadata metadata;
 
-	protected void init(final Map<String, String[]> requestParams, final IMetadataProvider metadataProvider)
-			throws VCatException {
+	private String renderUrl;
+
+	private final Map<String, String[]> requestParams = new HashMap<String, String[]>();
+
+	protected void init(final Map<String, String[]> requestParams, final String renderUrl,
+			final IMetadataProvider metadataProvider) throws VCatException {
+
+		// Remember the URL used to render a graph
+		this.renderUrl = renderUrl;
+
+		// Get a copy of the parameters to keep
+		this.requestParams.clear();
+		this.requestParams.putAll(requestParams);
 
 		// Get a copy of the parameters we can modify
 		final HashMap<String, String[]> params = new HashMap<String, String[]>(requestParams);
@@ -86,7 +99,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		String limitString = getAndRemove(params, "limit");
 		String showhiddenString = getAndRemove(params, "showhidden");
 		String relationString = getAndRemove(params, "rel");
-		String linkString = getAndRemove(params, "link");
+		String linksString = getAndRemove(params, "links");
 
 		// 'category'
 		if (categoryStrings != null) {
@@ -202,13 +215,13 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			}
 		}
 
-		// 'link' - whether to include links, and if yes, where they lead
-		Link link = Link.None;
-		if (linkString != null) {
-			link = Link.valueOfIgnoreCase(linkString);
-			if (link == null) {
+		// 'links' - whether to include links, and if yes, where they lead
+		Links links = Links.None;
+		if (linksString != null) {
+			links = Links.valueOfIgnoreCase(linksString);
+			if (links == null) {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						"link", linkString));
+						"links", linksString));
 			}
 		}
 
@@ -224,7 +237,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		this.getVCat().setLimit(limit);
 		this.getVCat().setShowhidden(showhidden);
 		this.getVCat().setRelation(relation);
-		this.getVCat().setLink(link);
+		this.getVCat().setLinks(links);
 
 		//
 		// After all this handling, no parameters should be left
@@ -293,6 +306,14 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 	public Metadata getMetadata() {
 		return this.metadata;
+	}
+
+	public String getRenderUrl() {
+		return this.renderUrl;
+	}
+
+	public Map<String, String[]> getRequestParams() {
+		return ImmutableMap.copyOf(this.requestParams);
 	}
 
 	public VCatParams<W> getVCat() {

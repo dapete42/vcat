@@ -58,7 +58,8 @@ public class VCatServlet extends HttpServlet {
 
 	protected void doRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			final AllParams all = new AllParams(req.getParameterMap(), this.metadataProvider);
+
+			final AllParams all = new AllParams(req.getParameterMap(), req.getRequestURI(), this.metadataProvider);
 			VCatRenderer<SimpleWikimediaWiki>.RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(all);
 
 			// Get finished rendered file

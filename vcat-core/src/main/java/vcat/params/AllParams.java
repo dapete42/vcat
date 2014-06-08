@@ -18,9 +18,9 @@ public class AllParams extends AbstractAllParams<SimpleWikimediaWiki> {
 	protected AllParams() {
 	}
 
-	public AllParams(final Map<String, String[]> requestParams, final IMetadataProvider metadataProvider)
-			throws VCatException {
-		this.init(requestParams, metadataProvider);
+	public AllParams(final Map<String, String[]> requestParams, final String renderUrl,
+			final IMetadataProvider metadataProvider) throws VCatException {
+		this.init(requestParams, renderUrl, metadataProvider);
 	}
 
 	@Override

@@ -8,6 +8,9 @@ The finished program needs a configuration file. This is an example of the
 properties that need to be set in this file (default values are commented
 out):
 
+	# URL of the 'render' script
+	render.url=http://tools.wmflabs.org/vcat/render
+	
 	# Cache directory for Graphviz and image files
 	cache.dir=/tmp/vcat-cache
 	
@@ -39,3 +42,6 @@ out):
 	redis.channel.control.suffix=-control
 	redis.channel.request.suffix=-requests
 	redis.channel.response.suffix=-responses
+
+The name of this configuration file must passed as the first command line
+parameter when running the program.

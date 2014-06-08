@@ -12,10 +12,10 @@ public class AllParamsToollabs extends AbstractAllParams<ToollabsWiki> {
 
 	private final ToollabsWikiProvider toollabsMetainfo;
 
-	public AllParamsToollabs(final Map<String, String[]> requestParams, final IMetadataProvider metadataProvider,
-			final ToollabsWikiProvider toollabsMetainfo) throws VCatException {
+	public AllParamsToollabs(final Map<String, String[]> requestParams, final String renderUrl,
+			final IMetadataProvider metadataProvider, final ToollabsWikiProvider toollabsMetainfo) throws VCatException {
 		this.toollabsMetainfo = toollabsMetainfo;
-		init(requestParams, metadataProvider);
+		init(requestParams, renderUrl, metadataProvider);
 	}
 
 	@Override

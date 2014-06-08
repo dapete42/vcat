@@ -18,7 +18,7 @@ public class VCatParams<W extends IWiki> implements Serializable {
 
 	private Integer limit;
 
-	private Link link = Link.None;
+	private Links links = Links.None;
 
 	private Relation relation = Relation.Category;
 
@@ -36,8 +36,8 @@ public class VCatParams<W extends IWiki> implements Serializable {
 		return this.limit;
 	}
 
-	public Link getLink() {
-		return this.link;
+	public Links getLinks() {
+		return this.links;
 	}
 
 	public Relation getRelation() {
@@ -64,8 +64,8 @@ public class VCatParams<W extends IWiki> implements Serializable {
 		this.limit = limit;
 	}
 
-	public void setLink(Link link) {
-		this.link = link;
+	public void setLinks(Links links) {
+		this.links = links;
 	}
 
 	public void setRelation(Relation relation) {

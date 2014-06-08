@@ -304,8 +304,8 @@ public class Main {
 
 							VCatRenderer<ToollabsWiki>.RenderedFileInfo renderedFileInfo;
 							try {
-								final AllParamsToollabs all = new AllParamsToollabs(parameterMap, metadataProvider,
-										toollabsMetainfo);
+								final AllParamsToollabs all = new AllParamsToollabs(parameterMap, config.renderUrl,
+										metadataProvider, toollabsMetainfo);
 								renderedFileInfo = vCatRenderer.render(all, tempDir);
 							} catch (VCatException e) {
 								handleError(jedis, requestKey, e);

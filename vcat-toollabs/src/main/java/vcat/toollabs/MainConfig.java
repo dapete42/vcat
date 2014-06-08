@@ -58,6 +58,8 @@ public class MainConfig {
 
 	public int redisServerPort;
 
+	public String renderUrl;
+
 	public boolean readFromPropertyFile(final File propertiesFile) throws VCatException {
 
 		Properties properties = new Properties();
@@ -71,6 +73,12 @@ public class MainConfig {
 		}
 
 		int errors = 0;
+
+		this.renderUrl = properties.getProperty("render.url");
+		if (this.renderUrl == null || this.renderUrl.isEmpty()) {
+			log.error(String.format(Messages.getString("Error.PropertyMissingOrEmpty"), "render.url"));
+			errors++;
+		}
 
 		this.cacheDir = properties.getProperty("cache.dir");
 		if (this.cacheDir == null || this.cacheDir.isEmpty()) {

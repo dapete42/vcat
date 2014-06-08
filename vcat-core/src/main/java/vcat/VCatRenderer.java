@@ -21,7 +21,7 @@ import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IWiki;
 import vcat.params.AbstractAllParams;
-import vcat.params.Link;
+import vcat.params.Links;
 import vcat.params.OutputFormat;
 import vcat.params.VCatFactory;
 import vcat.params.VCatParams;
@@ -249,7 +249,7 @@ public class VCatRenderer<W extends IWiki> {
 			if (outputFormat == OutputFormat.GraphvizRaw) {
 				// GraphvizRaw returns just the graph file
 				resultFile = createGraphFile(all, tmpDir);
-			} else if (all.getVCat().getLink() != Link.None && outputFormat.hasImageMapOutputFormat()) {
+			} else if (all.getVCat().getLinks() != Links.None && outputFormat.hasImageMapOutputFormat()) {
 				// If links are requested, some formats want to be shown in an HTML page with an image map
 				resultFile = createImagemapHtmlFile(all, tmpDir);
 			} else {
