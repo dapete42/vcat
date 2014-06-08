@@ -11,6 +11,8 @@ import vcat.params.AbstractAllParams;
  */
 public class VCatLinkProvider extends AbstractLinkProvider {
 
+	private static final long serialVersionUID = -6540033060770454452L;
+
 	private final String renderUrl;
 
 	private final String renderParams;

@@ -1,5 +1,6 @@
 package vcat.util;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
@@ -11,7 +12,8 @@ import vcat.params.AbstractAllParams;
  * 
  * @author Peter Schlömer
  */
-public abstract class AbstractLinkProvider {
+@SuppressWarnings("serial")
+public abstract class AbstractLinkProvider implements Serializable {
 
 	protected static String escapeForUrl(final String string) {
 		try {
@@ -32,9 +34,8 @@ public abstract class AbstractLinkProvider {
 	 */
 	public static AbstractLinkProvider fromParams(final AbstractAllParams<?> all) {
 		switch (all.getVCat().getLinks()) {
-// TODO Disabled, does not work yet.
-//		case Graph:
-//			return new VCatLinkProvider(all);
+		case Graph:
+			return new VCatLinkProvider(all);
 		case Wiki:
 			return new WikiLinkProvider(all);
 		default:

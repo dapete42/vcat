@@ -14,13 +14,12 @@ import vcat.mediawiki.ApiException;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IWiki;
 import vcat.params.AbstractAllParams;
-import vcat.util.AbstractLinkProvider;
 
 public class VCatForCategories<W extends IWiki> extends AbstractVCat<W> {
 
-	public VCatForCategories(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider,
-			final AbstractLinkProvider linkProvider) throws VCatException {
-		super(all, categoryProvider, linkProvider);
+	public VCatForCategories(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider)
+			throws VCatException {
+		super(all, categoryProvider);
 	}
 
 	protected void renderGraphInnerLoop(Graph graph, Node rootNode, Set<Node> allNodesFound, Collection<Node> newNodes,
@@ -28,7 +27,7 @@ public class VCatForCategories<W extends IWiki> extends AbstractVCat<W> {
 		for (String categoryFullTitle : categoryFullTitles) {
 			String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefixLength);
 			Node categoryNode = graph.node(categoryTitle);
-			this.linkProvider.addLinkToNode(categoryNode, categoryFullTitle);
+			all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
 			graph.edge(categoryNode, rootNode);
 			if (!allNodesFound.contains(categoryNode)) {
 				newNodes.add(categoryNode);
@@ -85,7 +84,7 @@ public class VCatForCategories<W extends IWiki> extends AbstractVCat<W> {
 						// Add edge to graph if the graph already contains a node
 						if (graph.containsNode(categoryTitle)) {
 							Node categoryNode = graph.node(categoryTitle);
-							this.linkProvider.addLinkToNode(categoryNode, categoryFullTitle);
+							all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
 							graph.edge(categoryNode, baseNode);
 							unlinkedEdgesRemaining--;
 						}
@@ -108,7 +107,7 @@ public class VCatForCategories<W extends IWiki> extends AbstractVCat<W> {
 					String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefixLength);
 					// Add node to graph
 					Node categoryNode = graph.node(categoryTitle);
-					this.linkProvider.addLinkToNode(categoryNode, categoryFullTitle);
+					all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
 					graph.edge(categoryNode, baseNode);
 					// If we had not encountered node before (will happen with loops!) we record it as a new node and
 					// remember we have already seen it

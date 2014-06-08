@@ -7,6 +7,8 @@ package vcat.util;
  */
 public class EmptyLinkProvider extends AbstractLinkProvider {
 
+	private static final long serialVersionUID = 4130505369114014479L;
+
 	@Override
 	public String provideLink(final String title) {
 		return null;

@@ -14,6 +14,7 @@ import vcat.mediawiki.ApiException;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
+import vcat.util.AbstractLinkProvider;
 
 /**
  * A bundle of {@link CombinedParams} plus temporary objects needed to build the category graph. Can only be constructed
@@ -238,6 +239,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		this.getVCat().setShowhidden(showhidden);
 		this.getVCat().setRelation(relation);
 		this.getVCat().setLinks(links);
+
+		// Create link provider
+		this.getVCat().setLinkProvider(AbstractLinkProvider.fromParams(this));
 
 		//
 		// After all this handling, no parameters should be left

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import vcat.mediawiki.IWiki;
+import vcat.util.AbstractLinkProvider;
 
 /**
  * Parameters for the graph generation used by the {@link vcat.AbstractVCat VCat} class.
@@ -12,11 +13,14 @@ import vcat.mediawiki.IWiki;
  */
 public class VCatParams<W extends IWiki> implements Serializable {
 
-	private static final long serialVersionUID = 254728898946893898L;
+	private static final long serialVersionUID = -7181473469976962467L;
 
 	private Integer depth;
 
 	private Integer limit;
+
+	/** Link provider. Included here because different linking requires different cache entries. */
+	private AbstractLinkProvider linkProvider;
 
 	private Links links = Links.None;
 
@@ -34,6 +38,10 @@ public class VCatParams<W extends IWiki> implements Serializable {
 
 	public Integer getLimit() {
 		return this.limit;
+	}
+
+	public AbstractLinkProvider getLinkProvider() {
+		return this.linkProvider;
 	}
 
 	public Links getLinks() {
@@ -62,6 +70,10 @@ public class VCatParams<W extends IWiki> implements Serializable {
 
 	public void setLimit(Integer limit) {
 		this.limit = limit;
+	}
+
+	public void setLinkProvider(AbstractLinkProvider linkProvider) {
+		this.linkProvider = linkProvider;
 	}
 
 	public void setLinks(Links links) {

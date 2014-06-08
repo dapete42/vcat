@@ -26,7 +26,6 @@ import vcat.params.AbstractAllParams;
 import vcat.params.TitleNamespaceParam;
 import vcat.params.VCatParams;
 import vcat.params.Relation;
-import vcat.util.AbstractLinkProvider;
 
 public abstract class AbstractVCat<W extends IWiki> {
 
@@ -82,13 +81,9 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 	protected final ICategoryProvider<W> categoryProvider;
 
-	protected final AbstractLinkProvider linkProvider;
-
-	protected AbstractVCat(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider,
-			final AbstractLinkProvider linkProvider) {
+	protected AbstractVCat(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider) {
 		this.all = all;
 		this.categoryProvider = categoryProvider;
-		this.linkProvider = linkProvider;
 	}
 
 	public AbstractAllParams<W> getAllParams() {
@@ -144,7 +139,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 					n++;
 					rootNode.setLabel(fullTitle);
 				}
-				this.linkProvider.addLinkToNode(rootNode, fullTitle);
+				all.getVCat().getLinkProvider().addLinkToNode(rootNode, fullTitle);
 
 				roots.add(new Root(rootNode, title, namespace, fullTitle));
 				allNodesFound.add(rootNode);

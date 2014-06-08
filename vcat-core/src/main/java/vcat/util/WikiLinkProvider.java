@@ -10,6 +10,8 @@ import vcat.params.AbstractAllParams;
  */
 public class WikiLinkProvider extends AbstractLinkProvider {
 
+	private static final long serialVersionUID = 3854287898146040511L;
+
 	/** Pattern (with $1 placeholder) to use when creating link. */
 	private final String pattern;
 
