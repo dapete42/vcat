@@ -12,7 +12,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  */
 public class GraphvizParams implements Serializable {
 
-	private static final long serialVersionUID = -6789163385179923066L;
+	private static final long serialVersionUID = -3887996473000446247L;
 
 	private Algorithm algorithm = Algorithm.DOT;
 
