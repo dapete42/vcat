@@ -252,7 +252,7 @@ public class Main {
 		}
 	}
 
-	private static void handleError(final Jedis jedis, final String requestKey, final Exception e) {
+	private static void handleError(final String requestKey, final Exception e) {
 		// There has been an error, but it is handled gracefully; so a warning is enough
 		log.warn(e);
 		e.printStackTrace();
@@ -261,7 +261,9 @@ public class Main {
 		json.put("status", "error");
 		json.put("error", e.getMessage());
 		final String jsonString = json.toString();
+		final Jedis jedis = jedisPool.getResource();
 		jedis.publish(config.redisChannelResponse, json.toString());
+		jedisPool.returnResource(jedis);
 		log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonString));
 	}
 
@@ -280,9 +282,7 @@ public class Main {
 					fillParametersFromJson(parameterMap, jsonRequest.getJSONObject("parameters"));
 				} catch (VCatException e) {
 					// Get Jedis connection from pool
-					final Jedis jedis = jedisPool.getResource();
-					handleError(jedis, requestKey, e);
-					jedisPool.returnResource(jedis);
+					handleError(requestKey, e);
 					return;
 				}
 
@@ -301,9 +301,7 @@ public class Main {
 										metadataProvider, toollabsMetainfo);
 								renderedFileInfo = vCatRenderer.render(all, tempDir);
 							} catch (VCatException e) {
-								final Jedis jedis = jedisPool.getResource();
-								handleError(jedis, requestKey, e);
-								jedisPool.returnResource(jedis);
+								handleError(requestKey, e);
 								return;
 							}
 
@@ -327,9 +325,7 @@ public class Main {
 								final String cacheControl = "max-age=" + (config.purge / 2);
 								jsonResponseHeaders.put("Cache-Control", cacheControl);
 							} catch (JSONException e) {
-								final Jedis jedis = jedisPool.getResource();
-								handleError(jedis, requestKey, e);
-								jedisPool.returnResource(jedis);
+								handleError(requestKey, e);
 								return;
 							}
 
@@ -354,9 +350,7 @@ public class Main {
 
 						} catch (Exception e) {
 							// All exceptions are caught so client is informed of error, if possible
-							final Jedis jedis = jedisPool.getResource();
-							handleError(jedis, requestKey, e);
-							jedisPool.returnResource(jedis);
+							handleError(requestKey, e);
 						}
 
 						log.info(String.format(Messages.getString("Main.Info.ThreadFinish"), Thread.currentThread()
@@ -368,9 +362,7 @@ public class Main {
 
 			} catch (Exception e) {
 				// All exceptions are caught to prevent the daemon from crashing
-				final Jedis jedis = jedisPool.getResource();
-				handleError(jedis, requestKey, e);
-				jedisPool.returnResource(jedis);
+				handleError(requestKey, e);
 			}
 
 		} catch (Exception e) {
