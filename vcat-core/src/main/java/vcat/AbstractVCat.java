@@ -1,7 +1,6 @@
 package vcat;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,8 +9,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import vcat.cache.CacheException;
-import vcat.cache.file.GraphFileCache;
 import vcat.graph.Graph;
 import vcat.graph.Group;
 import vcat.graph.GroupRank;
@@ -70,10 +67,6 @@ public abstract class AbstractVCat<W extends IWiki> {
 	protected final static String NODE_EXCEED_SUFFIX = "_more";
 
 	private final static String ROOT_NODE_PREFIX = "ROOT";
-
-	private final static String TEMPFILE_PREFIX = "graph-temp-";
-
-	private final static String TEMPFILE_SUFFIX = ".gv";
 
 	private final Log log = LogFactory.getLog(this.getClass());
 
@@ -255,44 +248,12 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 	protected abstract GroupRank renderGraphRootRank();
 
-	public void renderToCache(GraphFileCache<W> cache) throws CacheException, VCatException, GraphvizException {
-		this.renderToCache(cache, null);
-	}
-
-	public void renderToCache(GraphFileCache<W> cache, File tmpDir) throws CacheException, VCatException,
-			GraphvizException {
-		VCatParams<W> vCatParams = this.all.getVCat();
-
-		// Check if already in cache; nothing to do in that case
-		if (cache.containsKey(vCatParams)) {
-			return;
-		}
-
-		// Prepare a temporary file
-		File tmpFile;
-		try {
-			if (tmpDir == null) {
-				tmpFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX);
-			} else {
-				tmpFile = File.createTempFile(TEMPFILE_PREFIX, TEMPFILE_SUFFIX, tmpDir);
-			}
-		} catch (IOException e) {
-			throw new VCatException(Messages.getString("AbstractVCat.Exception.CreatingTempFile"), e);
-		}
-
+	public void renderToFile(File outputFile) throws VCatException, GraphvizException {
 		Graph graph = this.renderGraph();
-
 		try {
-			GraphWriter.writeGraphToFile(graph, tmpFile);
+			GraphWriter.writeGraphToFile(graph, outputFile);
 		} catch (GraphvizException e) {
-			tmpFile.delete();
-			throw e;
-		}
-
-		try {
-			cache.putFile(vCatParams, tmpFile, true);
-		} catch (CacheException e) {
-			tmpFile.delete();
+			outputFile.delete();
 			throw e;
 		}
 	}

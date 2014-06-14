@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class CollectionHelper {
+public abstract class CollectionHelper {
 
 	/**
 	 * Splits a Collection in several parts with a maximum number of items.

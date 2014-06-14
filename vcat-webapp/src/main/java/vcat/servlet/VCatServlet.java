@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -15,7 +16,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import vcat.VCatException;
-import vcat.VCatRenderer;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
@@ -29,6 +29,10 @@ import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.SimpleWikimediaWiki;
 import vcat.params.AllParams;
+import vcat.renderer.AbstractVCatRenderer;
+import vcat.renderer.CachedVCatRenderer;
+import vcat.renderer.RenderedFileInfo;
+import vcat.renderer.VCatRenderer;
 
 public class VCatServlet extends HttpServlet {
 
@@ -44,7 +48,7 @@ public class VCatServlet extends HttpServlet {
 
 	private IMetadataProvider metadataProvider;
 
-	private VCatRenderer<SimpleWikimediaWiki> vCatRenderer;
+	private AbstractVCatRenderer<SimpleWikimediaWiki> vCatRenderer;
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -60,7 +64,7 @@ public class VCatServlet extends HttpServlet {
 		try {
 
 			final AllParams all = new AllParams(req.getParameterMap(), req.getRequestURI(), this.metadataProvider);
-			VCatRenderer<SimpleWikimediaWiki>.RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(all);
+			RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(all);
 
 			// Get finished rendered file
 			File resultFile = renderedFileInfo.getFile();
@@ -102,6 +106,7 @@ public class VCatServlet extends HttpServlet {
 		final File cacheDir = new File(Config.getString(Config.CONFIG_CACHEDIR));
 		final File apiDir = new File(cacheDir, "api");
 		final File metadataDir = new File(cacheDir, "metadata");
+		final File tempDir = (File) this.getServletContext().getAttribute(ServletContext.TEMPDIR);
 		apiDir.mkdirs();
 		metadataDir.mkdirs();
 		try {
@@ -111,7 +116,8 @@ public class VCatServlet extends HttpServlet {
 			this.categoryProvider = apiClient;
 			final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, PURGE_METADATA);
 			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-			this.vCatRenderer = new VCatRenderer<>(graphviz, cacheDir, this.categoryProvider, PURGE);
+			this.vCatRenderer = new CachedVCatRenderer<>(new VCatRenderer<>(graphviz, tempDir, this.categoryProvider),
+					cacheDir, PURGE);
 		} catch (CacheException | VCatException e) {
 			throw new ServletException(e);
 		}

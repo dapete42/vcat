@@ -26,7 +26,6 @@ import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 
 import vcat.VCatException;
-import vcat.VCatRenderer;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
@@ -40,6 +39,10 @@ import vcat.mediawiki.IMetadataProvider;
 import vcat.redis.SimplePubSub;
 import vcat.redis.cache.ApiRedisCache;
 import vcat.redis.cache.MetadataRedisCache;
+import vcat.renderer.AbstractVCatRenderer;
+import vcat.renderer.CachedVCatRenderer;
+import vcat.renderer.RenderedFileInfo;
+import vcat.renderer.VCatRenderer;
 import vcat.toollabs.params.AllParamsToollabs;
 import vcat.toollabs.util.ThreadHelper;
 
@@ -135,8 +138,8 @@ public class Main {
 		// metadataProvider);
 
 		// Create renderer
-		final VCatRenderer<ToollabsWiki> vCatRenderer = new VCatRenderer<>(graphviz, cacheDir, categoryProvider,
-				config.purge);
+		final CachedVCatRenderer<ToollabsWiki> vCatRenderer = new CachedVCatRenderer<>(new VCatRenderer<>(graphviz,
+				tempDir, categoryProvider), cacheDir);
 
 		// Executor service for threads
 		final ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
@@ -267,7 +270,7 @@ public class Main {
 		log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonString));
 	}
 
-	private static void renderJson(final String jsonString, final VCatRenderer<ToollabsWiki> vCatRenderer,
+	private static void renderJson(final String jsonString, final AbstractVCatRenderer<ToollabsWiki> vCatRenderer,
 			final IMetadataProvider metadataProvider) {
 
 		try {
@@ -295,11 +298,11 @@ public class Main {
 
 						try {
 
-							VCatRenderer<ToollabsWiki>.RenderedFileInfo renderedFileInfo;
+							RenderedFileInfo renderedFileInfo;
 							try {
 								final AllParamsToollabs all = new AllParamsToollabs(parameterMap, config.renderUrl,
 										metadataProvider, toollabsMetainfo);
-								renderedFileInfo = vCatRenderer.render(all, tempDir);
+								renderedFileInfo = vCatRenderer.render(all);
 							} catch (VCatException e) {
 								handleError(requestKey, e);
 								return;

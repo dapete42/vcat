@@ -109,7 +109,7 @@ public class QueuedGraphviz implements Graphviz {
 		this.otherGraphviz = otherGraphviz;
 
 		final ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
-		tfb.setNameFormat(this.getClass().getSimpleName() + "-pool-%d");
+		tfb.setNameFormat(this.getClass().getSimpleName() + '-' + this.hashCode() + "-pool-%d");
 		final ThreadFactory tf = tfb.build();
 
 		if (numberOfThreads < 1) {
