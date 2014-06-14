@@ -43,7 +43,6 @@ import vcat.renderer.CachedVCatRenderer;
 import vcat.renderer.IVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
-import vcat.renderer.VCatRenderer;
 import vcat.toollabs.params.AllParamsToollabs;
 import vcat.toollabs.util.ThreadHelper;
 
@@ -140,7 +139,7 @@ public class Main {
 
 		// Create renderer
 		final QueuedVCatRenderer<ToollabsWiki> vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(
-				new VCatRenderer<>(graphviz, tempDir, categoryProvider), cacheDir), 10);
+				graphviz, tempDir, categoryProvider, cacheDir), 10);
 
 		// Executor service for threads
 		final ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();

@@ -6,29 +6,30 @@ import vcat.VCatException;
 import vcat.cache.CacheException;
 import vcat.cache.file.GraphFileCache;
 import vcat.cache.file.RenderedFileCache;
+import vcat.graphviz.Graphviz;
+import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IWiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.CombinedParams;
 import vcat.params.OutputFormat;
 import vcat.params.VCatParams;
 
-public class CachedVCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
+public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
 
 	private final GraphFileCache<W> graphCache;
-
-	private final AbstractVCatRenderer<W> otherRenderer;
 
 	private final int purge;
 
 	private final RenderedFileCache<W> renderedCache;
 
-	public CachedVCatRenderer(final AbstractVCatRenderer<W> otherRenderer, final File cacheDir) throws VCatException {
-		this(otherRenderer, cacheDir, 600);
+	public CachedVCatRenderer(final Graphviz graphviz, final File tempDir, final ICategoryProvider<W> categoryProvider,
+			final File cacheDir) throws VCatException {
+		this(graphviz, tempDir, categoryProvider, cacheDir, 600);
 	}
 
-	public CachedVCatRenderer(final AbstractVCatRenderer<W> otherRenderer, final File cacheDir, final int purge)
-			throws VCatException {
-		this.otherRenderer = otherRenderer;
+	public CachedVCatRenderer(final Graphviz graphviz, final File tempDir, final ICategoryProvider<W> categoryProvider,
+			final File cacheDir, final int purge) throws VCatException {
+		super(graphviz, tempDir, categoryProvider);
 		this.purge = purge;
 
 		File graphCacheDir = new File(cacheDir, "graphFile");
@@ -51,7 +52,7 @@ public class CachedVCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W>
 	protected File createGraphFile(final AbstractAllParams<W> all) throws VCatException {
 		final VCatParams<W> vCatParams = all.getVCat();
 		if (!this.graphCache.containsKey(vCatParams)) {
-			final File otherFile = otherRenderer.createGraphFile(all);
+			final File otherFile = super.createGraphFile(all);
 			try {
 				this.graphCache.putFile(vCatParams, otherFile, true);
 			} catch (CacheException e) {
@@ -62,11 +63,11 @@ public class CachedVCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W>
 	}
 
 	@Override
-	protected File createImagemapHtmlFile(final AbstractAllParams<W> all, OutputFormat imageFormat)
+	protected File createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
 			throws VCatException {
 		final CombinedParams<W> combinedParams = all.getCombined();
 		if (!this.renderedCache.containsKey(combinedParams)) {
-			final File otherFile = otherRenderer.createImagemapHtmlFile(all, imageFormat);
+			final File otherFile = super.createImagemapHtmlFile(all, imageFormat);
 			try {
 				this.renderedCache.putFile(combinedParams, otherFile, true);
 			} catch (CacheException e) {
@@ -81,7 +82,7 @@ public class CachedVCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W>
 			throws VCatException {
 		final CombinedParams<W> combinedParams = all.getCombined();
 		if (!this.renderedCache.containsKey(combinedParams)) {
-			final File otherFile = otherRenderer.createRenderedFileFromGraphFile(all, graphFile);
+			final File otherFile = super.createRenderedFileFromGraphFile(all, graphFile);
 			try {
 				this.renderedCache.putFile(combinedParams, otherFile, true);
 			} catch (CacheException e) {

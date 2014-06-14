@@ -33,7 +33,6 @@ import vcat.renderer.CachedVCatRenderer;
 import vcat.renderer.IVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
-import vcat.renderer.VCatRenderer;
 
 public class VCatServlet extends HttpServlet {
 
@@ -117,8 +116,8 @@ public class VCatServlet extends HttpServlet {
 			this.categoryProvider = apiClient;
 			final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, PURGE_METADATA);
 			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-			this.vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(new VCatRenderer<>(graphviz, tempDir,
-					this.categoryProvider), cacheDir, PURGE), 10);
+			this.vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir,
+					this.categoryProvider, cacheDir, PURGE), 10);
 		} catch (CacheException | VCatException e) {
 			throw new ServletException(e);
 		}
