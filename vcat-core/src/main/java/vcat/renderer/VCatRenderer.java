@@ -41,8 +41,7 @@ public class VCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
 	protected File createGraphFile(final AbstractAllParams<W> all) throws VCatException {
 		final AbstractVCat<W> vCat = this.vCatFactory.createInstance(all);
 		try {
-			final File outputFile = File.createTempFile("temp-Graph-", '.' + all.getGraphviz().getOutputFormat()
-					.getFileExtension(), this.outputDir);
+			final File outputFile = File.createTempFile("temp-Graph-", ".gv", this.outputDir);
 			vCat.renderToFile(outputFile);
 			return outputFile;
 		} catch (GraphvizException | IOException e) {
