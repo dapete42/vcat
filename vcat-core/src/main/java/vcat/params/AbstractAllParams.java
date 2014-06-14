@@ -25,7 +25,7 @@ import vcat.util.AbstractLinkProvider;
  */
 public abstract class AbstractAllParams<W extends IWiki> {
 
-	private static final int MAX_LIMIT = 500;
+	private static final int MAX_LIMIT = 250;
 
 	private final CombinedParams<W> combinedParams = new CombinedParams<>();
 
