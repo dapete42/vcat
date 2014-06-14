@@ -29,8 +29,9 @@ import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.SimpleWikimediaWiki;
 import vcat.params.AllParams;
-import vcat.renderer.AbstractVCatRenderer;
 import vcat.renderer.CachedVCatRenderer;
+import vcat.renderer.IVCatRenderer;
+import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
 import vcat.renderer.VCatRenderer;
 
@@ -48,7 +49,7 @@ public class VCatServlet extends HttpServlet {
 
 	private IMetadataProvider metadataProvider;
 
-	private AbstractVCatRenderer<SimpleWikimediaWiki> vCatRenderer;
+	private IVCatRenderer<SimpleWikimediaWiki> vCatRenderer;
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -116,8 +117,8 @@ public class VCatServlet extends HttpServlet {
 			this.categoryProvider = apiClient;
 			final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, PURGE_METADATA);
 			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-			this.vCatRenderer = new CachedVCatRenderer<>(new VCatRenderer<>(graphviz, tempDir, this.categoryProvider),
-					cacheDir, PURGE);
+			this.vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(new VCatRenderer<>(graphviz, tempDir,
+					this.categoryProvider), cacheDir, PURGE), 10);
 		} catch (CacheException | VCatException e) {
 			throw new ServletException(e);
 		}

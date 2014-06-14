@@ -8,7 +8,7 @@ import vcat.params.AbstractAllParams;
 import vcat.params.Links;
 import vcat.params.OutputFormat;
 
-public abstract class AbstractVCatRenderer<W extends IWiki> {
+public abstract class AbstractVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
 	protected abstract File createGraphFile(final AbstractAllParams<W> all) throws VCatException;
 
@@ -23,6 +23,7 @@ public abstract class AbstractVCatRenderer<W extends IWiki> {
 	protected abstract File createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final File graphFile)
 			throws VCatException;
 
+	@Override
 	public RenderedFileInfo render(final AbstractAllParams<W> all) throws VCatException {
 		// Get and, if necessary, create result file
 		final File resultFile;

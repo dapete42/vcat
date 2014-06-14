@@ -39,8 +39,9 @@ import vcat.mediawiki.IMetadataProvider;
 import vcat.redis.SimplePubSub;
 import vcat.redis.cache.ApiRedisCache;
 import vcat.redis.cache.MetadataRedisCache;
-import vcat.renderer.AbstractVCatRenderer;
 import vcat.renderer.CachedVCatRenderer;
+import vcat.renderer.IVCatRenderer;
+import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
 import vcat.renderer.VCatRenderer;
 import vcat.toollabs.params.AllParamsToollabs;
@@ -138,8 +139,8 @@ public class Main {
 		// metadataProvider);
 
 		// Create renderer
-		final CachedVCatRenderer<ToollabsWiki> vCatRenderer = new CachedVCatRenderer<>(new VCatRenderer<>(graphviz,
-				tempDir, categoryProvider), cacheDir);
+		final QueuedVCatRenderer<ToollabsWiki> vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(
+				new VCatRenderer<>(graphviz, tempDir, categoryProvider), cacheDir), 10);
 
 		// Executor service for threads
 		final ThreadFactoryBuilder tfb = new ThreadFactoryBuilder();
@@ -270,7 +271,7 @@ public class Main {
 		log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonString));
 	}
 
-	private static void renderJson(final String jsonString, final AbstractVCatRenderer<ToollabsWiki> vCatRenderer,
+	private static void renderJson(final String jsonString, final IVCatRenderer<ToollabsWiki> vCatRenderer,
 			final IMetadataProvider metadataProvider) {
 
 		try {

@@ -10,16 +10,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
+import vcat.util.HashHelper;
 
 /**
  * Abstract base class for caches to store generic {@link Serializable} objects, backed by files in a directory in the
@@ -152,17 +151,6 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	}
 
 	/**
-	 * Create a hash value from an array of bytes with data. Currently uses SHA-1, converted to a hex string.
-	 * 
-	 * @param bytes
-	 *            Data.
-	 * @return A hash value from the data.
-	 */
-	protected String hash(byte[] bytes) {
-		return DigestUtils.sha1Hex(bytes);
-	}
-
-	/**
 	 * Return a hash string for a key. This must be implemented by subclasses.
 	 * 
 	 * @param key
@@ -170,7 +158,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	 * @return A hash string for a key.
 	 */
 	protected String hashForKey(K key) {
-		return this.hash(SerializationUtils.serialize(key));
+		return HashHelper.hashFor(key);
 	}
 
 	public synchronized void purge() {
