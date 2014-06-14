@@ -18,6 +18,7 @@ public class StringRedisCache {
 	}
 
 	public synchronized boolean containsKey(final String key) {
+		System.err.println(jedisPool);
 		final Jedis jedis = jedisPool.getResource();
 		final boolean containsKey = jedis.exists(this.jedisKey(key));
 		jedisPool.returnResource(jedis);

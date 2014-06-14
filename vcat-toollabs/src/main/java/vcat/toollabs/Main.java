@@ -268,9 +268,6 @@ public class Main {
 	private static void renderJson(final String jsonString, final VCatRenderer<ToollabsWiki> vCatRenderer,
 			final IMetadataProvider metadataProvider) {
 
-		// Get Jedis connection from pool
-		final Jedis jedis = jedisPool.getResource();
-
 		try {
 
 			final JSONObject jsonRequest = new JSONObject(new JSONTokener(jsonString));
@@ -282,12 +279,12 @@ public class Main {
 				try {
 					fillParametersFromJson(parameterMap, jsonRequest.getJSONObject("parameters"));
 				} catch (VCatException e) {
+					// Get Jedis connection from pool
+					final Jedis jedis = jedisPool.getResource();
 					handleError(jedis, requestKey, e);
+					jedisPool.returnResource(jedis);
 					return;
 				}
-
-				// Return Jedis connection to pool
-				jedisPool.returnResource(jedis);
 
 				executorService.execute(new Runnable() {
 
@@ -295,9 +292,6 @@ public class Main {
 					public void run() {
 						log.info(String.format(Messages.getString("Main.Info.ThreadStart"), Thread.currentThread()
 								.getName(), requestKey));
-
-						// Get Jedis connection from pool
-						final Jedis jedis = jedisPool.getResource();
 
 						try {
 
@@ -307,7 +301,9 @@ public class Main {
 										metadataProvider, toollabsMetainfo);
 								renderedFileInfo = vCatRenderer.render(all, tempDir);
 							} catch (VCatException e) {
+								final Jedis jedis = jedisPool.getResource();
 								handleError(jedis, requestKey, e);
+								jedisPool.returnResource(jedis);
 								return;
 							}
 
@@ -331,7 +327,9 @@ public class Main {
 								final String cacheControl = "max-age=" + (config.purge / 2);
 								jsonResponseHeaders.put("Cache-Control", cacheControl);
 							} catch (JSONException e) {
+								final Jedis jedis = jedisPool.getResource();
 								handleError(jedis, requestKey, e);
+								jedisPool.returnResource(jedis);
 								return;
 							}
 
@@ -342,7 +340,9 @@ public class Main {
 
 							// Send response
 							String jsonResponseString = jsonResponse.toString();
+							final Jedis jedis = jedisPool.getResource();
 							long receivers = jedis.publish(config.redisChannelResponse, jsonResponseString);
+							jedisPool.returnResource(jedis);
 
 							log.info(String.format(Messages.getString("Main.Info.ResponseSent"), jsonResponseString));
 
@@ -354,9 +354,8 @@ public class Main {
 
 						} catch (Exception e) {
 							// All exceptions are caught so client is informed of error, if possible
+							final Jedis jedis = jedisPool.getResource();
 							handleError(jedis, requestKey, e);
-						} finally {
-							// Return Jedis connection to pool
 							jedisPool.returnResource(jedis);
 						}
 
@@ -369,15 +368,13 @@ public class Main {
 
 			} catch (Exception e) {
 				// All exceptions are caught to prevent the daemon from crashing
+				final Jedis jedis = jedisPool.getResource();
 				handleError(jedis, requestKey, e);
+				jedisPool.returnResource(jedis);
 			}
 
 		} catch (Exception e) {
 			// All exceptions are caught to prevent the daemon from crashing
-		}
-
-		finally {
-			jedisPool.returnResource(jedis);
 		}
 
 	}
