@@ -21,8 +21,8 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 	public JSONObject getJSONObject(final String key) throws CacheException {
 		final String jsonString;
 		final Jedis jedis = this.jedisPool.getResource();
-		this.jedisPool.returnResource(jedis);
 		jsonString = jedis.get(this.jedisKey(key));
+		this.jedisPool.returnResource(jedis);
 		if (jsonString == null) {
 			return null;
 		} else {

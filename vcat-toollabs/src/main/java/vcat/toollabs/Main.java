@@ -203,16 +203,15 @@ public class Main {
 		log.info(String.format(Messages.getString("Main.Info.RequestListen"), config.redisChannelRequest));
 
 		while (running) {
-			Jedis jedis = null;
+			Jedis jedis = jedisPool.getResource();
 			try {
-				jedis = jedisPool.getResource();
 				jedis.subscribe(jedisSubscribe, config.redisChannelControl, config.redisChannelRequest);
 			} catch (JedisException je) {
 				// Most likely the connection has been lost. Resource is broken.
-				jedisPool.returnBrokenResource(jedis);
 				log.warn(Messages.getString("Main.Warn.JedisConnection"), je);
 				ThreadHelper.sleep(1000);
 			}
+			jedisPool.returnResource(jedis);
 		}
 
 		cpds.close();
