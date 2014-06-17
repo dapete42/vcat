@@ -3,6 +3,8 @@ package vcat.params;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,6 +29,28 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 	private static final int MAX_LIMIT = 250;
 
+	private static final String PARAM_ALGORITHM = "algorithm";
+
+	private static final String PARAM_CATEGORY = "category";
+
+	private static final String PARAM_DEPTH = "depth";
+
+	private static final String PARAM_FORMAT = "format";
+
+	private static final String PARAM_LIMIT = "limit";
+
+	private static final String PARAM_LINKS = "links";
+
+	private static final String PARAM_NAMESPACE = "ns";
+
+	private static final String PARAM_RELATION = "rel";
+
+	private static final String PARAM_SHOWHIDDEN = "showhidden";
+
+	private static final String PARAM_TITLE = "title";
+
+	private static final String PARAM_WIKI = "wiki";
+
 	private final CombinedParams<W> combinedParams = new CombinedParams<>();
 
 	private Metadata metadata;
@@ -48,7 +72,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		// Get a copy of the parameters we can modify
 		final HashMap<String, String[]> params = new HashMap<>(requestParams);
 
-		String wikiString = getAndRemove(params, "wiki");
+		String wikiString = getAndRemove(params, PARAM_WIKI);
 		if (wikiString == null || wikiString.isEmpty()) {
 			throw new VCatException(Messages.getString("AbstractAllParams.Exception.WikiMissing"));
 		}
@@ -65,15 +89,15 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		// Parameters for graphviz itself
 		//
 
-		String formatString = getAndRemove(params, "format");
-		String algorithmString = getAndRemove(params, "algorithm");
+		String formatString = getAndRemove(params, PARAM_FORMAT);
+		String algorithmString = getAndRemove(params, PARAM_ALGORITHM);
 
 		OutputFormat format = OutputFormat.PNG;
 		if (formatString != null && !formatString.isEmpty()) {
 			format = OutputFormat.valueOfIgnoreCase(formatString);
 			if (format == null) {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						"format", formatString));
+						PARAM_FORMAT, formatString));
 			}
 		}
 
@@ -82,7 +106,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			algorithm = Algorithm.valueOfIgnoreCase(algorithmString);
 			if (algorithm == null) {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						"algorithm", algorithmString));
+						PARAM_ALGORITHM, algorithmString));
 			}
 		}
 
@@ -93,60 +117,67 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		// Parameter for vCat creation
 		//
 
-		String[] categoryStrings = getAndRemoveMulti(params, "category");
-		String[] titles = getAndRemoveMulti(params, "title");
-		String ns = getAndRemove(params, "ns");
-		String depthString = getAndRemove(params, "depth");
-		String limitString = getAndRemove(params, "limit");
-		String showhiddenString = getAndRemove(params, "showhidden");
-		String relationString = getAndRemove(params, "rel");
-		String linksString = getAndRemove(params, "links");
+		String[] categoryStrings = getAndRemoveMulti(params, PARAM_CATEGORY);
+		String[] titleStrings = getAndRemoveMulti(params, PARAM_TITLE);
+		String namespaceString = getAndRemove(params, PARAM_NAMESPACE);
+		String depthString = getAndRemove(params, PARAM_DEPTH);
+		String limitString = getAndRemove(params, PARAM_LIMIT);
+		String showhiddenString = getAndRemove(params, PARAM_SHOWHIDDEN);
+		String relationString = getAndRemove(params, PARAM_RELATION);
+		String linksString = getAndRemove(params, PARAM_LINKS);
 
 		// 'category'
 		if (categoryStrings != null) {
 			// If set, convert it to 'title' and 'ns' parameters; the other parameter may not also be used
-			if (titles != null || ns != null) {
+			if (titleStrings != null || namespaceString != null) {
 				throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleNsWithCategory"));
 			}
-			titles = categoryStrings;
-			ns = Integer.toString(Metadata.NS_CATEGORY);
+			titleStrings = categoryStrings;
+			namespaceString = Integer.toString(Metadata.NS_CATEGORY);
 		}
 
 		// 'title'
-		if (titles == null) {
+		final Set<String> titles = new TreeSet<>();
+		if (titleStrings == null) {
 			throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleCategoryMissing"));
 		}
-		for (int i = 0; i < titles.length; i++) {
-			titles[i] = unescapeMediawikiTitle(titles[i]);
-			if (titles[i].isEmpty()) {
-				throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleEmpty"));
+		for (int i = 0; i < titleStrings.length; i++) {
+			String[] split = titleStrings[i].split("\\|");
+			for (int j = 0; j < split.length; j++) {
+				final String title = unescapeMediawikiTitle(split[j]);
+				if (title.isEmpty()) {
+					throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleEmpty"));
+				}
+				titles.add(title);
 			}
 		}
 
+		// Build TitleNamespaceParams when handling namespaces
+		ArrayList<TitleNamespaceParam> titleNamespaceList = new ArrayList<>(titles.size());
+
 		// 'ns' (namespace)
-		int[] namespaces = new int[titles.length];
-		if (ns == null) {
+		if (namespaceString == null) {
 			// Automatically determine namespace from titles. Checks if it starts with a namespace; if not, the default
 			// (0) is used.
-			for (int i = 0; i < titles.length; i++) {
-				namespaces[i] = this.metadata.namespaceFromTitle(titles[i]);
-				titles[i] = this.metadata.titleWithoutNamespace(titles[i]);
+			for (String title : titles) {
+				titleNamespaceList.add(new TitleNamespaceParam(this.metadata.titleWithoutNamespace(title),
+						this.metadata.namespaceFromTitle(title)));
 			}
 		} else {
 			// Try to parse 'ns' as an integer
 			int namespace;
 			try {
-				namespace = Integer.parseInt(ns);
+				namespace = Integer.parseInt(namespaceString);
 			} catch (NumberFormatException e) {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
-						"ns", ns), e);
+						PARAM_NAMESPACE, namespaceString), e);
 			}
 			if (this.metadata.getAllNames(namespace).isEmpty()) {
 				throw new VCatException(String.format(
 						Messages.getString("AbstractAllParams.Exception.NamespaceDoesNotExist"), namespace));
 			}
-			for (int i = 0; i < titles.length; i++) {
-				namespaces[i] = namespace;
+			for (String title : titles) {
+				titleNamespaceList.add(new TitleNamespaceParam(title, namespace));
 			}
 		}
 
@@ -157,11 +188,11 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				depth = Integer.parseInt(depthString);
 			} catch (NumberFormatException e) {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
-						"depth", depthString), e);
+						PARAM_DEPTH, depthString), e);
 			}
 			if (depth < 1) {
 				throw new VCatException(String.format(
-						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), "depth", 1));
+						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), PARAM_DEPTH, 1));
 			}
 		}
 
@@ -173,14 +204,14 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				limit = Integer.parseInt(limitString);
 			} catch (NumberFormatException e) {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
-						"limit", limitString), e);
+						PARAM_LIMIT, limitString), e);
 			}
 			if (limit < 1) {
 				throw new VCatException(String.format(
-						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), "limit", 1));
+						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), PARAM_LIMIT, 1));
 			} else if (limit > maxLimit) {
 				throw new VCatException(String.format(
-						Messages.getString("AbstractAllParams.Exception.MustBeLessThanOrEqual"), "limit", maxLimit));
+						Messages.getString("AbstractAllParams.Exception.MustBeLessThanOrEqual"), PARAM_LIMIT, maxLimit));
 			}
 		}
 
@@ -203,8 +234,8 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				// all ok
 				break;
 			case Subcategory:
-				for (int namespace : namespaces) {
-					if (namespace != Metadata.NS_CATEGORY) {
+				for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
+					if (titleNamespace.getNamespace() != Metadata.NS_CATEGORY) {
 						throw new VCatException(String.format(
 								Messages.getString("AbstractAllParams.Exception.RelOnlyForCategories"), relationString));
 					}
@@ -212,7 +243,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 				break;
 			default:
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						"rel", relationString));
+						PARAM_RELATION, relationString));
 			}
 		}
 
@@ -222,14 +253,8 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			links = Links.valueOfIgnoreCase(linksString);
 			if (links == null) {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						"links", linksString));
+						PARAM_LINKS, linksString));
 			}
-		}
-
-		// Build TitleNamespaceParams
-		ArrayList<TitleNamespaceParam> titleNamespaceList = new ArrayList<>(titles.length);
-		for (int i = 0; i < titles.length; i++) {
-			titleNamespaceList.add(new TitleNamespaceParam(titles[i], namespaces[i]));
 		}
 
 		// Move values to parameters
