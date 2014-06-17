@@ -32,19 +32,15 @@ public abstract class CollectionHelper {
 		int collectionSize = collection.size();
 
 		collections = new ArrayList<>(collectionSize / numberOfItems + 1);
-		ArrayList<T> currentCollection = null;
-		long i = 0;
+		ArrayList<T> currentCollection = new ArrayList<>(numberOfItems);
 		for (T item : collection) {
-			if (i % numberOfItems == 0) {
-				if (currentCollection != null) {
-					collections.add(currentCollection);
-				}
+			currentCollection.add(item);
+			if (currentCollection.size() >= numberOfItems) {
+				collections.add(currentCollection);
 				currentCollection = new ArrayList<>(numberOfItems);
 			}
-			currentCollection.add(item);
-			i++;
 		}
-		if (currentCollection != null && !currentCollection.isEmpty()) {
+		if (!currentCollection.isEmpty()) {
 			collections.add(currentCollection);
 		}
 		return collections;
