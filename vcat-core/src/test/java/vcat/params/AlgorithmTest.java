@@ -1,5 +1,7 @@
 package vcat.params;
 
+import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import vcat.params.Algorithm;
@@ -18,6 +20,17 @@ public class AlgorithmTest {
 	public void testGetters() {
 		for (Algorithm algorithm : Algorithm.values()) {
 			algorithm.getProgram();
+		}
+	}
+
+	@Test
+	public void testValueOfIgnoreCase() {
+		for (Algorithm algorithm : Algorithm.values()) {
+			final String name = algorithm.name();
+			assertEquals(algorithm, Algorithm.valueOfIgnoreCase(name));
+			assertEquals(algorithm, Algorithm.valueOfIgnoreCase(name.toUpperCase()));
+			assertEquals(algorithm, Algorithm.valueOfIgnoreCase(name.toLowerCase()));
+			assertNull(Algorithm.valueOfIgnoreCase(name + "xxx"));
 		}
 	}
 
