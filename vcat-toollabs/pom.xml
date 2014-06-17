@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>vcat</groupId>
 		<artifactId>vcat</artifactId>
-		<version>1.1.0-SNAPSHOT</version>
+		<version>2-SNAPSHOT</version>
 	</parent>
 	<artifactId>vcat-toollabs</artifactId>
 
@@ -100,6 +100,8 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<finalName>vcat-toollabs</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 				<executions>
 					<execution>
