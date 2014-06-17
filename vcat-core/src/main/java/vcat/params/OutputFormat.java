@@ -27,11 +27,9 @@ public enum OutputFormat {
 
 	public static OutputFormat valueOfIgnoreCase(String name) {
 		for (OutputFormat format : values()) {
-			if (format.parameterNames != null) {
-				for (int i = 0; i < format.parameterNames.length; i++) {
-					if (format.parameterNames[i].equalsIgnoreCase(name)) {
-						return format;
-					}
+			for (String parameterName : format.parameterNames) {
+				if (parameterName.equalsIgnoreCase(name)) {
+					return format;
 				}
 			}
 		}

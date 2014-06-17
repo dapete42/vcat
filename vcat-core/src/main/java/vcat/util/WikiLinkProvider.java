@@ -29,13 +29,7 @@ public class WikiLinkProvider extends AbstractLinkProvider {
 
 	@Override
 	public String provideLink(final String title) {
-		final String url = pattern.replace("$1", escapeMediawikiTitleForUrl(title));
-		if (url.startsWith("//")) {
-			// Protocol-relative URLs do not work well with vCat, so we assume http
-			return "http:" + url;
-		} else {
-			return url;
-		}
+		return pattern.replace("$1", escapeMediawikiTitleForUrl(title));
 	}
 
 }
