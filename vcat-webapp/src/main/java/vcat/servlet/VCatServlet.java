@@ -1,19 +1,10 @@
 package vcat.servlet;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import vcat.VCatException;
 import vcat.cache.CacheException;
@@ -34,11 +25,9 @@ import vcat.renderer.IVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
 
-public class VCatServlet extends HttpServlet {
+public class VCatServlet extends AbstractVCatServlet {
 
-	private static final long serialVersionUID = -8091085002046525690L;
-
-	private final Log log = LogFactory.getLog(this.getClass());
+	private static final long serialVersionUID = 8952525278394777354L;
 
 	private static int PURGE = 600;
 
@@ -49,52 +38,6 @@ public class VCatServlet extends HttpServlet {
 	private IMetadataProvider metadataProvider;
 
 	private IVCatRenderer<SimpleWikimediaWiki> vCatRenderer;
-
-	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		this.doRequest(req, resp);
-	}
-
-	@Override
-	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		this.doRequest(req, resp);
-	}
-
-	protected void doRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		try {
-
-			final AllParams all = new AllParams(req.getParameterMap(), req.getRequestURI(), this.metadataProvider);
-			RenderedFileInfo renderedFileInfo = this.vCatRenderer.render(all);
-
-			// Get finished rendered file
-			File resultFile = renderedFileInfo.getFile();
-
-			// Content-type
-			String contentType = renderedFileInfo.getMimeType();
-			resp.setContentType(contentType);
-
-			// Content-length
-			long length = resultFile.length();
-			if (length < Integer.MAX_VALUE) {
-				resp.setContentLength((int) length);
-			}
-
-			// Content-disposition (for file name)
-			String filename = resultFile.getName();
-			resp.setHeader("Content-disposition", "filename=\"" + filename + '"');
-
-			// Serve file to browser
-			try (FileInputStream renderedInput = new FileInputStream(resultFile);
-					ServletOutputStream output = resp.getOutputStream()) {
-				IOUtils.copy(renderedInput, output);
-			}
-
-			log.info(String.format(Messages.getString("VCatServlet.Info.FileSent"), resultFile.getAbsolutePath(),
-					contentType, length));
-		} catch (Exception e) {
-			throw new ServletException(e);
-		}
-	}
 
 	@Override
 	public String getServletInfo() {
@@ -122,4 +65,15 @@ public class VCatServlet extends HttpServlet {
 			throw new ServletException(e);
 		}
 	}
+
+	@Override
+	protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
+		try {
+			return this.vCatRenderer.render(new AllParams(req.getParameterMap(), req.getRequestURI(),
+					this.metadataProvider));
+		} catch (VCatException e) {
+			throw new ServletException(e);
+		}
+	}
+
 }
