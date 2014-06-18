@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 
 public class Config {
 
-	private static final String BUNDLE_NAME = "vcat.webapp.simple";
+	private static final String BUNDLE_NAME = "vcat.webapp.simple.config";
 
 	public static final String CONFIG_CACHEDIR = "cachedir";
 
