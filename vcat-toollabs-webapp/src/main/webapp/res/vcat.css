@@ -1,0 +1,58 @@
+/* Additional styles based on style.css at http://tools.wmflabs.org/style.css */
+
+.formfullwidth {
+	display: block;
+	width: 100%;
+}
+
+.formline {
+	margin: 0.5em 0;
+}
+
+table.result td,
+table.result th {
+	padding: 0.25em;
+	text-align: left;
+	vertical-align: middle;
+}
+
+table.result tr.error th,
+table.result tr.error td {
+	color: #7f0000;
+	font-weight: bold;
+}
+
+table.result tr.warning th,
+table.result tr.warning td {
+	color: #7f7f00;
+	font-weight: bold;
+}
+
+table.result tr.highlight td {
+	border: 1px solid black;
+}
+
+ul.oneline {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+ul.oneline li {
+	display: inline;
+	list-style-type: none;
+	margin: 0 1em 0 0;
+	padding: 0;
+}
+
+#logo a {
+	font-weight: bold;
+	text-decoration: none;
+}
+
+p.error {
+	color: darkred;
+	font-size: 1.5em;
+	font-weight: bold;
+}
+}
