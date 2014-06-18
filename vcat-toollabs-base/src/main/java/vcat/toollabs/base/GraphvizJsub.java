@@ -1,4 +1,4 @@
-package vcat.toollabs.graphviz;
+package vcat.toollabs.base;
 
 import java.io.File;
 import java.util.ArrayList;

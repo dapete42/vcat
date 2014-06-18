@@ -1,4 +1,4 @@
-package vcat.toollabs.mediawiki;
+package vcat.toollabs.base;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,8 +15,6 @@ import vcat.mediawiki.ApiException;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.Metadata;
-import vcat.toollabs.ToollabsWiki;
-import vcat.toollabs.base.Messages;
 import vcat.util.CollectionHelper;
 
 public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki> {

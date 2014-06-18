@@ -1,4 +1,4 @@
-package vcat.toollabs;
+package vcat.toollabs.base;
 
 import vcat.mediawiki.IWiki;
 

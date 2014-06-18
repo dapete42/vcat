@@ -1,11 +1,10 @@
-package vcat.toollabs.mediawiki;
+package vcat.toollabs.base;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import vcat.VCatException;
-import vcat.toollabs.base.Messages;
 
 public class ToollabsConnectionBuilder {
 

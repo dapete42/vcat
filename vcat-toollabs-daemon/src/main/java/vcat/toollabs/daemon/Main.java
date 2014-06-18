@@ -43,11 +43,10 @@ import vcat.renderer.CachedVCatRenderer;
 import vcat.renderer.IVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
-import vcat.toollabs.MyCnfConfig;
-import vcat.toollabs.ToollabsWiki;
-import vcat.toollabs.ToollabsWikiProvider;
-import vcat.toollabs.params.AllParamsToollabs;
-import vcat.toollabs.util.ThreadHelper;
+import vcat.toollabs.base.AllParamsToollabs;
+import vcat.toollabs.base.MyCnfConfig;
+import vcat.toollabs.base.ToollabsWiki;
+import vcat.toollabs.base.ToollabsWikiProvider;
 
 public class Main {
 

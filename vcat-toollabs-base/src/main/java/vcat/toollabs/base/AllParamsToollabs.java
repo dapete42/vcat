@@ -1,12 +1,10 @@
-package vcat.toollabs.params;
+package vcat.toollabs.base;
 
 import java.util.Map;
 
 import vcat.VCatException;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.params.AbstractAllParams;
-import vcat.toollabs.ToollabsWiki;
-import vcat.toollabs.ToollabsWikiProvider;
 
 public class AllParamsToollabs extends AbstractAllParams<ToollabsWiki> {
 

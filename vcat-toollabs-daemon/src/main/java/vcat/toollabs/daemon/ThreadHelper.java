@@ -1,4 +1,4 @@
-package vcat.toollabs.util;
+package vcat.toollabs.daemon;
 
 public class ThreadHelper {
 
