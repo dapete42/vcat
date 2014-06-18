@@ -42,7 +42,7 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 
 	@Override
 	public String getServletInfo() {
-		return Messages.getString("VCatServlet.ServletInfo");
+		return "Simple vCat servlet";
 	}
 
 	@Override
