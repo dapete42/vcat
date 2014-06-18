@@ -7,12 +7,12 @@
 		<artifactId>vcat</artifactId>
 		<version>2-SNAPSHOT</version>
 	</parent>
-	<artifactId>vcat-webapp</artifactId>
+	<artifactId>vcat-webapp-base</artifactId>
 
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
-	<name>vCat Web Application</name>
-	<description>Simple web application for vCat.</description>
+	<name>vCat web application base classes</name>
+	<description>Base classes for web applications for vCat.</description>
 
 	<licenses>
 		<license>
@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>vcat</groupId>
 			<artifactId>vcat-core</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -49,26 +49,14 @@
 			<version>1.1.3</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.11</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>
-		<finalName>webapp</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -83,11 +71,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.4</version>
-			</plugin>
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>8.1.15.v20140411</version>
 			</plugin>
 		</plugins>
 	</build>

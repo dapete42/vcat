@@ -1,5 +1,5 @@
-vcat-webapp
-===========
+vcat-webapp-simple
+==================
 
 Tomcat encoding problems
 ------------------------

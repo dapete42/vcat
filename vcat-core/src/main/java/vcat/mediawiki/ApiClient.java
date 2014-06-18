@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,10 +65,10 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	@Override
 	public Map<String, Collection<String>> requestCategories(W wiki, Collection<String> fullTitles, boolean showhidden)
 			throws ApiException {
-		HashMap<String, Collection<String>> categorySet = new HashMap<>();
+		HashMap<String, Collection<String>> categoryMap = new HashMap<>();
 		String clshow = showhidden ? null : "!hidden";
-		this.requestCategoriesRecursive(wiki.getApiUrl(), fullTitles, categorySet, null, clshow);
-		return categorySet;
+		this.requestCategoriesRecursive(wiki.getApiUrl(), fullTitles, categoryMap, null, clshow);
+		return categoryMap;
 	}
 
 	private void requestCategoriesRecursive(String apiUrl, Collection<String> fullTitles,
@@ -166,6 +168,63 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 		}
 
+	}
+
+	public Collection<Pair<String, String>> requestLinksBetween(W wiki, Collection<String> fullTitles)
+			throws ApiException {
+		ArrayList<Pair<String, String>> links = new ArrayList<>();
+		this.requestLinksBetweenRecursive(wiki.getApiUrl(), fullTitles, links, null);
+		return links;
+	}
+
+	private void requestLinksBetweenRecursive(String apiUrl, Collection<String> fullTitles,
+			final Collection<Pair<String, String>> links, String plcontinue) throws ApiException {
+
+		if (fullTitles.size() > TITLES_MAX) {
+
+			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TITLES_MAX)) {
+				requestLinksBetweenRecursive(apiUrl, fullTitlesPart, links, plcontinue);
+			}
+
+		} else {
+
+			// Set query properties
+			HashMap<String, String> params = new HashMap<>();
+			params.put("prop", "links");
+			params.put("pllimit", "max");
+			final String titlesParam = StringUtils.join(fullTitles, '|');
+			params.put("titles", titlesParam);
+			params.put("pltitles", titlesParam);
+			if (plcontinue != null) {
+				params.put("plcontinue", plcontinue);
+			}
+			JSONObject result = this.request(apiUrl, params);
+
+			try {
+				JSONObject query = result.getJSONObject("query");
+				JSONObject pages = query.getJSONObject("pages");
+				for (String pagesKey : JSONObject.getNames(pages)) {
+					JSONObject pagesData = pages.getJSONObject(pagesKey);
+					if (pagesData.has("links")) {
+						JSONArray jsonLinks = pagesData.getJSONArray("links");
+						String pagesDataTitle = pagesData.getString("title");
+						for (int i = 0; i < jsonLinks.length(); i++) {
+							JSONObject category = jsonLinks.getJSONObject(i);
+							links.add(new MutablePair<>(pagesDataTitle, category.getString("title")));
+						}
+					}
+				}
+
+				// If query-continue was returned, make another request
+				if (result.has("query-continue")) {
+					this.requestLinksBetweenRecursive(apiUrl, fullTitles, links, result.getJSONObject("query-continue")
+							.getJSONObject("categories").getString("plcontinue"));
+				}
+			} catch (JSONException e) {
+				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
+			}
+
+		}
 	}
 
 	@Override
