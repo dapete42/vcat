@@ -8,12 +8,12 @@
 
 	<servlet>
 		<servlet-name>vcat</servlet-name>
-		<servlet-class>vcat.servlet.VCatServlet</servlet-class>
+		<servlet-class>vcat.webapp.simple.SimpleVCatServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>vcat</servlet-name>
-		<url-pattern>/*</url-pattern>
+		<url-pattern>render</url-pattern>
 	</servlet-mapping>
 
 </web-app>
