@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<%@page contentType="text/html; charset=UTF-8"%>
 <%@page import="org.apache.commons.lang3.StringEscapeUtils"%>
 <html>
 <head>

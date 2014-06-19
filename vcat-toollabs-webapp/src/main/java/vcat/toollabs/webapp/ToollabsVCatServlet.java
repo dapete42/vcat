@@ -1,10 +1,12 @@
 package vcat.toollabs.webapp;
 
 import java.io.File;
-import java.util.UUID;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -59,9 +61,6 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 	/** Redis server port. */
 	private static final int REDIS_PORT = 6379;
 
-	/** URL of the 'render' script. */
-	private static final String RENDER_URL = "http://tools.wmflabs.org/vcat/render";
-
 	private IVCatRenderer<ToollabsWiki> vCatRenderer;
 
 	private IMetadataProvider metadataProvider;
@@ -94,8 +93,9 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 		// Provider for Tool Labs wiki information
 		this.toollabsWikiProvider = new ToollabsWikiProvider(cpds);
 
-		// Use a random prefix for caches
-		final String redisSecret = UUID.randomUUID().toString();
+		// Use database credentials to create a secret prefix for caches
+		final String redisSecret = DigestUtils.md5Hex(configMyCnf.user + ':' + configMyCnf.password);
+
 		final String redisApiCacheKeyPrefix = redisSecret + "-cache-api-";
 		final String redisMetadataCacheKeyPrefix = redisSecret + "-cache-metadata-";
 
@@ -145,12 +145,17 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 		} catch (VCatException e) {
 			throw new ServletException(e);
 		}
+		
+	}
+
+	protected Map<String, String[]> parameterMap(final HttpServletRequest req) {
+		return req.getParameterMap();
 	}
 
 	@Override
 	protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
 		try {
-			return this.vCatRenderer.render(new AllParamsToollabs(req.getParameterMap(), RENDER_URL,
+			return this.vCatRenderer.render(new AllParamsToollabs(this.parameterMap(req), this.getHttpRequestURI(req),
 					this.metadataProvider, this.toollabsWikiProvider));
 		} catch (VCatException e) {
 			throw new ServletException(e);

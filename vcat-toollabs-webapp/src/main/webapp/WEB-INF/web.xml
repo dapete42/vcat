@@ -7,13 +7,33 @@
 	<display-name>vCat</display-name>
 
 	<servlet>
-		<servlet-name>vcat</servlet-name>
+		<servlet-name>vcat-servlet</servlet-name>
 		<servlet-class>vcat.toollabs.webapp.ToollabsVCatServlet</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>catgraph-servlet</servlet-name>
+		<servlet-class>vcat.toollabs.webapp.ToollabsCatgraphServlet</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>catgraph-converter-servlet</servlet-name>
+		<servlet-class>vcat.toollabs.webapp.ToollabsCatgraphConverterServlet</servlet-class>
+	</servlet>
+
 	<servlet-mapping>
-		<servlet-name>vcat</servlet-name>
+		<servlet-name>vcat-servlet</servlet-name>
 		<url-pattern>render</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>catgraph-servlet</servlet-name>
+		<url-pattern>catgraph-redirect</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>catgraph-converter-servlet</servlet-name>
+		<url-pattern>catgraph-convert</url-pattern>
 	</servlet-mapping>
 
 </web-app>
