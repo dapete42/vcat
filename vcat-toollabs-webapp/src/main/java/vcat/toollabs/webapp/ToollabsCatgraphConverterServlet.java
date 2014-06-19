@@ -75,7 +75,7 @@ public class ToollabsCatgraphConverterServlet extends HttpServlet {
 				req.setAttribute("inputUrl", "");
 				req.setAttribute("hasResult", false);
 			}
-			req.getRequestDispatcher("WEB-INF/catgraph-converter.jsp").forward(req, resp);
+			req.getRequestDispatcher("WEB-INF/catgraphConverter.jsp").forward(req, resp);
 
 		} catch (Exception e) {
 			req.setAttribute("exceptionMessage", e.getMessage());

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import vcat.VCatException;
 import vcat.webapp.base.AbstractVCatServlet;
 
 @SuppressWarnings("serial")
@@ -20,6 +21,9 @@ public abstract class AbstractVCatToollabsServlet extends AbstractVCatServlet {
 		try {
 			super.doRequest(req, resp);
 		} catch (IOException | ServletException e) {
+			if (!(e.getCause() instanceof VCatException)) {
+				log.error(e.getMessage(), e);
+			}
 			req.setAttribute("exceptionMessage", e.getMessage());
 			req.setAttribute("stacktrace", ExceptionUtils.getStackTrace(e));
 			req.getRequestDispatcher("WEB-INF/error.jsp").forward(req, resp);

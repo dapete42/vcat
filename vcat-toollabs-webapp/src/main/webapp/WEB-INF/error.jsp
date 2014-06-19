@@ -33,6 +33,9 @@
 						src="//tools.wmflabs.org/Tool_Labs_logo_thumb.png"
 						alt="Wikitech and Wikimedia Labs" height="138" width="122"></a>
 				</div>
+				<ul>
+					<li><a href="./">vCat</a></li>
+				</ul>
 			</div>
 		</div>
 	</div>

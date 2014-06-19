@@ -98,7 +98,7 @@
 									<th scope=row><%=StringEscapeUtils.escapeXml10(m.getCatgraphConverterString("th_output_url"))%></th>
 									<td><a
 										href="<%=StringEscapeUtils.escapeXml10((String) request.getAttribute("outputUrl"))%>"
-										target="catgraph-convert-output"><%=StringEscapeUtils.escapeXml10((String) request.getAttribute("outputUrl"))%></a></td>
+										target="catgraphConvertOutput"><%=StringEscapeUtils.escapeXml10((String) request.getAttribute("outputUrl"))%></a></td>
 								</tr>
 							</tbody>
 						</table>
@@ -128,13 +128,13 @@
 						for (int i = 0; i < languages.length; i++) {
 							if ("en".equals(languages[i])) {
 					%>
-					<li><a href="catgraph-convert"><%=StringEscapeUtils.escapeXml10(languageNames[i])%></a>
+					<li><a href="catgraphConvert"><%=StringEscapeUtils.escapeXml10(languageNames[i])%></a>
 					</li>
 					<%
 						} else {
 					%>
 					<li><a
-						href="catgraph-convert?lang=<%=StringEscapeUtils.escapeXml10(languages[i])%>"><%=StringEscapeUtils.escapeXml10(languageNames[i])%></a>
+						href="catgraphConvert?lang=<%=StringEscapeUtils.escapeXml10(languages[i])%>"><%=StringEscapeUtils.escapeXml10(languageNames[i])%></a>
 					</li>
 					<%
 						}

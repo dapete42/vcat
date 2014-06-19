@@ -1,5 +1,6 @@
 package vcat.toollabs.webapp;
 
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.util.Map;
 
@@ -46,8 +47,10 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 
 	private static final String HOME_TEMP_DIR = "temp";
 
+	private static final String JDBC_DRIVERCLASS = "org.mariadb.jdbc.Driver";
+
 	/** JDBC URL for MySQL/MariaDB access to wiki table. */
-	private static final String JDBC_URL = "jdbc:mysql://enwiki.labsdb:3306/meta_p";
+	private static final String JDBC_URL = "jdbc:mysql://s1.labsdb:3306/meta_p";
 
 	/** Purge caches after (seconds). */
 	private static final int PURGE = 600;
@@ -56,7 +59,7 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 	private static final int PURGE_METADATA = 86400;
 
 	/** Redis server hostname. */
-	private static final String REDIS_HOSTNAME = "localhost";
+	private static final String REDIS_HOSTNAME = "tools-redis";
 
 	/** Redis server port. */
 	private static final int REDIS_PORT = 6379;
@@ -75,77 +78,86 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 	@Override
 	public void init() throws ServletException {
 
-		MyCnfConfig configMyCnf = new MyCnfConfig();
-
-		// Pool for database connections
-		final ComboPooledDataSource cpds = new ComboPooledDataSource();
-		cpds.setJdbcUrl(JDBC_URL);
-		cpds.setUser(configMyCnf.user);
-		cpds.setPassword(configMyCnf.password);
-		// Stay small and close connections quickly - this is only used for metadata for now, so it's not used much
-		cpds.setInitialPoolSize(1);
-		cpds.setMinPoolSize(0);
-		cpds.setMaxPoolSize(10);
-		cpds.setAcquireIncrement(1);
-		cpds.setMaxIdleTime(600);
-		cpds.setMaxConnectionAge(3600);
-
-		// Provider for Tool Labs wiki information
-		this.toollabsWikiProvider = new ToollabsWikiProvider(cpds);
-
-		// Use database credentials to create a secret prefix for caches
-		final String redisSecret = DigestUtils.md5Hex(configMyCnf.user + ':' + configMyCnf.password);
-
-		final String redisApiCacheKeyPrefix = redisSecret + "-cache-api-";
-		final String redisMetadataCacheKeyPrefix = redisSecret + "-cache-metadata-";
-
-		// Conservative configuration for Redis connection pool - check connections as often as possible
-		final JedisPoolConfig poolConfig = new JedisPoolConfig();
-		poolConfig.setTestOnBorrow(true);
-		poolConfig.setTestOnReturn(true);
-		poolConfig.setTestWhileIdle(true);
-		// Allow some more concurrent connections
-		poolConfig.setMaxTotal(16);
-		// We expect low traffic most of the time, so don't keep many idle connections open
-		poolConfig.setMaxIdle(1);
-		// Keep one spare idle connection
-		poolConfig.setMinIdle(1);
-
-		// Pool of Redis connections
-		final JedisPool jedisPool = new JedisPool(poolConfig, REDIS_HOSTNAME, REDIS_PORT);
-
-		// Use Redis for API and metadata caches
-		final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, PURGE);
-		final IMetadataCache metadataCache = new MetadataRedisCache(jedisPool, redisMetadataCacheKeyPrefix,
-				PURGE_METADATA);
-
-		// Call external executables, but use a QueuedGraphviz to limit number of concurrent processes.
-		final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File(GRAPHVIZ_DIR)),
-				GRAPHVIZ_PROCESSES);
-
-		final CachedApiClient<ToollabsWiki> apiClient = new CachedApiClient<>(apiCache);
-
-		// Metadata provider
-		this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-
-		// Home directory
-		final File homeDirectory = new File(System.getProperty("user.home"));
-
-		// For cache of Graphviz files and rendered images, use this directory
-		final File cacheDir = new File(homeDirectory, HOME_CACHE_DIR);
-		cacheDir.mkdirs();
-		// Temporary directory for Graphviz files and rendered images
-		final File tempDir = new File(homeDirectory, HOME_TEMP_DIR);
-		tempDir.mkdirs();
-
-		// Create renderer
 		try {
+
+			MyCnfConfig configMyCnf = new MyCnfConfig();
+			configMyCnf.readFromMyCnf();
+
+			// Pool for database connections
+			final ComboPooledDataSource cpds = new ComboPooledDataSource();
+			cpds.setJdbcUrl(JDBC_URL);
+			try {
+				// Fails for some reason unless explicitly set
+				cpds.setDriverClass(JDBC_DRIVERCLASS);
+			} catch (PropertyVetoException e) {
+				// ignore
+			}
+			cpds.setUser(configMyCnf.user);
+			cpds.setPassword(configMyCnf.password);
+			// Stay small and close connections quickly - this is only used for metadata for now, so it's not used much
+			cpds.setInitialPoolSize(1);
+			cpds.setMinPoolSize(0);
+			cpds.setMaxPoolSize(10);
+			cpds.setAcquireIncrement(1);
+			cpds.setMaxIdleTime(600);
+			cpds.setMaxConnectionAge(3600);
+
+			// Provider for Tool Labs wiki information
+			this.toollabsWikiProvider = new ToollabsWikiProvider(cpds);
+
+			// Use database credentials to create a secret prefix for caches
+			final String redisSecret = DigestUtils.md5Hex(configMyCnf.user + ':' + configMyCnf.password);
+
+			final String redisApiCacheKeyPrefix = redisSecret + "-cache-api-";
+			final String redisMetadataCacheKeyPrefix = redisSecret + "-cache-metadata-";
+
+			// Conservative configuration for Redis connection pool - check connections as often as possible
+			final JedisPoolConfig poolConfig = new JedisPoolConfig();
+			poolConfig.setTestOnBorrow(true);
+			poolConfig.setTestOnReturn(true);
+			poolConfig.setTestWhileIdle(true);
+			// Allow some more concurrent connections
+			poolConfig.setMaxTotal(16);
+			// We expect low traffic most of the time, so don't keep many idle connections open
+			poolConfig.setMaxIdle(1);
+			// Keep one spare idle connection
+			poolConfig.setMinIdle(1);
+
+			// Pool of Redis connections
+			final JedisPool jedisPool = new JedisPool(poolConfig, REDIS_HOSTNAME, REDIS_PORT);
+
+			// Use Redis for API and metadata caches
+			final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, PURGE);
+			final IMetadataCache metadataCache = new MetadataRedisCache(jedisPool, redisMetadataCacheKeyPrefix,
+					PURGE_METADATA);
+
+			// Call external executables, but use a QueuedGraphviz to limit number of concurrent processes.
+			final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File(GRAPHVIZ_DIR)),
+					GRAPHVIZ_PROCESSES);
+
+			final CachedApiClient<ToollabsWiki> apiClient = new CachedApiClient<>(apiCache);
+
+			// Metadata provider
+			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
+
+			// Home directory
+			final File homeDirectory = new File(System.getProperty("user.home"));
+
+			// For cache of Graphviz files and rendered images, use this directory
+			final File cacheDir = new File(homeDirectory, HOME_CACHE_DIR);
+			cacheDir.mkdirs();
+			// Temporary directory for Graphviz files and rendered images
+			final File tempDir = new File(homeDirectory, HOME_TEMP_DIR);
+			tempDir.mkdirs();
+
+			// Create renderer
 			this.vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient,
 					cacheDir), 10);
+
 		} catch (VCatException e) {
 			throw new ServletException(e);
 		}
-		
+
 	}
 
 	protected Map<String, String[]> parameterMap(final HttpServletRequest req) {

@@ -24,7 +24,7 @@ import vcat.renderer.RenderedFileInfo;
 @SuppressWarnings("serial")
 public abstract class AbstractVCatServlet extends HttpServlet {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	protected final Log log = LogFactory.getLog(this.getClass());
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
