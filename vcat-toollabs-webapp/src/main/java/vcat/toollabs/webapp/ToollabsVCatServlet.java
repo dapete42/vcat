@@ -17,8 +17,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import vcat.VCatException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
-import vcat.graphviz.GraphvizExternal;
-import vcat.graphviz.QueuedGraphviz;
+import vcat.graphviz.Graphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
 import vcat.mediawiki.IMetadataProvider;
@@ -40,12 +39,9 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 	/** Directory with Graphviz binaries (dot, fdp). */
 	private static final String GRAPHVIZ_DIR = "/usr/bin";
 
-	/** Maximum number of concurrent processes running Graphviz (0=unlimited). */
-	private static final int GRAPHVIZ_PROCESSES = 1;
+	private static final String HOME_CACHE_DIR = "work/cache";
 
-	private static final String HOME_CACHE_DIR = "cache";
-
-	private static final String HOME_TEMP_DIR = "temp";
+	private static final String HOME_TEMP_DIR = "work/temp";
 
 	private static final String JDBC_DRIVERCLASS = "org.mariadb.jdbc.Driver";
 
@@ -63,6 +59,9 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 
 	/** Redis server port. */
 	private static final int REDIS_PORT = 6379;
+
+	/** Maximum number of concurrent threads running vCat (0=unlimited). */
+	private static final int VCAT_THREADS = 4;
 
 	private IVCatRenderer<ToollabsWiki> vCatRenderer;
 
@@ -108,8 +107,8 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 			// Use database credentials to create a secret prefix for caches
 			final String redisSecret = DigestUtils.md5Hex(configMyCnf.user + ':' + configMyCnf.password);
 
-			final String redisApiCacheKeyPrefix = redisSecret + "-cache-api-";
-			final String redisMetadataCacheKeyPrefix = redisSecret + "-cache-metadata-";
+			final String redisApiCacheKeyPrefix = redisSecret + "-vcat-cache-api-";
+			final String redisMetadataCacheKeyPrefix = redisSecret + "-vcat-cache-metadata-";
 
 			// Conservative configuration for Redis connection pool - check connections as often as possible
 			final JedisPoolConfig poolConfig = new JedisPoolConfig();
@@ -131,10 +130,6 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 			final IMetadataCache metadataCache = new MetadataRedisCache(jedisPool, redisMetadataCacheKeyPrefix,
 					PURGE_METADATA);
 
-			// Call external executables, but use a QueuedGraphviz to limit number of concurrent processes.
-			final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File(GRAPHVIZ_DIR)),
-					GRAPHVIZ_PROCESSES);
-
 			final CachedApiClient<ToollabsWiki> apiClient = new CachedApiClient<>(apiCache);
 
 			// Metadata provider
@@ -150,9 +145,13 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 			final File tempDir = new File(homeDirectory, HOME_TEMP_DIR);
 			tempDir.mkdirs();
 
+			// Use gridserver to render Graphviz files. The vCat is already queued, so this one does not have to be.
+			final Graphviz graphviz = new GraphvizGridClient(jedisPool, redisSecret, new File(homeDirectory, "bin"),
+					new File(GRAPHVIZ_DIR));
+
 			// Create renderer
 			this.vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient,
-					cacheDir), 10);
+					cacheDir), VCAT_THREADS);
 
 		} catch (VCatException e) {
 			throw new ServletException(e);
