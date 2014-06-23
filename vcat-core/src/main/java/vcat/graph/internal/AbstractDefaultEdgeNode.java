@@ -43,13 +43,16 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 	}
 
 	/**
-	 * @return URL in imagemap, PostScript and SVG files.
+	 * @return Label href attribute.
 	 */
 	@GraphProperty(Graph.PROPERTY_HREF)
 	public String getHref() {
 		return this.href;
 	}
 
+	/**
+	 * @return Label style attribute.
+	 */
 	@GraphProperty(Graph.PROPERTY_STYLE)
 	public String getStyle() {
 		return this.style;
@@ -64,7 +67,7 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 	}
 
 	/**
-	 * @param fontsite
+	 * @param fontsize
 	 *            Label size.
 	 */
 	public void setFontsize(int fontsize) {
@@ -72,12 +75,17 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 	}
 
 	/**
-	 * @return URL in imagemap, PostScript and SVG files.
+	 * @param href
+	 *            Label href attribute.
 	 */
 	public void setHref(String href) {
 		this.href = href;
 	}
 
+	/**
+	 * @param style
+	 *            Label style attribute.
+	 */
 	public void setStyle(String style) {
 		this.style = style;
 	}

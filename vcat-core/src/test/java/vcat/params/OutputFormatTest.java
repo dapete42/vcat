@@ -7,7 +7,7 @@ import org.junit.Test;
 import vcat.params.OutputFormat;
 
 /**
- * JUnit tests for the {@link OutputFromat} enumeration.
+ * JUnit tests for the {@link OutputFormat} enumeration.
  * 
  * @author Peter Schlömer
  */

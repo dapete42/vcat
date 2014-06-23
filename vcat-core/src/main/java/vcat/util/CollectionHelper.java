@@ -9,6 +9,8 @@ public abstract class CollectionHelper {
 	/**
 	 * Splits a Collection in several parts with a maximum number of items.
 	 * 
+	 * @param <T>
+	 *            Type of elements in the collection.
 	 * @param collection
 	 *            Collection to split
 	 * @param numberOfItems

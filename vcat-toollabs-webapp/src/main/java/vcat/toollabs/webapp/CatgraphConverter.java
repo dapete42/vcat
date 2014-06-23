@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class CatgraphConverter {
 
 	private CatgraphConverter() {
@@ -15,8 +17,8 @@ public class CatgraphConverter {
 	 * Only the absolute minimum is done, so invalid parameters may cause different rendering or errors.
 	 * 
 	 * @param inputParameters
-	 *            Map of parameters as used by {@link HttpServletRequest.getParameterMap()}.
-	 * @return Map of parameters as used by {@link HttpServletRequest.getParameterMap()}.
+	 *            Map of parameters as used by {@link HttpServletRequest#getParameterMap()}.
+	 * @return Map of parameters as used by {@link HttpServletRequest#getParameterMap()}.
 	 */
 	public static Map<String, String[]> convertParameters(final Map<String, String[]> inputParameters) {
 

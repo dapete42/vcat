@@ -25,6 +25,8 @@ public abstract class GraphvizJNILoader {
 	 * Try to load the Graphviz JNI library, <code>gv_java</code>, from default locations using
 	 * {@link System#load(String) load} or using {@link System#loadLibrary(String) loadLibrary}. This is called by new
 	 * {@link GraphvizJNI} instances automatically.
+	 * 
+	 * @return Whether loading has been successful.
 	 */
 	public static synchronized boolean init() {
 		if (initialized) {
@@ -42,6 +44,7 @@ public abstract class GraphvizJNILoader {
 	 * 
 	 * @param customLocations
 	 *            List of locations (full file path) where the <code>gv_java</code> library can be found.
+	 * @return Whether loading has been successful.
 	 */
 	public static synchronized boolean init(List<String> customLocations) {
 		if (initialized) {

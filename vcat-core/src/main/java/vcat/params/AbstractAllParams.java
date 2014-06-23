@@ -312,8 +312,10 @@ public abstract class AbstractAllParams<W extends IWiki> {
 	 * Determine Wiki from supplied wiki parameter.
 	 * 
 	 * @param wikiString
-	 * @return
+	 *            Value of wiki parameter.
+	 * @return Wiki corresponding to wikiString.
 	 * @throws VCatException
+	 *             If the wiki object could not be created.
 	 */
 	protected abstract W initWiki(final String wikiString) throws VCatException;
 

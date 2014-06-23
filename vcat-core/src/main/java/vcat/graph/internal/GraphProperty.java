@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates that a method is a getter for a value that should be used as a property when including it in Graphviz
- * output. The {@link value()} is used as the key in the property map.
+ * output. The {@link #value()} is used as the key in the property map.
  * 
  * @author Peter Schlömer
  */

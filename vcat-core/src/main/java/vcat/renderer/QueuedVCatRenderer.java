@@ -50,10 +50,10 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 	/**
 	 * Return an instance of QueuedGraphviz, which uses the supplied Graphviz for rendering.
 	 * 
-	 * @param otherGraphviz
-	 *            Graphviz renderer to use
+	 * @param otherRenderer
+	 *            vCat renderer to use.
 	 * @param numberOfThreads
-	 *            Maximum number of threads to use (Zero or less means an unlimited number)
+	 *            Maximum number of threads to use (zero or less means an unlimited number).
 	 */
 	public QueuedVCatRenderer(final IVCatRenderer<W> otherRenderer, final int numberOfThreads) {
 
