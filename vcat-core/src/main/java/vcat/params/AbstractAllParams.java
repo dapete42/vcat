@@ -29,27 +29,27 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 	private static final int MAX_LIMIT = 250;
 
-	private static final String PARAM_ALGORITHM = "algorithm";
+	public static final String PARAM_ALGORITHM = "algorithm";
 
-	private static final String PARAM_CATEGORY = "category";
+	public static final String PARAM_CATEGORY = "category";
 
-	private static final String PARAM_DEPTH = "depth";
+	public static final String PARAM_DEPTH = "depth";
 
-	private static final String PARAM_FORMAT = "format";
+	public static final String PARAM_FORMAT = "format";
 
-	private static final String PARAM_LIMIT = "limit";
+	public static final String PARAM_LIMIT = "limit";
 
-	private static final String PARAM_LINKS = "links";
+	public static final String PARAM_LINKS = "links";
 
-	private static final String PARAM_NAMESPACE = "ns";
+	public static final String PARAM_NAMESPACE = "ns";
 
-	private static final String PARAM_RELATION = "rel";
+	public static final String PARAM_RELATION = "rel";
 
-	private static final String PARAM_SHOWHIDDEN = "showhidden";
+	public static final String PARAM_SHOWHIDDEN = "showhidden";
 
-	private static final String PARAM_TITLE = "title";
+	public static final String PARAM_TITLE = "title";
 
-	private static final String PARAM_WIKI = "wiki";
+	public static final String PARAM_WIKI = "wiki";
 
 	private final CombinedParams<W> combinedParams = new CombinedParams<>();
 

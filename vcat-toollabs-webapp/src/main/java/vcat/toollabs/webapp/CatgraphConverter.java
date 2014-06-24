@@ -48,20 +48,17 @@ public class CatgraphConverter {
 		if (parameters.containsKey("wiki")) {
 			final String lang = parameters.get("lang");
 			String wiki = parameters.get("wiki");
-			if ("wikipedia".equalsIgnoreCase(wiki)) {
-				if (lang != null) {
-					wiki = lang + "wiki";
-					parameters.remove("lang");
-				}
-			} else if (wiki.matches("^(wiki(books|news|quote|wikiversity)|wiktionary)$")) {
-				if (lang != null) {
-					wiki = lang + wiki;
-					parameters.remove("lang");
-				}
-			} else if ("commons".equalsIgnoreCase(wiki) || "meta".equalsIgnoreCase(wiki)) {
+			if ("commons".equalsIgnoreCase(wiki) || "meta".equalsIgnoreCase(wiki)) {
 				wiki = wiki + "wiki";
+			} else if (lang != null) {
+				if ("wikipedia".equalsIgnoreCase(wiki)) {
+					wiki = lang + "wiki";
+				} else if (wiki.matches("^(wiki(books|news|quote|versity)|wiktionary)$")) {
+					wiki = lang + wiki;
+				}
 			}
 			parameters.put("wiki", wiki);
+			parameters.remove("lang");
 		}
 
 		// Set defaults for ns if if is not supplied
@@ -69,7 +66,6 @@ public class CatgraphConverter {
 			if ("article".equalsIgnoreCase(parameters.get("sub"))) {
 				// For sub=article, default is 0
 				parameters.put("ns", "0");
-				parameters.remove("sub");
 			} else {
 				// Otherwise, default is 14 (category namespace)
 				parameters.put("ns", "14");
@@ -77,9 +73,10 @@ public class CatgraphConverter {
 		}
 
 		// Set rel=subcategory if sub is set to a generic true value, but not 'article'
-		if (parameters.containsKey("sub") && !"article".equalsIgnoreCase(parameters.get("sub"))
-				&& isPhpTrue(parameters.get("sub"))) {
-			parameters.put("rel", "subcategory");
+		if (parameters.containsKey("sub")) {
+			if (!"article".equalsIgnoreCase(parameters.get("sub")) && isPhpTrue(parameters.get("sub"))) {
+				parameters.put("rel", "subcategory");
+			}
 			parameters.remove("sub");
 		}
 
@@ -108,8 +105,8 @@ public class CatgraphConverter {
 			parameters.remove("format");
 		}
 
-		// depth=0, limit=0 and sub=0 must be removed
-		for (String key : new String[] { "depth", "limit", "sub" }) {
+		// depth=0 and limit=0 must still be removed
+		for (String key : new String[] { "depth", "limit" }) {
 			final String value = parameters.get(key);
 			try {
 				if (value != null && Integer.parseInt(value) == 0) {
@@ -121,8 +118,11 @@ public class CatgraphConverter {
 		}
 
 		// showhidden is enabled if ignorehidden was explicitly set to false
-		if (parameters.containsKey("ignorehidden") && isPhpFalse(parameters.get("ignorehidden"))) {
-			parameters.put("showhidden", "1");
+		if (parameters.containsKey("ignorehidden")) {
+			if (isPhpFalse(parameters.get("ignorehidden"))) {
+				parameters.put("showhidden", "1");
+			}
+			parameters.remove("ignorehidden");
 		}
 
 		// Rebuild proper request parameters as expected (values are arrays)
