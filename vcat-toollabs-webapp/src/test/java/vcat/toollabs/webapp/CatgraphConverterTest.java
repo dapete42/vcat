@@ -95,6 +95,16 @@ public class CatgraphConverterTest {
 		assertEquals(1, out.size());
 		assertSingleValue("test", out, AbstractAllParams.PARAM_CATEGORY);
 
+		// Multiple
+		out = convertMap("cat", "test1", "cat", "test2", "cat", "test3");
+		assertEquals(1, out.size());
+		final String[] values = out.get(AbstractAllParams.PARAM_CATEGORY);
+		assertNotNull(values);
+		assertEquals(3, values.length);
+		assertTrue(ArrayUtils.contains(values, "test1"));
+		assertTrue(ArrayUtils.contains(values, "test2"));
+		assertTrue(ArrayUtils.contains(values, "test3"));
+
 		// Cat with ns 14
 		out = convertMap("cat", "test", "ns", "14");
 		assertEquals(1, out.size());
