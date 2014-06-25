@@ -125,6 +125,9 @@ public class CatgraphConverter {
 			parameters.remove("ignorehidden");
 		}
 
+		// small is removed because vCat does not support it
+		parameters.remove("small");
+
 		// Rebuild proper request parameters as expected (values are arrays)
 		final HashMap<String, String[]> outputParameters = new HashMap<>();
 

@@ -228,6 +228,18 @@ public class CatgraphConverterTest {
 			assertTrue(out.isEmpty());
 		}
 
+		/* small */
+
+		// Always removed
+		for (String falseString : FALSE_VALUES) {
+			out = convertMap("small", falseString);
+			assertTrue(out.isEmpty());
+		}
+		for (String falseString : TRUE_VALUES) {
+			out = convertMap("small", falseString);
+			assertTrue(out.isEmpty());
+		}
+
 		/* A few complex tests */
 
 		out = convertMap("wiki", "dewiki", "cat", "Köln", "sub", "article", "format", "gif", "ignorehidden", "1",
