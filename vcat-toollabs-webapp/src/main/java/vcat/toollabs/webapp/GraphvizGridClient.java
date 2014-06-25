@@ -85,13 +85,11 @@ public class GraphvizGridClient implements Graphviz {
 			if (listening == 0) {
 				// Nobody is listening, so we spawn a new instance of the gridserver, telling it to immediately run the
 				// command we just submitted. We assume it will run and return when it's finished.
-				/* TODO starting grid jobs currently not possible
 				try {
 					runtimeExec(new File(scriptPath, "gridserverStart").toString(), id);
 				} catch (IOException e) {
 					throw new GraphvizException("Nobody listening, starting gridserver for id %s", e);
-				} */
-				throw new GraphvizException("Error submitting job to vCat gridserver: nobody listening");
+				}
 			}
 
 			// Status of execution
