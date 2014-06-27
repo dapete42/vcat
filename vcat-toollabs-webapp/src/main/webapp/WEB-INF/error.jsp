@@ -29,13 +29,15 @@
 			</div>
 			<div class="col2">
 				<div id="logo">
-					<a href="//tools.wmflabs.org/"> <img
-						src="//tools.wmflabs.org/Tool_Labs_logo_thumb.png"
-						alt="Wikitech and Wikimedia Labs" height="138" width="122"></a>
+					<div>
+						<a href="//tools.wmflabs.org/"><img
+							src="//tools.wmflabs.org/Tool_Labs_logo_thumb.png"
+							alt="Wikitech and Wikimedia Labs" height="138" width="122" /></a>
+					</div>
+					<div>
+						<a href="./"><img src="res/vCat_logo_thumb.png" alt="vCat" /></a>
+					</div>
 				</div>
-				<ul>
-					<li><a href="./">vCat</a></li>
-				</ul>
 			</div>
 		</div>
 	</div>
