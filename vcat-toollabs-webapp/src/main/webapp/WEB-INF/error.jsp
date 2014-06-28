@@ -55,8 +55,10 @@
 				<ul>
 					<li><a href="//meta.wikimedia.org/wiki/User:Dapete/vCat">User:Dapete/vCat</a>
 						(Meta)</li>
-					<li>GitHub: <a href="https://github.com/dapete42/vcat">dapete42/vcat</a>,
-						<a href="https://github.com/dapete42/vcat-deployed">dapete42/vcat-deployed</a>
+					<li><a href="https://github.com/dapete42/vcat">dapete42/vcat</a>
+						(GitHub)</li>
+					<li><a href="https://github.com/dapete42/vcat-deployed">dapete42/vcat-deployed</a>
+						(GitHub)</li>
 				</ul>
 
 			</div>
