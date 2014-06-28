@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <%@page contentType="text/html; charset=UTF-8"%>
 <%@page import="org.apache.commons.lang3.StringEscapeUtils"%>
-<html>
+<html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" type="text/css"
@@ -17,14 +17,25 @@
 					<header>
 						<h1>vCat</h1>
 					</header>
-					<h2>Error</h2>
-					<p class="error"><%=StringEscapeUtils.escapeXml10((String) request.getAttribute("exceptionMessage"))%></p>
-					<pre><%=StringEscapeUtils.escapeXml10((String) request.getAttribute("stacktrace"))%></pre>
+					<h2>
+						Error/<span lang="de">Fehler</span>
+					</h2>
 					<p>
 						More information on vCat at <a
-							href="//meta.wikimedia.org/wiki/User:Dapete/vCat">User:Dapete/vCat</a>
-						(Meta)
+							href="//meta.wikimedia.org/wiki/User:Dapete/vCat#English">User:Dapete/vCat</a>
+						(Meta). Report problems at <a
+							href="//meta.wikimedia.org/wiki/User_talk:Dapete/vCat">User
+							talk:Dapete/vCat</a>.
 					</p>
+					<p lang="de">
+						Mehr Informationen über vCat unter <a
+							href="//meta.wikimedia.org/wiki/User:Dapete/vCat#Deutsch">User:Dapete/vCat</a>
+						(Meta). Probleme melden unter <a
+							href="//meta.wikimedia.org/wiki/User_talk:Dapete/vCat">User
+							talk:Dapete/vCat</a>.
+					</p>
+					<p class="error"><%=StringEscapeUtils.escapeXml10((String) request.getAttribute("exceptionMessage"))%></p>
+					<pre><%=StringEscapeUtils.escapeXml10((String) request.getAttribute("stacktrace"))%></pre>
 				</div>
 			</div>
 			<div class="col2">
