@@ -39,6 +39,7 @@
 				</div>
 			</div>
 			<div class="col2">
+
 				<div id="logo">
 					<div>
 						<a href="//tools.wmflabs.org/"><img
@@ -49,6 +50,15 @@
 						<a href="./"><img src="res/vCat_logo_thumb.png" alt="vCat" /></a>
 					</div>
 				</div>
+
+				<strong>Links</strong>
+				<ul>
+					<li><a href="//meta.wikimedia.org/wiki/User:Dapete/vCat">User:Dapete/vCat</a>
+						(Meta)</li>
+					<li>GitHub: <a href="https://github.com/dapete42/vcat">dapete42/vcat</a>,
+						<a href="https://github.com/dapete42/vcat-deployed">dapete42/vcat-deployed</a>
+				</ul>
+
 			</div>
 		</div>
 	</div>
