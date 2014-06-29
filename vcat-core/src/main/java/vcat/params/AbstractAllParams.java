@@ -229,19 +229,16 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		Relation relation = Relation.Category;
 		if (relationString != null) {
 			relation = Relation.valueOfIgnoreCase(relationString);
-			switch (relation) {
-			case Category:
+			if (relation == Relation.Category) {
 				// all ok
-				break;
-			case Subcategory:
+			} else if (relation == Relation.Subcategory) {
 				for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
 					if (titleNamespace.getNamespace() != Metadata.NS_CATEGORY) {
 						throw new VCatException(String.format(
 								Messages.getString("AbstractAllParams.Exception.RelOnlyForCategories"), relationString));
 					}
 				}
-				break;
-			default:
+			} else {
 				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
 						PARAM_RELATION, relationString));
 			}
