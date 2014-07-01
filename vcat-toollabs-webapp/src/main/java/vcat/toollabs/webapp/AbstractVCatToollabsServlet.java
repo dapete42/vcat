@@ -26,6 +26,7 @@ public abstract class AbstractVCatToollabsServlet extends AbstractVCatServlet {
 			}
 			req.setAttribute("exceptionMessage", e.getMessage());
 			req.setAttribute("stacktrace", ExceptionUtils.getStackTrace(e));
+			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			req.getRequestDispatcher("WEB-INF/error.jsp").forward(req, resp);
 		}
 	}
