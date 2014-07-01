@@ -21,10 +21,8 @@
 
 	<modules>
 		<module>vcat-core</module>
-		<module>vcat-gv_java</module>
 		<module>vcat-redis</module>
 		<module>vcat-toollabs-base</module>
-		<module>vcat-toollabs-daemon</module>
 		<module>vcat-toollabs-webapp</module>
 		<module>vcat-webapp-base</module>
 		<module>vcat-webapp-simple</module>

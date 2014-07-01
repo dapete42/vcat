@@ -11,26 +11,17 @@ It replaces a similar tool written in PHP, Catgraph.
 Projects
 --------
 
-It consists of five projects:
+It consists of five Maven submodules:
 
 * vcat-core: The core library to evaluate parameters, get the necessary
   category information from the wiki and render it into an image.
-* vcat-gv_java: An addition which allows the use of the Graphviz JNI, instead
-  of relying on external program calls to the Graphviz command line utilities.
 * vcat-redis: An addition which allows the use of Redis (through the Jedis
   library) to store the API and metadata caches.
-* vcat-webapp: A Java Servlet version of vCat which expects parameters as GET
-  or POST parameters and directly returns the rendered file.
-* vcat-toollabs: A deamon version of vCat for use on Tool Labs
-  (http://tools.wmflabs.org/).
+* vcat-webapp-base: Base classes to create Servlets which render graphs using
+  vCat.
+* vcat-webapp-simple: A simple Servlet version of vCat which expects
+  parameters as GET or POST parameters.
+* vcat-toollabs-base: Base classes for the vCat Servlet as used on Tool Labs.
+* vcat-toollabs-webapp: A Servlet version of vCat which uses the meta_p.wiki
+  table to look up wikis, and Redis for caching, as used on Tool Labs.
 
-Each of these are set up as Eclipse projects as well as Maven submodules.
-
-Licensing
----------
-
-The vcat-gv_java project is released under the Eclipse Public License (EPL)
-1.0. This is because it contains code from the Graphviz JNI, which is released
-under this license.
-
-All other projects are released under the Apache License, Version 2.0.
