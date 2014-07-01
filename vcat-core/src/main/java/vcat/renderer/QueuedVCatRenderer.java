@@ -72,6 +72,10 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 		}
 	}
 
+	public int getNumberOfQueuedJobs() {
+		return this.jobs.size();
+	}
+
 	@Override
 	public RenderedFileInfo render(final AbstractAllParams<W> all) throws VCatException {
 

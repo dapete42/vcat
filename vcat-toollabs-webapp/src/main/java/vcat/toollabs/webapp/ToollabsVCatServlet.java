@@ -24,7 +24,6 @@ import vcat.mediawiki.IMetadataProvider;
 import vcat.redis.cache.ApiRedisCache;
 import vcat.redis.cache.MetadataRedisCache;
 import vcat.renderer.CachedVCatRenderer;
-import vcat.renderer.IVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
 import vcat.toollabs.base.AllParamsToollabs;
@@ -63,7 +62,9 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 	/** Maximum number of concurrent threads running vCat (0=unlimited). */
 	private static final int VCAT_THREADS = 4;
 
-	private IVCatRenderer<ToollabsWiki> vCatRenderer;
+	private static final int VCAT_MAX_QUEUE = 20;
+
+	private QueuedVCatRenderer<ToollabsWiki> vCatRenderer;
 
 	private IMetadataProvider metadataProvider;
 
@@ -165,12 +166,18 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 
 	@Override
 	protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
+
+		if (this.vCatRenderer.getNumberOfQueuedJobs() > VCAT_MAX_QUEUE) {
+			throw new ServletException(Messages.getString("ToollabsVCatServlet.Error.TooManyQueuedJobs"));
+		}
+
 		try {
 			return this.vCatRenderer.render(new AllParamsToollabs(this.parameterMap(req), this.getHttpRequestURI(req),
 					this.metadataProvider, this.toollabsWikiProvider));
 		} catch (VCatException e) {
 			throw new ServletException(e);
 		}
+
 	}
 
 }
