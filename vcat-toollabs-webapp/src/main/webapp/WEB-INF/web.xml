@@ -21,6 +21,11 @@
 		<servlet-class>vcat.toollabs.webapp.ToollabsCatgraphConverterServlet</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>status</servlet-name>
+		<jsp-file>/WEB-INF/status.jsp</jsp-file>
+	</servlet>
+
 	<servlet-mapping>
 		<servlet-name>ToollabsVCatServlet</servlet-name>
 		<url-pattern>/render</url-pattern>
@@ -34,6 +39,11 @@
 	<servlet-mapping>
 		<servlet-name>ToollabsCatgraphConverterServlet</servlet-name>
 		<url-pattern>/catgraphConvert</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>status</servlet-name>
+		<url-pattern>status</url-pattern>
 	</servlet-mapping>
 
 </web-app>

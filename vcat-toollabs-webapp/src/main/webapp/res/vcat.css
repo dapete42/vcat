@@ -32,6 +32,10 @@ table.result tr.highlight td {
 	border: 1px solid black;
 }
 
+td.number {
+	text-align: right;
+}
+
 ul.oneline {
 	list-style-type: none;
 	margin: 0;
@@ -54,5 +58,4 @@ p.error {
 	color: darkred;
 	font-size: 1.5em;
 	font-weight: bold;
-}
 }
