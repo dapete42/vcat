@@ -160,10 +160,6 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 
 	}
 
-	protected Map<String, String[]> parameterMap(final HttpServletRequest req) {
-		return req.getParameterMap();
-	}
-
 	@Override
 	protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
 
@@ -171,8 +167,16 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 			throw new ServletException(Messages.getString("ToollabsVCatServlet.Error.TooManyQueuedJobs"));
 		}
 
+		Map<String, String[]> parameterMap;
+		if (req.getRequestURI().endsWith("/catgraphRedirect")) {
+			// If called as catgraphRedirect, convert from Catgraph parameters to vCat parameters
+			parameterMap = CatgraphConverter.convertParameters(req.getParameterMap());
+		} else {
+			parameterMap = req.getParameterMap();
+		}
+
 		try {
-			return this.vCatRenderer.render(new AllParamsToollabs(this.parameterMap(req), this.getHttpRequestURI(req),
+			return this.vCatRenderer.render(new AllParamsToollabs(parameterMap, this.getHttpRequestURI(req),
 					this.metadataProvider, this.toollabsWikiProvider));
 		} catch (VCatException e) {
 			throw new ServletException(e);

@@ -12,11 +12,6 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>ToollabsCatgraphServlet</servlet-name>
-		<servlet-class>vcat.toollabs.webapp.ToollabsCatgraphServlet</servlet-class>
-	</servlet>
-
-	<servlet>
 		<servlet-name>ToollabsCatgraphConverterServlet</servlet-name>
 		<servlet-class>vcat.toollabs.webapp.ToollabsCatgraphConverterServlet</servlet-class>
 	</servlet>
@@ -32,7 +27,8 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>ToollabsCatgraphServlet</servlet-name>
+		<servlet-name>ToollabsVCatServlet</servlet-name>
+		<!-- also hardcoded in the Servlet -->
 		<url-pattern>/catgraphRedirect</url-pattern>
 	</servlet-mapping>
 
