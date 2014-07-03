@@ -8,6 +8,10 @@
 		threads = new Thread[numberOfThreads];
 		numberOfThreads = Thread.enumerate(threads);
 	}
+	final long mb = 1024 * 1024;
+	final long freeMemory = Runtime.getRuntime().freeMemory();
+	final long maxMemory = Runtime.getRuntime().maxMemory();
+	final long totalMemory = Runtime.getRuntime().totalMemory();
 %>
 <html lang="en">
 <head>
@@ -27,28 +31,62 @@
 					</header>
 					<h2>Status</h2>
 
-					<table>
-						<caption>Memory</caption>
+					<table class="status">
+						<caption>System properties</caption>
 						<tbody>
 							<tr>
-								<th scope="col">Free memory</th>
-								<td class="number"><%=Runtime.getRuntime().freeMemory() / (1024 * 1024)%>
-									M</td>
+								<th scope="col">JRE vendor/version</th>
+								<td><%=System.getProperty("java.vendor")%>, <%=System.getProperty("java.version")%></td>
 							</tr>
 							<tr>
-								<th scope="col">Total memory</th>
-								<td class="number"><%=Runtime.getRuntime().totalMemory() / (1024 * 1024)%>
-									M</td>
+								<th scope="col">Operating system architecture</th>
+								<td><%=System.getProperty("os.arch")%></td>
 							</tr>
 							<tr>
-								<th scope="col">Maximum memory</th>
-								<td class="number"><%=Runtime.getRuntime().maxMemory() / (1024 * 1024)%>
-									M</td>
+								<th scope="col">Operation system name/version</th>
+								<td><%=System.getProperty("os.name")%>, <%=System.getProperty("os.version")%></td>
+							</tr>
+							<tr>
+								<th scope="col">User name</th>
+								<td><%=System.getProperty("user.name")%></td>
 							</tr>
 						</tbody>
 					</table>
 
-					<table>
+					<table class="status">
+						<caption>Server properties</caption>
+						<tbody>
+							<tr>
+								<th scope="col">Server info</th>
+								<td><%=getServletContext().getServerInfo()%></td>
+							</tr>
+						</tbody>
+					</table>
+
+					<table class="status">
+						<caption>Memory</caption>
+						<tbody>
+							<tr>
+								<th scope="col">Allocated memory</th>
+								<td class="number"><%=totalMemory / mb%> MB</td>
+							</tr>
+							<tr>
+								<th scope="col">Free allocated memory</th>
+								<td class="number"><%=freeMemory / mb%> MB</td>
+							</tr>
+							<tr>
+								<th scope="col">Maximum memory</th>
+								<td class="number"><%=maxMemory / mb%> MB</td>
+							</tr>
+							<tr>
+								<th scope="col">Free total memory</th>
+								<td class="number"><%=(freeMemory + maxMemory - totalMemory) / mb%>
+									MB</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<table class="status">
 						<caption>Threads</caption>
 						<thead>
 							<tr>

@@ -1,5 +1,4 @@
 /* Additional styles based on style.css at http://tools.wmflabs.org/style.css */
-
 .formfullwidth {
 	display: block;
 	width: 100%;
@@ -30,6 +29,20 @@ table.result tr.warning td {
 
 table.result tr.highlight td {
 	border: 1px solid black;
+}
+
+table.status {
+	margin-top: 1em;
+}
+
+table.status th[scope=col] {
+	min-width: 15em;
+}
+
+table.status caption {
+	border-bottom: 2px solid #1B61DD;
+	font-weight: bold;
+	text-align: left;
 }
 
 td.number {
