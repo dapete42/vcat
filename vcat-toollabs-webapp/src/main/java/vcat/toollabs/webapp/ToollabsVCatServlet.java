@@ -42,8 +42,6 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 
 	private static final String HOME_TEMP_DIR = "work/temp";
 
-	private static final String JDBC_DRIVERCLASS = "org.mariadb.jdbc.Driver";
-
 	/** JDBC URL for MySQL/MariaDB access to wiki table. */
 	private static final String JDBC_URL = "jdbc:mysql://s1.labsdb:3306/meta_p";
 
@@ -88,7 +86,7 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 			cpds.setJdbcUrl(JDBC_URL);
 			try {
 				// Fails for some reason unless explicitly set
-				cpds.setDriverClass(JDBC_DRIVERCLASS);
+				cpds.setDriverClass(org.mariadb.jdbc.Driver.class.getName());
 			} catch (PropertyVetoException e) {
 				// ignore
 			}
