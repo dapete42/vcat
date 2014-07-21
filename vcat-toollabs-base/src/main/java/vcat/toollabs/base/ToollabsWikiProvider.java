@@ -18,9 +18,7 @@ public class ToollabsWikiProvider {
 	}
 
 	public ToollabsWiki fromDbname(final String dbnameParam) throws VCatException {
-		Connection connection = null;
-		try {
-			connection = cpds.getConnection();
+		try (Connection connection = this.cpds.getConnection()) {
 			final PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?");
 			statement.setString(1, dbnameParam);
 			try (ResultSet rs = statement.executeQuery()) {
@@ -37,12 +35,6 @@ public class ToollabsWikiProvider {
 		} catch (SQLException e) {
 			throw new VCatException(String.format(Messages.getString("ToollabsWikiProvider.Exception.ReadingMetaInfo"),
 					dbnameParam), e);
-		} finally {
-			try {
-				connection.close();
-			} catch (Exception e) {
-				// ignore
-			}
 		}
 	}
 
