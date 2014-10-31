@@ -14,13 +14,6 @@
 	<name>vCat Tool Labs base classes</name>
 	<description>Base classes for vCat on Tool Labs.</description>
 
-	<licenses>
-		<license>
-			<name>Apache License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-		</license>
-	</licenses>
-
 	<developers>
 		<developer>
 			<name>Peter Schlömer</name>
@@ -40,6 +33,10 @@
 		<dependency>
 			<groupId>com.mchange</groupId>
 			<artifactId>c3p0</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
 		</dependency>
 	</dependencies>
 
