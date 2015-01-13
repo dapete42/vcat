@@ -8,19 +8,20 @@ import vcat.VCatException;
 
 public class ToollabsConnectionBuilder {
 
-	private static final String JDBC_URL_TEMPLATE = "jdbc:mysql://%s:3306/%s";
-
 	private final String jdbcPassword;
+
+	private final String jdbcUrlTemplate;
 
 	private final String jdbcUser;
 
-	public ToollabsConnectionBuilder(final String jdbcUser, final String jdbcPassword) {
+	public ToollabsConnectionBuilder(final String jdbcUser, final String jdbcPassword, final String jdbcUrlTemplate) {
 		this.jdbcUser = jdbcUser;
 		this.jdbcPassword = jdbcPassword;
+		this.jdbcUrlTemplate = jdbcUrlTemplate;
 	}
 
 	public Connection buildConnection(final String name) throws VCatException {
-		final String jdbcUrl = String.format(JDBC_URL_TEMPLATE, name + ".labsdb", name + "_p");
+		final String jdbcUrl = String.format(this.jdbcUrlTemplate, name + ".labsdb", name + "_p");
 		try {
 			return DriverManager.getConnection(jdbcUrl, this.jdbcUser, this.jdbcPassword);
 		} catch (SQLException e) {

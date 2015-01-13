@@ -7,18 +7,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonObject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
+import org.apache.http.Header;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 
 import vcat.Messages;
 import vcat.util.CollectionHelper;
@@ -28,14 +33,16 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	/** Maximum number of titles parameters to use in one request. */
 	private final static int TITLES_MAX = 50;
 
-	private DefaultHttpClient client;
+	private final HttpClient client;
 
 	public ApiClient() {
-		this.client = new DefaultHttpClient();
-		this.client.getParams().setParameter("User-Agent", Messages.getString("ApiClient.UserAgent"));
+		HttpClientBuilder hcb = HttpClientBuilder.create();
+		Header userAgent = new BasicHeader("User-Agent", Messages.getString("ApiClient.UserAgent"));
+		hcb.setDefaultHeaders(Collections.singleton(userAgent));
+		this.client = hcb.build();
 	}
 
-	protected JSONObject request(String apiUrl, Map<String, String> params) throws ApiException {
+	protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {
 		// API Etiquette: use get to enable server-side caching
 		HttpRequestBuilder builder = Http.get(apiUrl);
 		builder.use(this.client).charset("utf-8");
@@ -51,11 +58,11 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		synchronized (ApiClient.class) {
 
 			try (final InputStreamReader reader = new InputStreamReader(builder.asResponse().getEntity().getContent())) {
-				return new JSONObject(new JSONTokener(reader));
+				return Json.createReader(reader).readObject();
 			} catch (IOException e) {
 				// IOException will be thrown for all HTTP problems
 				throw new ApiException(Messages.getString("ApiClient.Exception.HTTP"), e);
-			} catch (JSONException e) {
+			} catch (JsonException e) {
 				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 			}
 
@@ -93,35 +100,35 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			if (clcontinue != null) {
 				params.put("clcontinue", clcontinue);
 			}
-			JSONObject result = this.request(apiUrl, params);
+			JsonObject result = this.request(apiUrl, params);
 
 			try {
-				JSONObject query = result.getJSONObject("query");
-				JSONObject pages = query.getJSONObject("pages");
-				for (String pagesKey : JSONObject.getNames(pages)) {
-					JSONObject pagesData = pages.getJSONObject(pagesKey);
-					if (pagesData.has("categories")) {
-						JSONArray jsonCategories = pagesData.getJSONArray("categories");
+				JsonObject query = result.getJsonObject("query");
+				JsonObject pages = query.getJsonObject("pages");
+				for (String pagesKey : pages.keySet()) {
+					JsonObject pagesData = pages.getJsonObject(pagesKey);
+					if (pagesData.containsKey("categories")) {
+						JsonArray jsonCategories = pagesData.getJsonArray("categories");
 						String pagesDataTitle = pagesData.getString("title");
 						Collection<String> categories = categoryMap.get(pagesDataTitle);
 						if (categories == null) {
-							categories = new ArrayList<>(jsonCategories.length());
+							categories = new ArrayList<>(jsonCategories.size());
 							categoryMap.put(pagesDataTitle, categories);
 						}
-						for (int i = 0; i < jsonCategories.length(); i++) {
-							JSONObject category = jsonCategories.getJSONObject(i);
+						for (int i = 0; i < jsonCategories.size(); i++) {
+							JsonObject category = jsonCategories.getJsonObject(i);
 							categories.add(category.getString("title"));
 						}
 					}
 				}
 
 				// If query-continue was returned, make another request
-				if (result.has("query-continue")) {
+				if (result.containsKey("query-continue")) {
 					this.requestCategoriesRecursive(apiUrl, fullTitles, categoryMap,
-							result.getJSONObject("query-continue").getJSONObject("categories").getString("clcontinue"),
+							result.getJsonObject("query-continue").getJsonObject("categories").getString("clcontinue"),
 							clshow);
 				}
-			} catch (JSONException e) {
+			} catch (JsonException e) {
 				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 			}
 
@@ -129,7 +136,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	}
 
 	@Override
-	public List<String> requestCategorymembers(final IWiki wiki, final String fullTitle) throws ApiException {
+	public List<String> requestCategorymembers(final W wiki, final String fullTitle) throws ApiException {
 		List<String> categories = new ArrayList<>();
 		this.requestCategorymembersRecursive(wiki.getApiUrl(), fullTitle, categories, null);
 		return categories;
@@ -147,24 +154,24 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		if (cmcontinue != null) {
 			params.put("cmcontinue", cmcontinue);
 		}
-		JSONObject result = this.request(apiUrl, params);
+		JsonObject result = this.request(apiUrl, params);
 
 		try {
-			JSONObject query = result.getJSONObject("query");
-			if (query.has("categorymembers")) {
-				JSONArray jsonCategories = query.getJSONArray("categorymembers");
-				for (int i = 0; i < jsonCategories.length(); i++) {
-					JSONObject category = jsonCategories.getJSONObject(i);
+			JsonObject query = result.getJsonObject("query");
+			if (query.containsKey("categorymembers")) {
+				JsonArray jsonCategories = query.getJsonArray("categorymembers");
+				for (int i = 0; i < jsonCategories.size(); i++) {
+					JsonObject category = jsonCategories.getJsonObject(i);
 					categories.add(category.getString("title"));
 				}
 			}
 
 			// If query-continue was returned, make another request
-			if (result.has("query-continue")) {
+			if (result.containsKey("query-continue")) {
 				this.requestCategorymembersRecursive(apiUrl, fullTitle, categories,
-						result.getJSONObject("query-continue").getJSONObject("categorymembers").getString("cmcontinue"));
+						result.getJsonObject("query-continue").getJsonObject("categorymembers").getString("cmcontinue"));
 			}
-		} catch (JSONException e) {
+		} catch (JsonException e) {
 			throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 		}
 
@@ -198,29 +205,29 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			if (plcontinue != null) {
 				params.put("plcontinue", plcontinue);
 			}
-			JSONObject result = this.request(apiUrl, params);
+			JsonObject result = this.request(apiUrl, params);
 
 			try {
-				JSONObject query = result.getJSONObject("query");
-				JSONObject pages = query.getJSONObject("pages");
-				for (String pagesKey : JSONObject.getNames(pages)) {
-					JSONObject pagesData = pages.getJSONObject(pagesKey);
-					if (pagesData.has("links")) {
-						JSONArray jsonLinks = pagesData.getJSONArray("links");
+				JsonObject query = result.getJsonObject("query");
+				JsonObject pages = query.getJsonObject("pages");
+				for (String pagesKey : pages.keySet()) {
+					JsonObject pagesData = pages.getJsonObject(pagesKey);
+					if (pagesData.containsKey("links")) {
+						JsonArray jsonLinks = pagesData.getJsonArray("links");
 						String pagesDataTitle = pagesData.getString("title");
-						for (int i = 0; i < jsonLinks.length(); i++) {
-							JSONObject category = jsonLinks.getJSONObject(i);
+						for (int i = 0; i < jsonLinks.size(); i++) {
+							JsonObject category = jsonLinks.getJsonObject(i);
 							links.add(new MutablePair<>(pagesDataTitle, category.getString("title")));
 						}
 					}
 				}
 
 				// If query-continue was returned, make another request
-				if (result.has("query-continue")) {
-					this.requestLinksBetweenRecursive(apiUrl, fullTitles, links, result.getJSONObject("query-continue")
-							.getJSONObject("categories").getString("plcontinue"));
+				if (result.containsKey("query-continue")) {
+					this.requestLinksBetweenRecursive(apiUrl, fullTitles, links, result.getJsonObject("query-continue")
+							.getJsonObject("categories").getString("plcontinue"));
 				}
-			} catch (JSONException e) {
+			} catch (JsonException e) {
 				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 			}
 
@@ -234,7 +241,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		params.put("meta", "siteinfo");
 		params.put("siprop", "general|namespaces|namespacealiases");
 
-		JSONObject json = this.request(wiki.getApiUrl(), params);
+		JsonObject json = this.request(wiki.getApiUrl(), params);
 
 		String articlepath;
 		String server;
@@ -242,20 +249,20 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		final Map<String, Integer> allNamespacesInverse = new HashMap<>();
 
 		try {
-			JSONObject query = json.getJSONObject("query");
+			JsonObject query = json.getJsonObject("query");
 
-			articlepath = query.getJSONObject("general").getString("articlepath");
+			articlepath = query.getJsonObject("general").getString("articlepath");
 
-			server = query.getJSONObject("general").getString("server");
+			server = query.getJsonObject("general").getString("server");
 
-			JSONObject namespaces = query.getJSONObject("namespaces");
-			for (String nsIdString : JSONObject.getNames(namespaces)) {
-				JSONObject namespaceData = namespaces.getJSONObject(nsIdString);
+			JsonObject namespaces = query.getJsonObject("namespaces");
+			for (String nsIdString : namespaces.keySet()) {
+				JsonObject namespaceData = namespaces.getJsonObject(nsIdString);
 				int nsId = Integer.parseInt(nsIdString);
 				String nsName = namespaceData.getString("*");
 				authoritativeNamespaces.put(nsId, nsName);
 				allNamespacesInverse.put(nsName, nsId);
-				if (namespaceData.has("canonical")) {
+				if (namespaceData.containsKey("canonical")) {
 					String nsCanonical = namespaceData.getString("canonical");
 					if (nsCanonical != null && !nsCanonical.isEmpty()) {
 						allNamespacesInverse.put(nsCanonical, nsId);
@@ -263,9 +270,9 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 				}
 			}
 
-			JSONArray namespacealiases = query.getJSONArray("namespacealiases");
-			for (int i = 0; i < namespacealiases.length(); i++) {
-				JSONObject namespacealiasData = namespacealiases.getJSONObject(i);
+			JsonArray namespacealiases = query.getJsonArray("namespacealiases");
+			for (int i = 0; i < namespacealiases.size(); i++) {
+				JsonObject namespacealiasData = namespacealiases.getJsonObject(i);
 				int nsId = namespacealiasData.getInt("id");
 				String nsName = namespacealiasData.getString("*");
 				if (nsName != null && !nsName.isEmpty()) {
@@ -273,7 +280,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 				}
 			}
 
-		} catch (JSONException e) {
+		} catch (JsonException e) {
 			throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
 		}
 

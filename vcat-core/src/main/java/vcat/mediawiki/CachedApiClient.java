@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.json.JSONObject;
+import javax.json.JsonObject;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -25,7 +25,7 @@ public class CachedApiClient<W extends IWiki> extends ApiClient<W> {
 	}
 
 	@Override
-	protected JSONObject request(String apiUrl, Map<String, String> params) throws ApiException {
+	protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {
 		StringBuilder requestStuff = new StringBuilder();
 		requestStuff.append(apiUrl);
 		requestStuff.append('&');
@@ -48,7 +48,7 @@ public class CachedApiClient<W extends IWiki> extends ApiClient<W> {
 					throw new ApiException(Messages.getString("CachedApiClient.Exception.AccessCache"), e);
 				}
 			} else {
-				JSONObject jsonObject = super.request(apiUrl, params);
+				JsonObject jsonObject = super.request(apiUrl, params);
 				try {
 					this.cache.put(cacheKey, jsonObject);
 				} catch (CacheException e) {

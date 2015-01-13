@@ -1,12 +1,14 @@
 package vcat.redis.cache;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.StringReader;
+
+import javax.json.Json;
+import javax.json.JsonException;
+import javax.json.JsonObject;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
-
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.redis.Messages;
@@ -18,7 +20,7 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 	}
 
 	@Override
-	public JSONObject getJSONObject(final String key) throws CacheException {
+	public JsonObject getJSONObject(final String key) throws CacheException {
 		final String jsonString;
 		final Jedis jedis = this.jedisPool.getResource();
 		jsonString = jedis.get(this.jedisKey(key));
@@ -27,15 +29,15 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 			return null;
 		} else {
 			try {
-				return new JSONObject(jsonString);
-			} catch (JSONException e) {
+				return Json.createReader(new StringReader(jsonString)).readObject();
+			} catch (JsonException e) {
 				throw new CacheException(Messages.getString("ApiRedisCache.Exception.StoreJSON"), e);
 			}
 		}
 	}
 
 	@Override
-	public synchronized void put(final String key, final JSONObject jsonObject) throws CacheException {
+	public synchronized void put(final String key, final JsonObject jsonObject) throws CacheException {
 		final String jedisKey = this.jedisKey(key);
 		final Jedis jedis = this.jedisPool.getResource();
 		Transaction t = jedis.multi();

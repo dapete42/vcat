@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+
 import org.apache.commons.lang3.RandomStringUtils;
-import org.json.JSONArray;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -65,7 +67,11 @@ public class GraphvizGridClient implements Graphviz {
 
 	private void exec(String... cmdarray) throws GraphvizException {
 		// Message to be sent to Redis
-		final String message = new JSONArray(cmdarray).toString();
+		final JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+		for (String cmd : cmdarray) {
+			jsonArrayBuilder.add(cmd);
+		}
+		final String message = jsonArrayBuilder.build().toString();
 
 		final String requestChannel = this.redisSecret + "-request";
 		final String responseChannel = this.redisSecret + "-response";
