@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,10 +19,8 @@ import javax.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.Header;
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import vcat.Messages;
 import vcat.util.CollectionHelper;
@@ -36,10 +33,8 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	private final HttpClient client;
 
 	public ApiClient() {
-		HttpClientBuilder hcb = HttpClientBuilder.create();
-		Header userAgent = new BasicHeader("User-Agent", Messages.getString("ApiClient.UserAgent"));
-		hcb.setDefaultHeaders(Collections.singleton(userAgent));
-		this.client = hcb.build();
+		this.client = new DefaultHttpClient();
+		this.client.getParams().setParameter("User-Agent", Messages.getString("ApiClient.UserAgent"));
 	}
 
 	protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {

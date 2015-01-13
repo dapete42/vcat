@@ -115,12 +115,14 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.3.6</version>
+				<!-- in.yuvi http.fluent does not support 4.3 or up -->
+				<version>4.2.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
-				<version>4.3.3</version>
+				<!-- in.yuvi http.fluent does not support 4.3 or up -->
+				<version>4.2.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish</groupId>
