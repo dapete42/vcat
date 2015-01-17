@@ -5,7 +5,7 @@
 
 	<groupId>vcat</groupId>
 	<artifactId>vcat</artifactId>
-	<version>2-SNAPSHOT</version>
+	<version>3-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
