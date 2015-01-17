@@ -3,7 +3,7 @@
 <%@page import="org.apache.commons.lang3.StringEscapeUtils"%>
 <html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
 <link rel="stylesheet" type="text/css"
 	href="//tools.wmflabs.org/style.css" />
 <link rel="stylesheet" type="text/css" href="res/vcat.css" />

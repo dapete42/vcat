@@ -17,7 +17,7 @@
 %>
 <html lang="<%=StringEscapeUtils.escapeXml10(lang)%>">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8" />
 <title><%=StringEscapeUtils.escapeXml10(m.getCatgraphConverterString("title"))%></title>
 <link rel="stylesheet" type="text/css"
 	href="//tools.wmflabs.org/style.css" />
