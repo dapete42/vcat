@@ -34,16 +34,12 @@ public class GraphWriter {
 	private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
 
 	private static String escape(String string) {
-		// Simple text strings do not have to be escaped
-		if (Graph.PATTERN_IDENTIFIER.matcher(string).matches()) {
-			return string;
-		} else {
-			String output = string.replace("\\", "\\\\");
-			output = output.replace("\r", "");
-			output = output.replace("\n", "\\n");
-			output = output.replace("\"", "\\\"");
-			return "\"" + output + "\"";
-		}
+		// Always escape strings, otherwise node names may be misidentified as GV keywords
+		String output = string.replace("\\", "\\\\");
+		output = output.replace("\r", "");
+		output = output.replace("\n", "\\n");
+		output = output.replace("\"", "\\\"");
+		return '"' + output + '"';
 	}
 
 	public static void writeGraphToFile(Graph graph, File outputFile) throws GraphvizException {
