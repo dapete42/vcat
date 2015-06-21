@@ -162,8 +162,10 @@ public class GraphWriter {
 		}
 
 		for (Node node : graph.getNodes()) {
-			this.writeNode(node, true);
-			for (Edge edge : graph.getEdgesFrom(node)) {
+			final Set<Edge> edges = graph.getEdgesFrom(node);
+			// Write the node; if there are no edges, write it even if it has no properties
+			this.writeNode(node, edges.isEmpty());
+			for (Edge edge : edges) {
 				this.writeEdge(edge);
 			}
 		}
