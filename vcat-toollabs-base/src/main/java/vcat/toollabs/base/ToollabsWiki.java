@@ -18,7 +18,7 @@ public class ToollabsWiki implements IWiki {
 		// Since June 2015, WMF have started to make wikis HTTPS-only, with all HTTP requests redirecting. All wikis
 		// support HTTPS, so using it for the API would already have made sense before, and will now also avoid
 		// unnecessary requests.
-		if (url.startsWith("http://")) {
+		if (url != null && url.startsWith("http://")) {
 			this.url = "https" + url.substring(4);
 		} else {
 			this.url = url;
