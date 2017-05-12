@@ -21,7 +21,7 @@ public class ApiClientTest {
 
 	private final static String CATEGORY_1 = "Kategorie:Deutschland";
 
-	private final static String WIKI_API = "http://de.wikipedia.org/w/api.php";
+	private final static String WIKI = "de.wikipedia.org";
 
 	private IWiki wiki;
 
@@ -29,7 +29,7 @@ public class ApiClientTest {
 
 	@Before
 	public void before() {
-		this.wiki = new SimpleWiki("test", WIKI_API);
+		this.wiki = new SimpleWikimediaWiki(WIKI);
 		this.client = new ApiClient<>();
 	}
 

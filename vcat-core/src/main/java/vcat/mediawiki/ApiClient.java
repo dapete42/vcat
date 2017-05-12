@@ -1,26 +1,30 @@
 package vcat.mediawiki;
 
-import in.yuvi.http.fluent.Http;
-import in.yuvi.http.fluent.Http.HttpRequestBuilder;
-
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonException;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import vcat.Messages;
 import vcat.util.CollectionHelper;
@@ -30,59 +34,73 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	/** Maximum number of titles parameters to use in one request. */
 	private final static int TITLES_MAX = 50;
 
-	private final HttpClient client;
+	private final HttpClientBuilder clientBuilder;
 
 	public ApiClient() {
-		this.client = new DefaultHttpClient();
-		this.client.getParams().setParameter("User-Agent", Messages.getString("ApiClient.UserAgent"));
+		final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+		connectionManager.setMaxTotal(5);
+		/*
+		 * API Etiquette: There should always be only one concurrent HTTP access; at least for Wikimedia-run wikis,
+		 * doing more at the same time may lead to being blocked. It is probably nice to do this for any wiki, anyway.
+		 * See https://www.mediawiki.org/wiki/API:Etiquette for more information on Wikimedia API etiquette.
+		 */
+		connectionManager.setDefaultMaxPerRoute(1);
+
+		this.clientBuilder = HttpClientBuilder.create().setConnectionManager(connectionManager)
+				.setConnectionManagerShared(true).setUserAgent(Messages.getString("ApiClient.UserAgent"))
+				.disableCookieManagement();
 	}
 
 	private static Map<String, String> buildContinueMap(JsonObject result, final String oldQueryContinueChildName) {
 		Map<String, String> continueMap = null;
-		final boolean containsContinue = result.containsKey("continue");
-		if (containsContinue || result.containsKey("query-continue")) {
-			JsonObject jsonContinue = null;
-			if (containsContinue) {
-				// new continue (default starting with MW 1.26)
-				jsonContinue = result.getJsonObject("continue");
-			} else {
-				// Old "raw" continue (default until MW 1.25)
-				jsonContinue = result.getJsonObject("query-continue").getJsonObject(oldQueryContinueChildName);
-			}
-			if (jsonContinue != null) {
-				continueMap = new HashMap<>();
-				for (String key : jsonContinue.keySet()) {
-					continueMap.put(key, jsonContinue.getString(key));
-				}
+		JsonObject jsonContinue = null;
+		if (result.containsKey("continue")) {
+			// new continue (default starting with MW 1.26)
+			jsonContinue = result.getJsonObject("continue");
+		} else if (result.containsKey("query-continue")) {
+			// Old "raw" continue (default until MW 1.25)
+			jsonContinue = result.getJsonObject("query-continue").getJsonObject(oldQueryContinueChildName);
+		}
+		if (jsonContinue != null) {
+			continueMap = new HashMap<>();
+			for (String key : jsonContinue.keySet()) {
+				continueMap.put(key, jsonContinue.getString(key));
 			}
 		}
 		return continueMap;
 	}
 
 	protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {
-		// API Etiquette: use get to enable server-side caching
-		HttpRequestBuilder builder = Http.get(apiUrl);
-		builder.use(this.client).charset("utf-8");
-		builder.data("format", "json");
-		builder.data("action", "query");
-		builder.data(params);
+		// API Etiquette: use "get" method to enable server-side caching
+		final RequestBuilder requestBuilder = RequestBuilder.get(apiUrl);
+		requestBuilder.setCharset(StandardCharsets.UTF_8);
+		requestBuilder.addParameter("format", "json");
+		requestBuilder.addParameter("action", "query");
 
-		/*
-		 * API Etiquette: There should always be only one concurrent HTTP access; at least for Wikimedia-run wikis,
-		 * doing more at the same time may lead to being blocked. It is probably nice to do this for any wiki, anyway.
-		 * See https://www.mediawiki.org/wiki/API:Etiquette for more information on Wikimedia API etiquette.
-		 */
-		synchronized (ApiClient.class) {
+		for (Entry<String, String> param : params.entrySet()) {
+			requestBuilder.addParameter(param.getKey(), param.getValue());
+		}
 
-			try (final InputStreamReader reader = new InputStreamReader(builder.asResponse().getEntity().getContent())) {
-				return Json.createReader(reader).readObject();
-			} catch (IOException e) {
-				// IOException will be thrown for all HTTP problems
-				throw new ApiException(Messages.getString("ApiClient.Exception.HTTP"), e);
-			} catch (JsonException e) {
-				throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
-			}
+		final HttpUriRequest request = requestBuilder.build();
 
+		try (CloseableHttpClient client = this.clientBuilder.build();
+				CloseableHttpResponse response = client.execute(request);
+				InputStream inputStream = response.getEntity().getContent();
+				JsonReader jsonReader = Json.createReader(inputStream)) {
+			final JsonObject result = jsonReader.readObject();
+			jsonReader.close();
+			inputStream.close();
+			response.close();
+			client.close();
+			return result;
+		} catch (IllegalStateException | IOException e) {
+			// IOException will be thrown for all HTTP problems
+			throw new ApiException(
+					String.format(Messages.getString("ApiClient.Exception.HTTP"), request.getURI().toString()), e);
+		} catch (JsonException e) {
+			throw new ApiException(
+					String.format(Messages.getString("ApiClient.Exception.ParsingJSON"), request.getURI().toString()),
+					e);
 		}
 	}
 
@@ -97,7 +115,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 
 	private void requestCategoriesRecursive(String apiUrl, Collection<String> fullTitles,
 			final Map<String, Collection<String>> categoryMap, Map<String, String> continueMap, String clshow)
-			throws ApiException {
+					throws ApiException {
 
 		if (fullTitles.size() > TITLES_MAX) {
 
