@@ -87,12 +87,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 				CloseableHttpResponse response = client.execute(request);
 				InputStream inputStream = response.getEntity().getContent();
 				JsonReader jsonReader = Json.createReader(inputStream)) {
-			final JsonObject result = jsonReader.readObject();
-			jsonReader.close();
-			inputStream.close();
-			response.close();
-			client.close();
-			return result;
+			return jsonReader.readObject();
 		} catch (IllegalStateException | IOException e) {
 			// IOException will be thrown for all HTTP problems
 			throw new ApiException(
