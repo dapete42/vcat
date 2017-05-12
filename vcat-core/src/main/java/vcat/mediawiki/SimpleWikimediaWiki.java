@@ -12,7 +12,7 @@ public class SimpleWikimediaWiki implements IWiki {
 
 	@Override
 	public String getApiUrl() {
-		return "http://" + this.host + "/w/api.php";
+		return "https://" + this.host + "/w/api.php";
 	}
 
 	@Override
