@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/dapete42/vcat.svg?branch=master)](https://travis-ci.org/dapete42/vcat)
+
 vcat
 ====
 
