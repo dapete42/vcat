@@ -10,12 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Lists;
+
 import vcat.VCatException;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.Metadata;
-import vcat.util.CollectionHelper;
 
 public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki> {
 
@@ -44,7 +45,7 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 	}
 
 	@Override
-	public Map<String, Collection<String>> requestCategories(ToollabsWiki wiki, Collection<String> fullTitles,
+	public Map<String, Collection<String>> requestCategories(ToollabsWiki wiki, List<String> fullTitles,
 			boolean showhidden) throws ApiException {
 
 		final String dbname = wiki.getName();
@@ -52,8 +53,8 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		try {
 			metadata = metadataProvider.requestMetadata(wiki);
 		} catch (ApiException e) {
-			throw new ApiException(String.format(
-					Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
+			throw new ApiException(
+					String.format(Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
 		}
 
 		// Get namespaces from full titles and store the truncated titles and full titles by namespace
@@ -74,7 +75,7 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		for (int namespace : titlesByNamespace.keySet()) {
 			final ArrayList<String> allTitles = titlesByNamespace.get(namespace);
 
-			for (final Collection<String> titles : CollectionHelper.splitCollectionInParts(allTitles, 100)) {
+			for (final List<String> titles : Lists.partition(allTitles, 100)) {
 
 				try (Connection connection = this.connectionBuilder.buildConnection(dbname)) {
 					try {
@@ -83,7 +84,8 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 										+ " WHERE page_namespace=? AND page_title IN "
 										+ preparedStatementInArguments(titles.size()));
 						if (!showhidden) {
-							sql.append(" AND NOT EXISTS (SELECT * FROM page_props WHERE pp_page=page_id AND pp_propname='hiddencat');");
+							sql.append(
+									" AND NOT EXISTS (SELECT * FROM page_props WHERE pp_page=page_id AND pp_propname='hiddencat');");
 						}
 						final PreparedStatement statement = connection.prepareStatement(sql.toString());
 						statement.setInt(1, namespace);
@@ -139,8 +141,8 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		try {
 			metadata = this.metadataProvider.requestMetadata(wiki);
 		} catch (ApiException e) {
-			throw new ApiException(String.format(
-					Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
+			throw new ApiException(
+					String.format(Messages.getString("ToollabsCategoryProvider.Exception.ReadingMetadata"), dbname), e);
 		}
 
 		final ArrayList<String> result = new ArrayList<>();
@@ -150,8 +152,8 @@ public class ToollabsCategoryProvider implements ICategoryProvider<ToollabsWiki>
 		try (Connection connection = this.connectionBuilder.buildConnection(dbname)) {
 
 			try {
-				final PreparedStatement statement = connection
-						.prepareStatement("SELECT page_title, page_namespace FROM page INNER JOIN categorylinks ON cl_from=page_id WHERE cl_to=?");
+				final PreparedStatement statement = connection.prepareStatement(
+						"SELECT page_title, page_namespace FROM page INNER JOIN categorylinks ON cl_from=page_id WHERE cl_to=?");
 				statement.setString(1, title);
 				try (ResultSet rs = statement.executeQuery()) {
 					while (rs.next()) {

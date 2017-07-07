@@ -26,8 +26,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
+import com.google.common.collect.Lists;
+
 import vcat.Messages;
-import vcat.util.CollectionHelper;
 
 public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetadataProvider {
 
@@ -100,7 +101,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 	}
 
 	@Override
-	public Map<String, Collection<String>> requestCategories(W wiki, Collection<String> fullTitles, boolean showhidden)
+	public Map<String, Collection<String>> requestCategories(W wiki, List<String> fullTitles, boolean showhidden)
 			throws ApiException {
 		Map<String, Collection<String>> categoryMap = new HashMap<>();
 		String clshow = showhidden ? null : "!hidden";
@@ -108,13 +109,13 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 		return categoryMap;
 	}
 
-	private void requestCategoriesRecursive(String apiUrl, Collection<String> fullTitles,
+	private void requestCategoriesRecursive(String apiUrl, List<String> fullTitles,
 			final Map<String, Collection<String>> categoryMap, Map<String, String> continueMap, String clshow)
-					throws ApiException {
+			throws ApiException {
 
 		if (fullTitles.size() > TITLES_MAX) {
 
-			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TITLES_MAX)) {
+			for (List<String> fullTitlesPart : Lists.partition(fullTitles, TITLES_MAX)) {
 				requestCategoriesRecursive(apiUrl, fullTitlesPart, categoryMap, continueMap, clshow);
 			}
 
@@ -213,19 +214,18 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 
 	}
 
-	public Collection<Pair<String, String>> requestLinksBetween(W wiki, Collection<String> fullTitles)
-			throws ApiException {
+	public Collection<Pair<String, String>> requestLinksBetween(W wiki, List<String> fullTitles) throws ApiException {
 		ArrayList<Pair<String, String>> links = new ArrayList<>();
 		this.requestLinksBetweenRecursive(wiki.getApiUrl(), fullTitles, links, null);
 		return links;
 	}
 
-	private void requestLinksBetweenRecursive(final String apiUrl, final Collection<String> fullTitles,
+	private void requestLinksBetweenRecursive(final String apiUrl, final List<String> fullTitles,
 			final Collection<Pair<String, String>> links, Map<String, String> continueMap) throws ApiException {
 
 		if (fullTitles.size() > TITLES_MAX) {
 
-			for (Collection<String> fullTitlesPart : CollectionHelper.splitCollectionInParts(fullTitles, TITLES_MAX)) {
+			for (List<String> fullTitlesPart : Lists.partition(fullTitles, TITLES_MAX)) {
 				requestLinksBetweenRecursive(apiUrl, fullTitlesPart, links, continueMap);
 			}
 

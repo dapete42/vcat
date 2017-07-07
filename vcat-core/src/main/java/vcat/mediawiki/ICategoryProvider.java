@@ -20,7 +20,7 @@ public interface ICategoryProvider<W extends IWiki> {
 	 * @throws ApiException
 	 *             If there are any errors.
 	 */
-	public abstract Map<String, Collection<String>> requestCategories(W wiki, Collection<String> fullTitles,
+	public abstract Map<String, Collection<String>> requestCategories(W wiki, List<String> fullTitles,
 			boolean showhidden) throws ApiException;
 
 	/**

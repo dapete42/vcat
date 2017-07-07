@@ -3,6 +3,7 @@ package vcat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -40,10 +41,10 @@ public class VCatForCategories<W extends IWiki> extends AbstractVCat<W> {
 	protected void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode,
 			Set<Node> allNodesFound, String fullTitle, int categoryNamespacePrefixLength, boolean showhidden)
 			throws ApiException {
-		Collection<String> rootFullTitles = Collections.singleton(fullTitle);
+		List<String> rootFullTitles = Collections.singletonList(fullTitle);
 		{
-			Collection<String> categoryFullTitles = this.categoryProvider.requestCategories(this.all.getWiki(),
-					rootFullTitles, showhidden).get(fullTitle);
+			Collection<String> categoryFullTitles = this.categoryProvider
+					.requestCategories(this.all.getWiki(), rootFullTitles, showhidden).get(fullTitle);
 			if (categoryFullTitles != null) {
 				renderGraphInnerLoop(graph, rootNode, allNodesFound, newNodes, categoryFullTitles,
 						categoryNamespacePrefixLength);
