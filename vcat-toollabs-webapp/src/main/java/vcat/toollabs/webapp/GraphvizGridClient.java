@@ -80,8 +80,7 @@ public class GraphvizGridClient implements Graphviz {
 		// Random ID for the request
 		final String id = RandomStringUtils.randomNumeric(16);
 
-		{
-			final Jedis jedis = this.jedisPool.getResource();
+		try (Jedis jedis = this.jedisPool.getResource()) {
 
 			// Put message in Redis
 			jedis.set(requestPrefix + id, message);
@@ -142,7 +141,7 @@ public class GraphvizGridClient implements Graphviz {
 
 			// Start listening for response
 			jedis.subscribe(jedisSubscribe, responseChannel);
-			this.jedisPool.returnResource(jedis);
+			jedis.close();
 
 			// Just in case
 			abortTimer.cancel();
@@ -159,8 +158,8 @@ public class GraphvizGridClient implements Graphviz {
 	public void render(final File inputFile, final File outputFile, final GraphvizParams params)
 			throws GraphvizException {
 		try {
-			this.exec(new File(programPath, params.getAlgorithm().getProgram()).getAbsolutePath(), "-T"
-					+ params.getOutputFormat().getGraphvizTypeParameter(), "-o" + outputFile.getAbsolutePath(),
+			this.exec(new File(programPath, params.getAlgorithm().getProgram()).getAbsolutePath(),
+					"-T" + params.getOutputFormat().getGraphvizTypeParameter(), "-o" + outputFile.getAbsolutePath(),
 					inputFile.getAbsolutePath());
 		} catch (GraphvizException e) {
 			throw new GraphvizException(e);

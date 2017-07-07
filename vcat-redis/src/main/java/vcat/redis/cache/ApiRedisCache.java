@@ -22,9 +22,9 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 	@Override
 	public JsonObject getJSONObject(final String key) throws CacheException {
 		final String jsonString;
-		final Jedis jedis = this.jedisPool.getResource();
-		jsonString = jedis.get(this.jedisKey(key));
-		this.jedisPool.returnResource(jedis);
+		try (Jedis jedis = this.jedisPool.getResource()) {
+			jsonString = jedis.get(this.jedisKey(key));
+		}
 		if (jsonString == null) {
 			return null;
 		} else {
@@ -39,12 +39,12 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 	@Override
 	public synchronized void put(final String key, final JsonObject jsonObject) throws CacheException {
 		final String jedisKey = this.jedisKey(key);
-		final Jedis jedis = this.jedisPool.getResource();
-		Transaction t = jedis.multi();
-		t.set(jedisKey, jsonObject.toString());
-		t.expire(jedisKey, this.maxAgeInSeconds);
-		t.exec();
-		this.jedisPool.returnResource(jedis);
+		try (Jedis jedis = this.jedisPool.getResource()) {
+			Transaction t = jedis.multi();
+			t.set(jedisKey, jsonObject.toString());
+			t.expire(jedisKey, this.maxAgeInSeconds);
+			t.exec();
+		}
 	}
 
 }

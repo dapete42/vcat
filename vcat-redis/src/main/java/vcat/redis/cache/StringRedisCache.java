@@ -18,10 +18,9 @@ public class StringRedisCache {
 	}
 
 	public synchronized boolean containsKey(final String key) {
-		final Jedis jedis = jedisPool.getResource();
-		final boolean containsKey = jedis.exists(this.jedisKey(key));
-		jedisPool.returnResource(jedis);
-		return containsKey;
+		try (Jedis jedis = jedisPool.getResource()) {
+			return jedis.exists(this.jedisKey(key));
+		}
 	}
 
 	protected String jedisKey(final String key) {
@@ -37,9 +36,9 @@ public class StringRedisCache {
 	}
 
 	public synchronized void remove(String key) {
-		final Jedis jedis = jedisPool.getResource();
-		jedis.del(this.jedisKey(key));
-		jedisPool.returnResource(jedis);
+		try (Jedis jedis = jedisPool.getResource()) {
+			jedis.del(this.jedisKey(key));
+		}
 	}
 
 }

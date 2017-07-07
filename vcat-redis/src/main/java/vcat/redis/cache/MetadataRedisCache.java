@@ -27,12 +27,10 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 	public synchronized Metadata getMetadata(IWiki wiki) throws CacheException {
 		final String key = wiki.getApiUrl();
 		if (this.containsKey(key)) {
-			final Jedis jedis = this.jedisPool.getResource();
-			final byte[] metadataObjectData = jedis.get(this.jedisKeyBytes(key));
-			this.jedisPool.returnResource(jedis);
-			Object metadataObject = null;
-			try {
-				metadataObject = SerializationUtils.deserialize(metadataObjectData);
+			try (Jedis jedis = this.jedisPool.getResource()) {
+				final byte[] metadataObjectData = jedis.get(this.jedisKeyBytes(key));
+				jedis.close();
+				final Object metadataObject = SerializationUtils.deserialize(metadataObjectData);
 				if (metadataObject != null && metadataObject instanceof Metadata) {
 					return (Metadata) metadataObject;
 				} else {
@@ -57,12 +55,12 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 	@Override
 	public synchronized void put(IWiki wiki, Metadata metadata) throws CacheException {
 		final byte[] keyBytes = this.jedisKeyBytes(wiki.getApiUrl());
-		final Jedis jedis = this.jedisPool.getResource();
-		Transaction t = jedis.multi();
-		t.set(keyBytes, SerializationUtils.serialize(metadata));
-		t.expire(keyBytes, this.maxAgeInSeconds);
-		t.exec();
-		this.jedisPool.returnResource(jedis);
+		try (Jedis jedis = this.jedisPool.getResource()) {
+			Transaction t = jedis.multi();
+			t.set(keyBytes, SerializationUtils.serialize(metadata));
+			t.expire(keyBytes, this.maxAgeInSeconds);
+			t.exec();
+		}
 	}
 
 }
