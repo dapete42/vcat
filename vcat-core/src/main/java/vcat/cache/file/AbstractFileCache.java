@@ -54,6 +54,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	 *            File name prefix.
 	 * @param suffix
 	 *            File name suffix.
+	 * @param maxAgeInSeconds
+	 *            Maximum age of cached items in seconds.
 	 * @throws CacheException
 	 *             If the directory does not exist or is not writeable.
 	 */
