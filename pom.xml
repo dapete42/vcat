@@ -66,6 +66,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
+				<!-- cannot update to 21.0, needs Java 8 -->
 				<version>20.0</version>
 			</dependency>
 			<dependency>
@@ -127,6 +128,7 @@
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
+				<!-- can't update to 2.x, needs Java 8 -->
 				<version>1.6.2</version>
 			</dependency>
 			<dependency>
