@@ -70,7 +70,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>webapp</finalName>
+		<finalName>vcat-toollabs</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
