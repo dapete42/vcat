@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8" />
 <link rel="stylesheet" type="text/css"
-	href="//tools.wmflabs.org/style.css" />
+	href="//tools.wmflabs.org/admin/assets/style.css" />
 <link rel="stylesheet" type="text/css" href="res/vcat.css" />
 <title>vCat</title>
 </head>
@@ -43,7 +43,7 @@
 				<div id="logo">
 					<div>
 						<a href="//tools.wmflabs.org/"><img
-							src="//tools.wmflabs.org/Tool_Labs_logo_thumb.png"
+							src="//tools.wmflabs.org/admin/assets/Tool_Labs_logo_thumb.png"
 							alt="Wikitech and Wikimedia Labs" height="138" width="122" /></a>
 					</div>
 					<div>
