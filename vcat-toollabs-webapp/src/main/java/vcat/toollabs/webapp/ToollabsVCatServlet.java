@@ -104,7 +104,7 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 			this.toollabsWikiProvider = new ToollabsWikiProvider(cpds);
 
 			// Use database credentials to create a secret prefix for caches
-			final String redisSecret = DigestUtils.md5Hex(configMyCnf.user + ':' + configMyCnf.password);
+			final String redisSecret = DigestUtils.sha256Hex(configMyCnf.user + ':' + configMyCnf.password);
 
 			final String redisApiCacheKeyPrefix = redisSecret + "-vcat-cache-api-";
 			final String redisMetadataCacheKeyPrefix = redisSecret + "-vcat-cache-metadata-";
@@ -149,8 +149,8 @@ public class ToollabsVCatServlet extends AbstractVCatToollabsServlet {
 					new File(GRAPHVIZ_DIR));
 
 			// Create renderer
-			this.vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient,
-					cacheDir), VCAT_THREADS);
+			this.vCatRenderer = new QueuedVCatRenderer<>(
+					new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir), VCAT_THREADS);
 
 		} catch (VCatException e) {
 			throw new ServletException(e);
