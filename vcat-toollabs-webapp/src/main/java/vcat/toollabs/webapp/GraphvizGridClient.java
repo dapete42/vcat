@@ -141,7 +141,6 @@ public class GraphvizGridClient implements Graphviz {
 
 			// Start listening for response
 			jedis.subscribe(jedisSubscribe, responseChannel);
-			jedis.close();
 
 			// Just in case
 			abortTimer.cancel();

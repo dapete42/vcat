@@ -29,7 +29,6 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 		if (this.containsKey(key)) {
 			try (Jedis jedis = this.jedisPool.getResource()) {
 				final byte[] metadataObjectData = jedis.get(this.jedisKeyBytes(key));
-				jedis.close();
 				final Object metadataObject = SerializationUtils.deserialize(metadataObjectData);
 				if (metadataObject != null && metadataObject instanceof Metadata) {
 					return (Metadata) metadataObject;
