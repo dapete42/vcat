@@ -23,9 +23,11 @@ It consists of five Maven submodules:
   vCat.
 * vcat-webapp-simple: A simple Servlet version of vCat which expects
   parameters as GET or POST parameters.
-* vcat-toollabs-base: Base classes for the vCat Servlet as used on Tool Labs.
-* vcat-toollabs-webapp: A Servlet version of vCat which uses the meta_p.wiki
-  table to look up wikis, and Redis for caching, as used on Tool Labs.
+* vcat-toolforge-base: Base classes for the vCat Servlet as used on Wikimedia
+  Toolforge.
+* vcat-toolforge-webapp: A Servlet version of vCat which uses the meta_p.wiki
+  table to look up wikis, and Redis for caching, as used on Wikimedia
+  Toolforge.
 
 Copyright notice
 ----------------

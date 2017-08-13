@@ -7,12 +7,12 @@
 		<artifactId>vcat</artifactId>
 		<version>4-SNAPSHOT</version>
 	</parent>
-	<artifactId>vcat-redis</artifactId>
+	<artifactId>vcat-toolforge-base</artifactId>
 
 	<packaging>jar</packaging>
 
-	<name>vCat Redis Support</name>
-	<description>Additional vCat components for using Redis (using the Jedis library).</description>
+	<name>vCat Wikimedia Toolforge base classes</name>
+	<description>Base classes for vCat on Wikimedia Toolforge.</description>
 
 	<developers>
 		<developer>
@@ -27,20 +27,20 @@
 			<artifactId>vcat-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>vcat-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.mchange</groupId>
+			<artifactId>c3p0</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
 		</dependency>
 	</dependencies>
 
