@@ -123,7 +123,8 @@
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
-				<version>1.1</version>
+				<!-- cant' update to 1.1, needs Java 8 -->
+				<version>1.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
