@@ -162,7 +162,7 @@
 				<plugin>
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
-					<version>9.4.5.v20170502</version>
+					<version>9.4.6.v20170531</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -185,6 +185,11 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
 					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.simplericity.jettyconsole</groupId>
+					<artifactId>jetty-console-maven-plugin</artifactId>
+					<version>1.60</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
