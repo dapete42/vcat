@@ -8,14 +8,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import vcat.VCatException;
 
 public class MyCnfConfig {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private static final String MY_CNF = "replica.my.cnf";
 
@@ -29,8 +30,8 @@ public class MyCnfConfig {
 
 		Properties properties = new Properties();
 		try {
-			BufferedReader propertiesReader = new BufferedReader(new InputStreamReader(new FileInputStream(myCnfFile),
-					StandardCharsets.UTF_8));
+			BufferedReader propertiesReader = new BufferedReader(
+					new InputStreamReader(new FileInputStream(myCnfFile), StandardCharsets.UTF_8));
 			properties.load(propertiesReader);
 		} catch (IOException e) {
 			throw new VCatException(String.format("Error reading file '%s'", myCnfFile.getAbsolutePath()), e);
@@ -40,7 +41,7 @@ public class MyCnfConfig {
 
 		this.user = properties.getProperty("user");
 		if (this.user == null || this.user.isEmpty()) {
-			log.error(String.format("Property '%s' missing or empty", "user"));
+			LOGGER.error(String.format("Property '%s' missing or empty", "user"));
 			errors++;
 		}
 		if (this.user.startsWith("'") && this.user.endsWith("'")) {
@@ -49,7 +50,7 @@ public class MyCnfConfig {
 
 		this.password = properties.getProperty("password");
 		if (this.password == null || this.password.isEmpty()) {
-			log.error(String.format("Property '%s' missing or empty", "password"));
+			LOGGER.error(String.format("Property '%s' missing or empty", "password"));
 			errors++;
 		}
 		if (this.password.startsWith("'") && this.password.endsWith("'")) {

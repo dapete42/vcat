@@ -11,8 +11,8 @@ import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -63,7 +63,8 @@ public class QueuedGraphviz implements Graphviz {
 
 	}
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final ExecutorService executorService;
 
@@ -133,7 +134,7 @@ public class QueuedGraphviz implements Graphviz {
 			if (this.jobs.containsKey(job)) {
 				// If the job is alread queued or running, we need to record that we are also waiting for it to finish.
 				this.jobs.put(job, this.jobs.get(job) + 1);
-				log.info(String.format(Messages.getString("QueuedGraphviz.Info.AlreadyScheduled"), job.hashCode()));
+				LOGGER.info(String.format(Messages.getString("QueuedGraphviz.Info.AlreadyScheduled"), job.hashCode()));
 				// Get lock
 				lock = jobLocks.get(job);
 			} else {
@@ -152,7 +153,7 @@ public class QueuedGraphviz implements Graphviz {
 
 				});
 
-				log.info(String.format(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode()));
+				LOGGER.info(String.format(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode()));
 			}
 		}
 
@@ -198,7 +199,7 @@ public class QueuedGraphviz implements Graphviz {
 	 */
 	private void runJob(Job job) {
 
-		log.info(String.format(Messages.getString("QueuedGraphviz.Info.ThreadStarted"), job.hashCode()));
+		LOGGER.info(String.format(Messages.getString("QueuedGraphviz.Info.ThreadStarted"), job.hashCode()));
 
 		Object lock = jobLocks.get(job);
 		synchronized (lock) {
@@ -208,7 +209,7 @@ public class QueuedGraphviz implements Graphviz {
 			} catch (Exception e) {
 				// Record exception as thrown for this job
 				this.jobExceptions.put(job, e);
-				log.error(Messages.getString("QueuedGraphviz.Exception.Job"), e);
+				LOGGER.error(Messages.getString("QueuedGraphviz.Exception.Job"), e);
 			}
 
 			// Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
@@ -220,7 +221,7 @@ public class QueuedGraphviz implements Graphviz {
 
 		}
 
-		log.info(Messages.getString("QueuedGraphviz.Info.ThreadFinished"));
+		LOGGER.info(Messages.getString("QueuedGraphviz.Info.ThreadFinished"));
 
 	}
 

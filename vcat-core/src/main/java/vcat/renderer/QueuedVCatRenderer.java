@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -19,7 +19,8 @@ import vcat.util.HashHelper;
 
 public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final ExecutorService executorService;
 
@@ -88,7 +89,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 			if (this.jobs.containsKey(jobId)) {
 				// If the job is alread queued or running, we need to record that we are also waiting for it to finish.
 				this.jobs.put(jobId, this.jobs.get(jobId) + 1);
-				log.info(String.format(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId));
+				LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId));
 				// Get lock
 				lock = jobLocks.get(jobId);
 			} else {
@@ -107,7 +108,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
 				});
 
-				log.info(String.format(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId));
+				LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId));
 			}
 		}
 
@@ -159,7 +160,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 	 */
 	private void runJob(final String jobId, final AbstractAllParams<W> all) {
 
-		log.info(String.format(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId));
+		LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId));
 
 		Object lock = jobLocks.get(jobId);
 		synchronized (lock) {
@@ -170,7 +171,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 			} catch (Exception e) {
 				// Record exception as thrown for this job
 				this.jobExceptions.put(jobId, e);
-				log.error(Messages.getString("QueuedVCatRenderer.Exception.Job"), e);
+				LOGGER.error(Messages.getString("QueuedVCatRenderer.Exception.Job"), e);
 			}
 
 			// Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
@@ -182,7 +183,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
 		}
 
-		log.info(Messages.getString("QueuedVCatRenderer.Info.ThreadFinished"));
+		LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.ThreadFinished"));
 
 	}
 

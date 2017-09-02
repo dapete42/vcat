@@ -13,8 +13,9 @@ import java.io.Serializable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -31,7 +32,8 @@ import vcat.util.HashHelper;
  */
 public abstract class AbstractFileCache<K extends Serializable> {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	/** The cache directory. */
 	protected final File cacheDirectory;
@@ -77,12 +79,12 @@ public abstract class AbstractFileCache<K extends Serializable> {
 			if (file.delete()) {
 				clearedFiles++;
 			} else {
-				log.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeleteClearing"),
+				LOGGER.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeleteClearing"),
 						file.getAbsolutePath()));
 			}
 		}
 		if (clearedFiles > 0) {
-			log.info(String.format(Messages.getString("AbstractFileCache.Info.Cleared"), clearedFiles));
+			LOGGER.info(String.format(Messages.getString("AbstractFileCache.Info.Cleared"), clearedFiles));
 		}
 	}
 
@@ -119,7 +121,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 				return new FileInputStream(this.getCacheFile(key));
 			} catch (FileNotFoundException e) {
 				String message = Messages.getString("AbstractFileCache.Exception.FileNotFoundShouldNotHappen");
-				log.error(message, e);
+				LOGGER.error(message, e);
 				throw new CacheException(message, e);
 			}
 		} else {
@@ -171,13 +173,13 @@ public abstract class AbstractFileCache<K extends Serializable> {
 				if (file.delete()) {
 					purgedFiles++;
 				} else {
-					log.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeletePurging"),
+					LOGGER.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeletePurging"),
 							file.getAbsolutePath()));
 				}
 			}
 		}
 		if (purgedFiles > 0) {
-			log.info(String.format(Messages.getString("AbstractFileCache.Info.Purged"), purgedFiles));
+			LOGGER.info(String.format(Messages.getString("AbstractFileCache.Info.Purged"), purgedFiles));
 		}
 	}
 

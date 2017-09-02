@@ -2,8 +2,8 @@ package vcat.redis.cache;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -17,7 +17,8 @@ import vcat.redis.Messages;
 
 public class MetadataRedisCache extends StringRedisCache implements IMetadataCache {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	public MetadataRedisCache(final JedisPool jedisPool, final String redisPrefix, final int maxAgeInSeconds) {
 		super(jedisPool, redisPrefix, maxAgeInSeconds);
@@ -36,14 +37,14 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 					// Wrong type
 					this.remove(key);
 					String message = Messages.getString("MetadataRedisCache.Error.Deserialize");
-					log.error(message);
+					LOGGER.error(message);
 					throw new CacheException(message);
 				}
 			} catch (SerializationException e) {
 				// Error during deserializing
 				this.remove(key);
 				String message = Messages.getString("MetadataRedisCache.Error.Deserialize");
-				log.warn(message, e);
+				LOGGER.warn(message, e);
 				throw new CacheException(message, e);
 			}
 		} else {

@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import vcat.renderer.RenderedFileInfo;
 
@@ -24,7 +24,8 @@ import vcat.renderer.RenderedFileInfo;
 @SuppressWarnings("serial")
 public abstract class AbstractVCatServlet extends HttpServlet {
 
-	protected final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -63,8 +64,8 @@ public abstract class AbstractVCatServlet extends HttpServlet {
 				IOUtils.copy(renderedInput, output);
 			}
 
-			log.info(String.format("File sent: '%s' sent as '%s', %d bytes", resultFile.getAbsolutePath(), contentType,
-					length));
+			LOGGER.info(String.format("File sent: '%s' sent as '%s', %d bytes", resultFile.getAbsolutePath(),
+					contentType, length));
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}

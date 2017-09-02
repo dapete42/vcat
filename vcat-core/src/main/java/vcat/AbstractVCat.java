@@ -6,8 +6,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import vcat.graph.Graph;
 import vcat.graph.Group;
@@ -50,6 +50,9 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 	}
 
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
+
 	private final static String GRAPH_FONT = "DejaVu Sans";
 
 	private final static String GROUP_EXCEED = "exceed";
@@ -67,8 +70,6 @@ public abstract class AbstractVCat<W extends IWiki> {
 	protected final static String NODE_EXCEED_SUFFIX = "_more";
 
 	private final static String ROOT_NODE_PREFIX = "ROOT";
-
-	private final Log log = LogFactory.getLog(this.getClass());
 
 	protected final AbstractAllParams<W> all;
 
@@ -209,8 +210,8 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 		long endMillis = System.currentTimeMillis();
 
-		log.info(String.format(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(), endMillis
-				- startMillis));
+		LOGGER.info(String.format(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(),
+				endMillis - startMillis));
 
 		return graph;
 

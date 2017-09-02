@@ -1,7 +1,7 @@
 package vcat.mediawiki;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -9,7 +9,8 @@ import vcat.cache.IMetadataCache;
 
 public class CachedMetadataProvider implements IMetadataProvider {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final IMetadataCache metadataCache;
 
@@ -27,7 +28,7 @@ public class CachedMetadataProvider implements IMetadataProvider {
 			this.metadataCache.purge();
 			metadata = this.metadataCache.getMetadata(wiki);
 		} catch (CacheException e) {
-			log.warn(Messages.getString("CachedMetadataProvider.Warn.Retrieve"), e);
+			LOGGER.warn(Messages.getString("CachedMetadataProvider.Warn.Retrieve"), e);
 		}
 
 		if (metadata == null) {

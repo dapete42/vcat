@@ -4,8 +4,8 @@ import java.io.File;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -15,7 +15,8 @@ import vcat.mediawiki.Metadata;
 
 public class MetadataFileCache extends StringFileCache implements IMetadataCache {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final static String PREFIX = "Metadata-";
 
@@ -38,14 +39,14 @@ public class MetadataFileCache extends StringFileCache implements IMetadataCache
 					// Wrong type
 					this.remove(key);
 					String message = Messages.getString("MetadataFileCache.Error.Deserialize");
-					log.error(message);
+					LOGGER.error(message);
 					throw new CacheException(message);
 				}
 			} catch (SerializationException e) {
 				// Error during deserializing
 				this.remove(key);
 				String message = Messages.getString("MetadataFileCache.Error.Deserialize");
-				log.warn(message, e);
+				LOGGER.warn(message, e);
 				throw new CacheException(message, e);
 			}
 		} else {

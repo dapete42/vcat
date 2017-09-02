@@ -6,8 +6,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import vcat.Messages;
 import vcat.params.GraphvizParams;
@@ -19,7 +19,8 @@ import vcat.params.GraphvizParams;
  */
 public class GraphvizExternal implements Graphviz {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final File programPath;
 
@@ -31,7 +32,8 @@ public class GraphvizExternal implements Graphviz {
 		this.programPath = programPath;
 	}
 
-	public List<String> buildCommandParts(final String command, GraphvizParams params, File inputFile, File outputFile) {
+	public List<String> buildCommandParts(final String command, GraphvizParams params, File inputFile,
+			File outputFile) {
 		ArrayList<String> commandParts = new ArrayList<>(4);
 		commandParts.add(command);
 		commandParts.add("-T" + params.getOutputFormat().getGraphvizTypeParameter());
@@ -94,14 +96,14 @@ public class GraphvizExternal implements Graphviz {
 		long endMillis = System.currentTimeMillis();
 
 		if (exitValue == 0) {
-			log.info(String.format(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.getAbsolutePath(),
+			LOGGER.info(String.format(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.getAbsolutePath(),
 					endMillis - startMillis));
 		} else {
-			log.error(String.format(Messages.getString("GraphvizExternal.Error.ExitCode"), inputFile.getAbsolutePath(),
-					exitValue));
+			LOGGER.error(String.format(Messages.getString("GraphvizExternal.Error.ExitCode"),
+					inputFile.getAbsolutePath(), exitValue));
 			outputFile.delete();
-			throw new GraphvizException(String.format(Messages.getString("GraphvizExternal.Exception.ExitCode"),
-					exitValue));
+			throw new GraphvizException(
+					String.format(Messages.getString("GraphvizExternal.Exception.ExitCode"), exitValue));
 		}
 	}
 

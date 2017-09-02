@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import vcat.VCatException;
 import vcat.webapp.base.AbstractVCatServlet;
@@ -14,15 +16,18 @@ import vcat.webapp.base.AbstractVCatServlet;
 @SuppressWarnings("serial")
 public abstract class AbstractVCatToolforgeServlet extends AbstractVCatServlet {
 
+	/** Log4j2 Logger */
+	private static final Logger LOGGER = LogManager.getLogger();
+
 	@Override
-	protected void doRequest(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
-			IOException {
+	protected void doRequest(final HttpServletRequest req, final HttpServletResponse resp)
+			throws ServletException, IOException {
 		// Add a wrapper around doRequest which displays a nice error page instead of the default error message.
 		try {
 			super.doRequest(req, resp);
 		} catch (IOException | ServletException e) {
 			if (!(e.getCause() instanceof VCatException)) {
-				log.error(e.getMessage(), e);
+				LOGGER.error(e.getMessage(), e);
 			}
 			req.setAttribute("exceptionMessage", e.getMessage());
 			req.setAttribute("stacktrace", ExceptionUtils.getStackTrace(e));
