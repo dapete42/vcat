@@ -4,6 +4,7 @@ import java.io.File;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 import vcat.VCatException;
@@ -26,6 +27,7 @@ import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
 import vcat.webapp.base.AbstractVCatServlet;
 
+@WebServlet(urlPatterns = "/render")
 public class SimpleVCatServlet extends AbstractVCatServlet {
 
 	private static final long serialVersionUID = 8952525278394777354L;
@@ -60,8 +62,8 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 			this.categoryProvider = apiClient;
 			final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, PURGE_METADATA);
 			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-			this.vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir,
-					this.categoryProvider, cacheDir, PURGE), 10);
+			this.vCatRenderer = new QueuedVCatRenderer<>(
+					new CachedVCatRenderer<>(graphviz, tempDir, this.categoryProvider, cacheDir, PURGE), 10);
 		} catch (CacheException | VCatException e) {
 			throw new ServletException(e);
 		}
@@ -70,8 +72,8 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 	@Override
 	protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
 		try {
-			return this.vCatRenderer.render(new AllParams(req.getParameterMap(), req.getRequestURI(),
-					this.metadataProvider));
+			return this.vCatRenderer
+					.render(new AllParams(req.getParameterMap(), req.getRequestURI(), this.metadataProvider));
 		} catch (VCatException e) {
 			throw new ServletException(e);
 		}
