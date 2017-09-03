@@ -2,7 +2,7 @@
 <Configuration status="WARN">
 	<Appenders>
 		<RollingFile name="rollingVcatLog" fileName="logs/vcat.log"
-			filePattern="logs/vcat.%d{MM-dd-yyyy}.log">
+			filePattern="logs/vcat.%d{yyyy-MM-dd}.log">
 			<PatternLayout>
 				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
 			</PatternLayout>
