@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,9 +32,12 @@ import vcat.toolforge.base.MyCnfConfig;
 import vcat.toolforge.base.ToolforgeWiki;
 import vcat.toolforge.base.ToolforgeWikiProvider;
 
+@WebServlet(urlPatterns = { "/render", ToolforgeVCatServlet.CATGRAPH_REDIRECT_URL_PATTERN })
 public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
 	private static final long serialVersionUID = -7294276687476708402L;
+
+	protected static final String CATGRAPH_REDIRECT_URL_PATTERN = "/catgraphRedirect";
 
 	/** Directory with Graphviz binaries (dot, fdp). */
 	private static final String GRAPHVIZ_DIR = "/usr/bin";
@@ -166,7 +170,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 		}
 
 		Map<String, String[]> parameterMap;
-		if (req.getRequestURI().endsWith("/catgraphRedirect")) {
+		if (req.getRequestURI().endsWith(CATGRAPH_REDIRECT_URL_PATTERN)) {
 			// If called as catgraphRedirect, convert from Catgraph parameters to vCat parameters
 			parameterMap = CatgraphConverter.convertParameters(req.getParameterMap());
 		} else {
