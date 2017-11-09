@@ -12,15 +12,13 @@
 
 	Messages m = new Messages(lang);
 	final String[] languages = Messages.getString("ToolforgeCatgraphConverterServlet.Languages").split(",");
-	final String[] languageNames = Messages.getString("ToolforgeCatgraphConverterServlet.LanguageNames").split(
-			",");
+	final String[] languageNames = Messages.getString("ToolforgeCatgraphConverterServlet.LanguageNames")
+			.split(",");
 %>
 <html lang="<%=StringEscapeUtils.escapeXml10(lang)%>">
 <head>
 <meta charset="utf-8" />
 <title><%=StringEscapeUtils.escapeXml10(m.getCatgraphConverterString("title"))%></title>
-<link rel="stylesheet" type="text/css"
-	href="//tools.wmflabs.org/admin/assets/style.css" />
 <link rel="stylesheet" type="text/css" href="res/vcat.css" />
 </head>
 <body>
@@ -72,8 +70,8 @@
 															.entrySet()) {
 														final String key = entry.getKey();
 														for (String value : entry.getValue()) {
-											%><li><%=StringEscapeUtils.escapeXml10(URLDecoder.decode(value == null ? key : key + '='
-								+ value, "UTF8"))%></li>
+											%><li><%=StringEscapeUtils
+								.escapeXml10(URLDecoder.decode(value == null ? key : key + '=' + value, "UTF8"))%></li>
 											<%
 												}
 													}
@@ -114,11 +112,11 @@
 				<div id="logo">
 					<div>
 						<a href="//tools.wmflabs.org/"><img
-							src="//tools.wmflabs.org/admin/assets/Toolforge.png"
-							alt="Wikimedia Toolforge" height="124" width="125" /></a>
+							src="//tools-static.wmflabs.org/toolforge/logos/logo-with-text.png"
+							alt="Wikimedia Toolforge" height="125" width="125" /></a>
 					</div>
 					<div>
-						<a href="./"><img src="res/vCat_logo_thumb.png" alt="vCat" /></a>
+						<a href="./"><img src="res/vcat.png" alt="vCat" /></a>
 					</div>
 				</div>
 

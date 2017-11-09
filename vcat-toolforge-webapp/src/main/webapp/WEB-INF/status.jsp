@@ -16,8 +16,6 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<link rel="stylesheet" type="text/css"
-	href="//tools.wmflabs.org/admin/assets/style.css" />
 <link rel="stylesheet" type="text/css" href="res/vcat.css" />
 <title>vCat</title>
 </head>
@@ -118,11 +116,11 @@
 				<div id="logo">
 					<div>
 						<a href="//tools.wmflabs.org/"><img
-							src="//tools.wmflabs.org/admin/assets/Toolforge.png"
-							alt="Wikimedia Toolforge" height="124" width="125" /></a>
+							src="//tools-static.wmflabs.org/toolforge/logos/logo-with-text.png"
+							alt="Wikimedia Toolforge" height="125" width="125" /></a>
 					</div>
 					<div>
-						<a href="./"><img src="res/vCat_logo_thumb.png" alt="vCat" /></a>
+						<a href="./"><img src="res/vcat.png" alt="vCat" /></a>
 					</div>
 				</div>
 
