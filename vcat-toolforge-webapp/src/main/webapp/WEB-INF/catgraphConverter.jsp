@@ -6,7 +6,7 @@
 <%@page import="java.util.Map"%>
 <%@page import="java.util.Collection"%>
 <%@page import="java.util.Map.Entry"%>
-<%@page import="org.apache.commons.lang3.StringEscapeUtils"%>
+<%@page import="org.apache.commons.text.StringEscapeUtils"%>
 <%
 	final String lang = (String) request.getAttribute("lang");
 

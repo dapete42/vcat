@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <%@page contentType="text/html; charset=UTF-8"%>
-<%@page import="org.apache.commons.lang3.StringEscapeUtils"%>
+<%@page import="org.apache.commons.text.StringEscapeUtils"%>
 <%
 	Thread[] threads = new Thread[Thread.activeCount()];
 	int numberOfThreads = Thread.enumerate(threads);
