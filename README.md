@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/dapete42/vcat.svg?branch=master)](https://travis-ci.org/dapete42/vcat) [![Dependency Status](https://www.versioneye.com/user/projects/59ac472f6725bd003ce531b1/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/59ac472f6725bd003ce531b1)
+[![Build Status](https://travis-ci.org/dapete42/vcat.svg?branch=master)](https://travis-ci.org/dapete42/vcat)
 
 vcat
 ====
