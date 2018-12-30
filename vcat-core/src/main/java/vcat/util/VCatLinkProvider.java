@@ -27,7 +27,7 @@ public class VCatLinkProvider extends AbstractLinkProvider {
 				// category, title and ns may must be removed, ignore them here
 			} else {
 				for (String value : entry.getValue()) {
-					renderParams.append('&').append(escapeForUrl(key));
+					renderParams.append("&amp;").append(escapeForUrl(key));
 					if (value != null) {
 						renderParams.append('=').append(escapeForUrl(value));
 					}
