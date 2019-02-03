@@ -1,3 +1,17 @@
-language: java
+dist:
+  - trusty
+  - xenial
 jdk:
   - openjdk7
+  - openjdk11
+language:
+  - java
+matrix:
+    include:
+      - dist: trusty
+        jdk: openjdk7
+        language: java
+    include:
+      - dist: xenial
+        jdk: openjdk11
+        language: java
