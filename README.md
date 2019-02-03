@@ -32,7 +32,7 @@ It consists of five Maven submodules:
 Copyright notice
 ----------------
 
-Copyright 2017 Peter Schlömer
+Copyright 2013-2019 Peter Schlömer
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 the files in this project except in compliance with the License. You may obtain
