@@ -279,7 +279,7 @@
 	<distributionManagement>
 		<site>
 			<id>dummy</id>
-			<url>file://${project.basedir}/site/</url>
+			<url>file://${project.basedir}/site</url>
 		</site>
 	</distributionManagement>
 
