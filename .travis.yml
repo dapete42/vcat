@@ -2,14 +2,14 @@ dist:
   - trusty
   - xenial
 jdk:
-  - openjdk7
+  - openjdk8
   - openjdk11
 language:
   - java
 matrix:
     include:
       - dist: trusty
-        jdk: openjdk7
+        jdk: openjdk8
         language: java
     include:
       - dist: xenial
