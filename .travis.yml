@@ -1,6 +1,5 @@
 dist:
   - xenial
-  - bionic
 jdk:
   - openjdk8
   - openjdk11
@@ -12,6 +11,6 @@ matrix:
         jdk: openjdk8
         language: java
     include:
-      - dist: bionic
+      - dist: xenial
         jdk: openjdk11
         language: java
