@@ -203,7 +203,7 @@
 				<plugin>
 					<groupId>org.simplericity.jettyconsole</groupId>
 					<artifactId>jetty-console-maven-plugin</artifactId>
-					<version>1.60</version>
+					<version>1.61</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
