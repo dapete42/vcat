@@ -134,8 +134,6 @@ public class ToolforgeCategoryProvider implements ICategoryProvider<ToolforgeWik
 	@Override
 	public List<String> requestCategorymembers(ToolforgeWiki wiki, String fullTitle) throws ApiException {
 
-		// TODO: Does not work yet.
-
 		final String dbname = wiki.getName();
 		Metadata metadata;
 		try {
@@ -151,9 +149,8 @@ public class ToolforgeCategoryProvider implements ICategoryProvider<ToolforgeWik
 
 		try (Connection connection = this.connectionBuilder.buildConnection(dbname)) {
 
-			try {
-				final PreparedStatement statement = connection.prepareStatement(
-						"SELECT page_title, page_namespace FROM page INNER JOIN categorylinks ON cl_from=page_id WHERE cl_to=?");
+			try (PreparedStatement statement = connection.prepareStatement(
+					"SELECT page_title, page_namespace FROM page INNER JOIN categorylinks ON cl_from=page_id WHERE cl_to=?")) {
 				statement.setString(1, title);
 				try (ResultSet rs = statement.executeQuery()) {
 					while (rs.next()) {

@@ -72,8 +72,6 @@ public class Graph extends AbstractGraphPropertyUser {
 				}
 			}
 			createSubgraphRecursive(subGraph, fullGraph, nextNodes, depth - 1);
-		} else {
-
 		}
 	}
 

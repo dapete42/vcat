@@ -1,5 +1,9 @@
 package vcat.graph.internal;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import vcat.graph.DefaultNode;
 import vcat.graph.Graph;
 
 /**
@@ -19,6 +23,16 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 	private String href;
 
 	private String style;
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof AbstractDefaultEdgeNode) {
+			final AbstractDefaultEdgeNode n = (AbstractDefaultEdgeNode) o;
+			return new EqualsBuilder().append(fontname, n.fontname).append(fontsize, n.fontsize).append(href, n.href)
+					.append(style, n.style).build();
+		}
+		return false;
+	}
 
 	/** @return Label font family name. */
 	@GraphProperty("fontname")
@@ -88,6 +102,11 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 	 */
 	public void setStyle(String style) {
 		this.style = style;
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(277, 2009).append(fontname).append(fontsize).append(href).append(style).build();
 	}
 
 }

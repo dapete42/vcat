@@ -1,5 +1,6 @@
 package vcat.graph;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import vcat.graph.internal.AbstractDefaultEdgeNode;
@@ -15,8 +16,17 @@ public class DefaultNode extends AbstractDefaultEdgeNode {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (o instanceof DefaultNode) {
+			final DefaultNode n = (DefaultNode) o;
+			return new EqualsBuilder().appendSuper(super.equals(o)).append(shape, n.shape).build();
+		}
+		return false;
+	}
+
+	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(197, 1117).toHashCode();
+		return new HashCodeBuilder(197, 1117).append(shape).toHashCode();
 	}
 
 	public void setShape(String shape) {
