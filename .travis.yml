@@ -5,12 +5,3 @@ jdk:
   - openjdk11
 language:
   - java
-matrix:
-    include:
-      - dist: xenial
-        jdk: openjdk8
-        language: java
-    include:
-      - dist: xenial
-        jdk: openjdk11
-        language: java
