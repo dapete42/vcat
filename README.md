@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.com/dapete42/vcat.svg?branch=master)](https://travis-ci.com/dapete42/vcat)
 [![CodeFactor](https://www.codefactor.io/repository/github/dapete42/vcat/badge)](https://www.codefactor.io/repository/github/dapete42/vcat)
+[![codecov](https://codecov.io/gh/dapete42/vcat/branch/master/graph/badge.svg)](https://codecov.io/gh/dapete42/vcat)
 
 vcat
 ====
