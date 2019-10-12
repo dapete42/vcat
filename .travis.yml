@@ -5,6 +5,5 @@ jdk:
   - openjdk11
 language:
   - java
-# environment variable CODECOV_TOKEN for Codecov is in project configuration on travis-ci.com
 after_success:
   - bash <(curl -s https://codecov.io/bash)
