@@ -125,8 +125,6 @@ public class AbstractFileCacheTest {
 	@Test
 	public void testGetAsInputStreamNull() throws CacheException, IOException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
-
 		assertNull(underTest.getAsInputStream("test"));
 
 	}

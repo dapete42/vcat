@@ -53,11 +53,11 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
 	private final CombinedParams<W> combinedParams = new CombinedParams<>();
 
-	private Metadata metadata;
+	protected Metadata metadata;
 
 	private String renderUrl;
 
-	private final Map<String, String[]> requestParams = new HashMap<>();
+	protected final Map<String, String[]> requestParams = new HashMap<>();
 
 	protected void init(final Map<String, String[]> requestParams, final String renderUrl,
 			final IMetadataProvider metadataProvider) throws VCatException {

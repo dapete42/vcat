@@ -108,7 +108,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 			this.toolforgeWikiProvider = new ToolforgeWikiProvider(cpds);
 
 			// Use database credentials to create a secret prefix for caches
-			final String redisSecret = DigestUtils.md5Hex(configMyCnf.user + ':' + configMyCnf.password);
+			final String redisSecret = DigestUtils.sha256Hex(configMyCnf.user + ':' + configMyCnf.password);
 
 			final String redisApiCacheKeyPrefix = redisSecret + "-vcat-cache-api-";
 			final String redisMetadataCacheKeyPrefix = redisSecret + "-vcat-cache-metadata-";

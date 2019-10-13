@@ -3,14 +3,9 @@ package vcat.cache.file;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
@@ -20,36 +15,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import vcat.cache.CacheException;
-import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
-import vcat.params.CombinedParams;
-import vcat.params.GraphvizParams;
-import vcat.params.OutputFormat;
-import vcat.params.VCatParams;
+import vcat.test.TestWiki;
 
 public class MetadataFileCacheTest {
 
-	private class TestWiki implements IWiki {
-
-		private static final long serialVersionUID = 3643372252757660130L;
-
-		@Override
-		public String getApiUrl() {
-			return "http://api.url";
-		}
-
-		@Override
-		public String getDisplayName() {
-			return "Test";
-		}
-
-		@Override
-		public String getName() {
-			return "test";
-		}
-
-	}
-	
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
@@ -93,7 +63,7 @@ public class MetadataFileCacheTest {
 		assertNull(underTest.getMetadata(wiki));
 
 	}
-	
+
 	@Test
 	public void testGetMetadataWrongType() throws CacheException {
 

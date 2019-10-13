@@ -16,6 +16,9 @@ import vcat.params.AbstractAllParams;
 public abstract class AbstractLinkProvider implements Serializable {
 
 	protected static String escapeForUrl(final String string) {
+		if (string == null) {
+			return null;
+		}
 		try {
 			return URLEncoder.encode(string.replace(' ', '_'), "UTF8");
 		} catch (UnsupportedEncodingException e) {
@@ -24,7 +27,7 @@ public abstract class AbstractLinkProvider implements Serializable {
 	}
 
 	protected static String escapeMediawikiTitleForUrl(final String title) {
-		return escapeForUrl(title).replaceAll("%3A", ":");
+		return title == null ? null : escapeForUrl(title).replace("%3A", ":");
 	}
 
 	/**

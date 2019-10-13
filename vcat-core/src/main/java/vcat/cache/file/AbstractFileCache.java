@@ -162,11 +162,11 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	 * @return A hash string for a key.
 	 */
 	protected String hashForKey(K key) {
-		return HashHelper.hashFor(key);
+		return HashHelper.sha256Hex(key);
 	}
 
 	public synchronized void purge() {
-		long lastModifiedThreshold = System.currentTimeMillis() - (1000l * this.maxAgeInSeconds);
+		long lastModifiedThreshold = System.currentTimeMillis() - (1000L * this.maxAgeInSeconds);
 		int purgedFiles = 0;
 		for (File file : this.getAllFiles()) {
 			if (file.lastModified() < lastModifiedThreshold) {

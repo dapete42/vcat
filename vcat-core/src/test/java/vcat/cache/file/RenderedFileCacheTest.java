@@ -3,47 +3,21 @@ package vcat.cache.file;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import vcat.cache.CacheException;
-import vcat.mediawiki.IWiki;
 import vcat.params.CombinedParams;
 import vcat.params.GraphvizParams;
 import vcat.params.OutputFormat;
 import vcat.params.VCatParams;
+import vcat.test.TestWiki;
 
 public class RenderedFileCacheTest {
-
-	private class TestWiki implements IWiki {
-
-		private static final long serialVersionUID = -508773764595362723L;
-
-		@Override
-		public String getApiUrl() {
-			return "http://api.url";
-		}
-
-		@Override
-		public String getDisplayName() {
-			return "Test";
-		}
-
-		@Override
-		public String getName() {
-			return "test";
-		}
-
-	}
 
 	private Path tempDirectory;
 

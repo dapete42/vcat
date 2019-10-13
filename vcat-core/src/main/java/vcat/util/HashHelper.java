@@ -1,36 +1,30 @@
 package vcat.util;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
-public abstract class HashHelper {
+public class HashHelper {
 
-	/**
-	 * Create a hash value from an array of bytes with data. Currently uses SHA-1, converted to a hex string.
-	 * 
-	 * @param bytes
-	 *            Data.
-	 * @return A hash value from the data.
-	 */
-	public static String hashFor(byte[] bytes) {
-		return DigestUtils.sha1Hex(bytes);
+	private HashHelper() {
 	}
 
 	/**
-	 * Return a hash string for a serializable object.
+	 * Calculates the SHA-256 digest from a serialized form of a Serializable object and returns the value as a hex
+	 * string.
 	 * 
 	 * @param object
-	 *            Serializable object.
-	 * @return Hash string for serializable object.
+	 *            Serializable object to digest
+	 * @return SHA-256 digest as a hex string
 	 */
-	public static String hashFor(Serializable object) {
+	public static String sha256Hex(Serializable object) {
 		if (object instanceof String) {
 			// For strings, directly use bytes
-			return hashFor(((String) object).getBytes());
+			return DigestUtils.sha256Hex(((String) object).getBytes(StandardCharsets.UTF_8));
 		} else {
-			return hashFor(SerializationUtils.serialize(object));
+			return DigestUtils.sha256Hex(SerializationUtils.serialize(object));
 		}
 	}
 

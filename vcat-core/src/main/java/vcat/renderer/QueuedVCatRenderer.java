@@ -81,7 +81,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 	public RenderedFileInfo render(final AbstractAllParams<W> all) throws VCatException {
 
 		// Build a Job instance for the parameters.
-		final String jobId = HashHelper.hashFor(all.getCombined());
+		final String jobId = HashHelper.sha256Hex(all.getCombined());
 		Object lock;
 
 		// Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
