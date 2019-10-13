@@ -7,16 +7,17 @@ import java.io.InputStreamReader;
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 
-public class ApiFileCache extends StringFileCache implements IApiCache {
+public class ApiFileCache extends AbstractFileCache<String> implements IApiCache {
 
-	private final static String PREFIX = "ApiRequest-";
+	private static final String PREFIX = "ApiRequest-";
 
-	private final static String SUFFIX = ".json";
+	private static final String SUFFIX = ".json";
 
 	public ApiFileCache(final File cacheDirectory, final int maxAgeInSeconds) throws CacheException {
 		super(cacheDirectory, PREFIX, SUFFIX, maxAgeInSeconds);
@@ -25,9 +26,9 @@ public class ApiFileCache extends StringFileCache implements IApiCache {
 	@Override
 	public synchronized JsonObject getJSONObject(String key) throws CacheException {
 		if (this.containsKey(key)) {
-			try (InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key))) {
-				JsonObject result = Json.createReader(reader).readObject();
-				return result;
+			try (InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key));
+					JsonReader jsonReader = Json.createReader(reader)) {
+				return jsonReader.readObject();
 			} catch (JsonException e) {
 				throw new CacheException(Messages.getString("ApiFileCache.Exception.ParseJSON"), e);
 			} catch (IOException e) {

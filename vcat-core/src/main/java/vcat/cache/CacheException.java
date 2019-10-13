@@ -7,7 +7,11 @@ package vcat.cache;
  */
 public class CacheException extends Exception {
 
-	private static final long serialVersionUID = -5629241518904562787L;
+	private static final long serialVersionUID = -4820106025233905079L;
+
+	public CacheException(Throwable cause) {
+		super(cause);
+	}
 
 	public CacheException(String message) {
 		super(message);

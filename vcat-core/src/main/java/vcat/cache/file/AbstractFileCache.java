@@ -95,14 +95,14 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	public synchronized byte[] get(K key) throws CacheException {
 		File cacheFile = this.getCacheFile(key);
 		if (cacheFile.exists()) {
-			FileInputStream inputStream;
-			try {
-				inputStream = new FileInputStream(cacheFile);
+			try (InputStream inputStream = new FileInputStream(cacheFile)) {
+				return IOUtils.toByteArray(inputStream);
 			} catch (FileNotFoundException e) {
 				throw new CacheException(String.format(Messages.getString("AbstractFileCache.Exception.FileNotFound"),
 						cacheFile.getAbsolutePath()));
+			} catch (IOException e) {
+				throw new CacheException(e);
 			}
-			return this.readValueFromStream(inputStream);
 		} else {
 			return null;
 		}
@@ -207,14 +207,6 @@ public abstract class AbstractFileCache<K extends Serializable> {
 			} catch (IOException e) {
 				throw new CacheException(Messages.getString("AbstractFileCache.Exception.MoveFailed"), e);
 			}
-		}
-	}
-
-	protected synchronized byte[] readValueFromStream(InputStream inputStream) throws CacheException {
-		try {
-			return IOUtils.toByteArray(inputStream);
-		} catch (IOException e) {
-			throw new CacheException(Messages.getString("AbstractFileCache.Exception.IOReading"), e);
 		}
 	}
 

@@ -11,13 +11,13 @@ import vcat.Messages;
 
 public class Metadata implements Serializable {
 
-	private static final long serialVersionUID = -3086995448506417630L;
+	private static final long serialVersionUID = -2562390668664997668L;
 
 	/** ID of the article namespace. */
-	public final static int NS_ARTICLE = 0;
+	public static final int NS_ARTICLE = 0;
 
 	/** ID of the category namespace. */
-	public final static int NS_CATEGORY = 14;
+	public static final int NS_CATEGORY = 14;
 
 	/** A map of all namespace names of the MediaWiki installation. */
 	private final Map<String, Integer> allNamespacesInverse;
@@ -31,9 +31,8 @@ public class Metadata implements Serializable {
 	/** The server the wiki is running on (start of URL). */
 	protected final String server;
 
-	protected Metadata(final String articlepath, final String server,
-			final Map<Integer, String> authoritativeNamespaces, final Map<String, Integer> allNamespacesInverse)
-			throws ApiException {
+	public Metadata(final String articlepath, final String server, final Map<Integer, String> authoritativeNamespaces,
+			final Map<String, Integer> allNamespacesInverse) {
 		this.articlepath = articlepath;
 		this.server = server;
 		this.authoritativeNamespaces = authoritativeNamespaces;
@@ -107,7 +106,7 @@ public class Metadata implements Serializable {
 		return title;
 	}
 
-	public String truncateTitle(String fullTitle) throws ApiException {
+	public String truncateTitle(String fullTitle) {
 		for (Entry<String, Integer> entry : this.allNamespacesInverse.entrySet()) {
 			String key = entry.getKey();
 			if (!key.isEmpty()) {

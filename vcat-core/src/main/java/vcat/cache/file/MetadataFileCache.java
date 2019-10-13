@@ -13,14 +13,14 @@ import vcat.cache.IMetadataCache;
 import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
 
-public class MetadataFileCache extends StringFileCache implements IMetadataCache {
+public class MetadataFileCache extends AbstractFileCache<String> implements IMetadataCache {
 
 	/** Log4j2 Logger */
 	private static final Logger LOGGER = LogManager.getLogger();
 
-	private final static String PREFIX = "Metadata-";
+	private static final String PREFIX = "Metadata-";
 
-	private final static String SUFFIX = "";
+	private static final String SUFFIX = "";
 
 	public MetadataFileCache(final File cacheDirectory, final int maxAgeInSeconds) throws CacheException {
 		super(cacheDirectory, PREFIX, SUFFIX, maxAgeInSeconds);
@@ -33,7 +33,9 @@ public class MetadataFileCache extends StringFileCache implements IMetadataCache
 			Object metadataObject = null;
 			try {
 				metadataObject = SerializationUtils.deserialize(this.get(key));
-				if (metadataObject != null && metadataObject instanceof Metadata) {
+				if (metadataObject == null) {
+					return null;
+				} else if (metadataObject instanceof Metadata) {
 					return (Metadata) metadataObject;
 				} else {
 					// Wrong type
