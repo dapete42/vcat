@@ -89,7 +89,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 			if (this.jobs.containsKey(jobId)) {
 				// If the job is alread queued or running, we need to record that we are also waiting for it to finish.
 				this.jobs.put(jobId, this.jobs.get(jobId) + 1);
-				LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId));
+				LOGGER.info(() -> String.format(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId));
 				// Get lock
 				lock = jobLocks.get(jobId);
 			} else {
@@ -99,16 +99,9 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 				lock = new Object();
 				this.jobLocks.put(jobId, lock);
 
-				this.executorService.execute(new Runnable() {
+				this.executorService.execute(() -> runJob(jobId, all));
 
-					@Override
-					public void run() {
-						runJob(jobId, all);
-					}
-
-				});
-
-				LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId));
+				LOGGER.info(() -> String.format(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId));
 			}
 		}
 
@@ -160,7 +153,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 	 */
 	private void runJob(final String jobId, final AbstractAllParams<W> all) {
 
-		LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId));
+		LOGGER.info(() -> String.format(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId));
 
 		Object lock = jobLocks.get(jobId);
 		synchronized (lock) {
@@ -183,7 +176,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
 		}
 
-		LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.ThreadFinished"));
+		LOGGER.info(() -> Messages.getString("QueuedVCatRenderer.Info.ThreadFinished"));
 
 	}
 
