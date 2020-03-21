@@ -1,5 +1,5 @@
 dist:
-  - xenial
+  - bionic
 jdk:
   - openjdk11
 language:
