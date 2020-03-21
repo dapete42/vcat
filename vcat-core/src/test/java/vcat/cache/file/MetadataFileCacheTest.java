@@ -10,18 +10,13 @@ import java.util.Collections;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import vcat.cache.CacheException;
 import vcat.mediawiki.Metadata;
 import vcat.test.TestWiki;
 
 public class MetadataFileCacheTest {
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	private Path tempDirectory;
 
@@ -48,10 +43,9 @@ public class MetadataFileCacheTest {
 
 		underTest.put(wiki.getApiUrl(), new byte[0]);
 
-		expectedException.expect(CacheException.class);
-		expectedException.expectMessage("Error while deserializing cached file to Metadata; removing from cache");
+		CacheException thrown = assertThrows(CacheException.class, () -> underTest.getMetadata(wiki));
 
-		underTest.getMetadata(wiki);
+		assertEquals("Error while deserializing cached file to Metadata; removing from cache", thrown.getMessage());
 
 	}
 
@@ -71,10 +65,9 @@ public class MetadataFileCacheTest {
 
 		underTest.put(wiki.getApiUrl(), SerializationUtils.serialize("Test String"));
 
-		expectedException.expect(CacheException.class);
-		expectedException.expectMessage("Error while deserializing cached file to Metadata; removing from cache");
+		CacheException thrown = assertThrows(CacheException.class, () -> underTest.getMetadata(wiki));
 
-		underTest.getMetadata(wiki);
+		assertEquals("Error while deserializing cached file to Metadata; removing from cache", thrown.getMessage());
 
 	}
 

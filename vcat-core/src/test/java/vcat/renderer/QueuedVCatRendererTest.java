@@ -2,15 +2,10 @@ package vcat.renderer;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import vcat.VCatException;
-import vcat.params.AbstractAllParams;
 import vcat.test.TestAllParams;
 import vcat.test.TestVCatRenderer;
 import vcat.test.TestWiki;

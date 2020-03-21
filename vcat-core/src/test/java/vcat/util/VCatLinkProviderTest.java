@@ -2,11 +2,8 @@ package vcat.util;
 
 import static org.junit.Assert.*;
 
-import java.util.Collections;
-
 import org.junit.Test;
 
-import vcat.mediawiki.Metadata;
 import vcat.test.TestAllParams;
 
 public class VCatLinkProviderTest {

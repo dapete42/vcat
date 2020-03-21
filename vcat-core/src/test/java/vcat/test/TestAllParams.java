@@ -1,7 +1,5 @@
 package vcat.test;
 
-import java.util.TreeMap;
-
 import vcat.VCatException;
 import vcat.mediawiki.Metadata;
 import vcat.params.AbstractAllParams;

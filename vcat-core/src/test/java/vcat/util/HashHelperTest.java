@@ -12,21 +12,15 @@ public class HashHelperTest {
 
 	private static class TestClass implements Serializable {
 
-		private static final long serialVersionUID = -4501273461721468930L;
-
-		private int i = 0;
-
-		private TestClass(int i) {
-			this.i = i;
-		}
+		private static final long serialVersionUID = 4591638198169811763L;
 
 	}
 
 	@Test
 	public void testSha256Hex() {
 
-		Serializable testObject1 = new TestClass(10);
-		Serializable testObject2 = new TestClass(10);
+		Serializable testObject1 = new TestClass();
+		Serializable testObject2 = new TestClass();
 
 		// the result should be the same if the objects are equal
 		String result1 = HashHelper.sha256Hex(testObject1);
