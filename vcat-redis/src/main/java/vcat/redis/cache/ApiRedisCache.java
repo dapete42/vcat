@@ -31,7 +31,8 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 			try {
 				return Json.createReader(new StringReader(jsonString)).readObject();
 			} catch (JsonException e) {
-				throw new CacheException(Messages.getString("ApiRedisCache.Exception.StoreJSON"), e);
+				throw new CacheException(
+						String.format(Messages.getString("ApiRedisCache.Exception.ReadJSON"), jsonString), e);
 			}
 		}
 	}
