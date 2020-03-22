@@ -1,5 +1,7 @@
 package vcat.redis.cache;
 
+import java.nio.charset.StandardCharsets;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -28,16 +30,16 @@ public class StringRedisCache {
 	}
 
 	protected synchronized byte[] jedisKeyBytes(final String key) {
-		return this.jedisKey(key).getBytes();
+		return this.jedisKey(key).getBytes(StandardCharsets.UTF_8);
 	}
 
 	public void purge() {
 		// Do nothing, this is handled by redis itself
 	}
 
-	public synchronized void remove(String key) {
+	public synchronized Long remove(String key) {
 		try (Jedis jedis = jedisPool.getResource()) {
-			jedis.del(this.jedisKey(key));
+			return jedis.del(this.jedisKey(key));
 		}
 	}
 
