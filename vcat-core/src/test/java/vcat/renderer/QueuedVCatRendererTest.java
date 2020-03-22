@@ -1,9 +1,9 @@
 package vcat.renderer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import vcat.VCatException;
 import vcat.test.TestAllParams;
@@ -16,7 +16,7 @@ public class QueuedVCatRendererTest {
 
 	private QueuedVCatRenderer<TestWiki> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		testRenderer = new TestVCatRenderer();
 		underTest = new QueuedVCatRenderer<>(testRenderer, 2);

@@ -1,15 +1,15 @@
 package vcat.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class EmptyLinkProviderTest {
 
 	private EmptyLinkProvider underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = new EmptyLinkProvider();
 	}

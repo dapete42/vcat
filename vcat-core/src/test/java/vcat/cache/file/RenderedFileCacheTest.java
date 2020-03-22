@@ -1,14 +1,14 @@
 package vcat.cache.file;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import vcat.cache.CacheException;
 import vcat.params.CombinedParams;
@@ -23,13 +23,13 @@ public class RenderedFileCacheTest {
 
 	private RenderedFileCache<TestWiki> underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
 		underTest = new RenderedFileCache<>(tempDirectory.toFile(), 10);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws IOException {
 		underTest.clear();
 		if (tempDirectory != null) {

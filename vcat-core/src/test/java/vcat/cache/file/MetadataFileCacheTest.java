@@ -1,6 +1,6 @@
 package vcat.cache.file;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,9 +8,9 @@ import java.nio.file.Path;
 import java.util.Collections;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import vcat.cache.CacheException;
 import vcat.mediawiki.Metadata;
@@ -22,13 +22,13 @@ public class MetadataFileCacheTest {
 
 	private MetadataFileCache underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
 		underTest = new MetadataFileCache(tempDirectory.toFile(), 10);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws IOException {
 		underTest.clear();
 		if (tempDirectory != null) {

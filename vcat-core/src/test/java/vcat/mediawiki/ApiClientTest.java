@@ -1,6 +1,6 @@
 package vcat.mediawiki;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ApiClientTest {
 
@@ -27,7 +27,7 @@ public class ApiClientTest {
 
 	private ApiClient<IWiki> client;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		this.wiki = new SimpleWikimediaWiki(WIKI);
 		this.client = new ApiClient<>();
