@@ -1,12 +1,11 @@
 package vcat.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import vcat.graph.Node;
 import vcat.mediawiki.Metadata;
@@ -18,7 +17,7 @@ public class AbstractLinkProviderTest {
 
 	private TestLinkProvider underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		underTest = new TestLinkProvider();
 	}

@@ -1,6 +1,6 @@
 package vcat.cache.file;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import vcat.cache.CacheException;
 
@@ -30,13 +30,13 @@ public class AbstractFileCacheTest {
 
 	private FileCacheImpl underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
 		underTest = new FileCacheImpl(tempDirectory.toFile(), 10);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws IOException {
 		underTest.clear();
 		if (tempDirectory != null) {

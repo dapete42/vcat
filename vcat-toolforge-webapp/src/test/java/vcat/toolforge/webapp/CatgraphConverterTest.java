@@ -1,12 +1,12 @@
 package vcat.toolforge.webapp;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import vcat.params.AbstractAllParams;
 import vcat.params.OutputFormat;
@@ -27,7 +27,8 @@ public class CatgraphConverterTest {
 
 	private static final String[] WIKI_LIST_NOLANGUAGE = { "commons", "meta" };
 
-	private static void assertSingleValue(final String expectedValue, final Map<String, String[]> map, final String key) {
+	private static void assertSingleValue(final String expectedValue, final Map<String, String[]> map,
+			final String key) {
 		assertNotNull(map);
 		assertTrue(map.containsKey(key));
 		assertEquals(1, map.get(key).length);

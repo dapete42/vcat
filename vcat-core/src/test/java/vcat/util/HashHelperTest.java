@@ -1,12 +1,12 @@
 package vcat.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class HashHelperTest {
 

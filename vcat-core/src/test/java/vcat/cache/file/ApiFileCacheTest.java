@@ -1,6 +1,6 @@
 package vcat.cache.file;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,9 +9,9 @@ import java.nio.file.Path;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import vcat.cache.CacheException;
 
@@ -21,13 +21,13 @@ public class ApiFileCacheTest {
 
 	private ApiFileCache underTest;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
 		underTest = new ApiFileCache(tempDirectory.toFile(), 10);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws IOException {
 		underTest.clear();
 		if (tempDirectory != null) {
