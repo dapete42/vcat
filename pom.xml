@@ -97,7 +97,7 @@
 			<dependency>
 				<groupId>net.bull.javamelody</groupId>
 				<artifactId>javamelody-core</artifactId>
-				<version>1.82.0</version>
+				<version>1.83.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
