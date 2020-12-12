@@ -95,46 +95,6 @@
 
 	<build>
 		<finalName>vcat-toolforge</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>jetty-console</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.simplericity.jettyconsole</groupId>
-						<artifactId>jetty-console-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<goals>
-									<goal>createconsole</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<additionalDependencies>
-								<additionalDependency>
-									<artifactId>jetty-console-gzip-plugin</artifactId>
-								</additionalDependency>
-								<additionalDependency>
-									<artifactId>jetty-console-jsp-plugin</artifactId>
-								</additionalDependency>
-								<additionalDependency>
-									<artifactId>jetty-console-requestlog-plugin</artifactId>
-								</additionalDependency>
-							</additionalDependencies>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 </project>

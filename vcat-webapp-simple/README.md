@@ -16,13 +16,3 @@ Configuration
 The configuration file src/main/resources/vcat/servlet/config.properties
 contains only a single setting, cachedir. This can be used to set where the
 cached files (API access, metadata, Graphviz and rendered images) are stored.
-
-Running with Jetty
-------------------
-
-Jetty is a simple HTTP server with servlet support. To run this application
-with it, use
-	mvn jetty:run
-on the command line or otherwise start Maven's 'jetty:run' goal. I set this up
-primarily for testing and debugging, but it should work even in a production
-environment. The web server does not have much to do, anyway.
