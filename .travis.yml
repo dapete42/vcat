@@ -1,5 +1,5 @@
 dist:
-  - bionic
+  - focal
 jdk:
   - openjdk11
 language:
