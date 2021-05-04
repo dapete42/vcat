@@ -21,7 +21,7 @@ public class ToolforgeConnectionBuilder {
 	}
 
 	public Connection buildConnection(final String name) throws VCatException {
-		final String jdbcUrl = String.format(this.jdbcUrlTemplate, name + ".labsdb", name + "_p");
+		final String jdbcUrl = String.format(this.jdbcUrlTemplate, name + ".web.db.svc.wikimedia.cloud", name + "_p");
 		try {
 			return DriverManager.getConnection(jdbcUrl, this.jdbcUser, this.jdbcPassword);
 		} catch (SQLException e) {
