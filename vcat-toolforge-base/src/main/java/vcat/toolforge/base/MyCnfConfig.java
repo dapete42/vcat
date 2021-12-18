@@ -8,15 +8,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import vcat.VCatException;
 
 public class MyCnfConfig {
 
 	/** Log4j2 Logger */
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LoggerFactory.getLogger(MyCnfConfig.class);
 
 	private static final String MY_CNF = "replica.my.cnf";
 

@@ -1,7 +1,7 @@
 package vcat.mediawiki;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -10,7 +10,7 @@ import vcat.cache.IMetadataCache;
 public class CachedMetadataProvider implements IMetadataProvider {
 
 	/** Log4j2 Logger */
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LoggerFactory.getLogger(CachedMetadataProvider.class);
 
 	private final IMetadataCache metadataCache;
 
