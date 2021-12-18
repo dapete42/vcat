@@ -4,8 +4,8 @@ import java.io.File;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -16,7 +16,7 @@ import vcat.mediawiki.Metadata;
 public class MetadataFileCache extends AbstractFileCache<String> implements IMetadataCache {
 
 	/** Log4j2 Logger */
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetadataFileCache.class);
 
 	private static final String PREFIX = "Metadata-";
 

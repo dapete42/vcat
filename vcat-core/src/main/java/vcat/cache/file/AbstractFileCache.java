@@ -13,9 +13,8 @@ import java.io.Serializable;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
-
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -33,7 +32,7 @@ import vcat.util.HashHelper;
 public abstract class AbstractFileCache<K extends Serializable> {
 
 	/** Log4j2 Logger */
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileCache.class);
 
 	/** The cache directory. */
 	protected final File cacheDirectory;

@@ -6,8 +6,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import vcat.graph.Graph;
 import vcat.graph.Group;
@@ -20,9 +20,9 @@ import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
 import vcat.params.AbstractAllParams;
+import vcat.params.Relation;
 import vcat.params.TitleNamespaceParam;
 import vcat.params.VCatParams;
-import vcat.params.Relation;
 
 public abstract class AbstractVCat<W extends IWiki> {
 
@@ -51,7 +51,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 	}
 
 	/** Log4j2 Logger */
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractVCat.class);
 
 	private final static String GRAPH_FONT = "DejaVu Sans";
 
