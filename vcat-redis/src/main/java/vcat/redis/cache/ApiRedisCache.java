@@ -40,12 +40,10 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 	@Override
 	public synchronized void put(final String key, final JsonObject jsonObject) throws CacheException {
 		final String jedisKey = this.jedisKey(key);
-		try (Jedis jedis = this.jedisPool.getResource()) {
-			Transaction t = jedis.multi();
+		transaction(t -> {
 			t.set(jedisKey, jsonObject.toString());
 			t.expire(jedisKey, this.maxAgeInSeconds);
-			t.exec();
-		}
+		});
 	}
 
 }

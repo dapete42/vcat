@@ -1,9 +1,12 @@
 package vcat.redis.cache;
 
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
+import redis.clients.jedis.Connection;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Transaction;
 
 public class StringRedisCache {
 
@@ -33,6 +36,10 @@ public class StringRedisCache {
 		return this.jedisKey(key).getBytes(StandardCharsets.UTF_8);
 	}
 
+	protected Transaction newTransaction(final Connection connection) {
+		return new Transaction(connection);
+	}
+
 	public void purge() {
 		// Do nothing, this is handled by redis itself
 	}
@@ -40,6 +47,14 @@ public class StringRedisCache {
 	public synchronized Long remove(String key) {
 		try (Jedis jedis = jedisPool.getResource()) {
 			return jedis.del(this.jedisKey(key));
+		}
+	}
+
+	protected void transaction(final Consumer<Transaction> consumer) {
+		try (Jedis jedis = jedisPool.getResource(); Connection connection = jedis.getConnection()) {
+			final Transaction transaction = newTransaction(connection);
+			consumer.accept(transaction);
+			transaction.exec();
 		}
 	}
 
