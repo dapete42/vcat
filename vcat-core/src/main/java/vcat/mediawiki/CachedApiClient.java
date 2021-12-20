@@ -14,6 +14,8 @@ import vcat.cache.IApiCache;
 
 public class CachedApiClient<W extends IWiki> extends ApiClient<W> {
 
+	private static final long serialVersionUID = -391353677303504163L;
+
 	private final IApiCache cache;
 
 	public CachedApiClient(IApiCache cache) {

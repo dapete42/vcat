@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.helpers.MessageFormatter;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -96,8 +97,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		if (formatString != null && !formatString.isEmpty()) {
 			format = OutputFormat.valueOfIgnoreCase(formatString);
 			if (format == null) {
-				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						PARAM_FORMAT, formatString));
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+								PARAM_FORMAT, formatString).getMessage());
 			}
 		}
 
@@ -105,8 +107,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		if (algorithmString != null && !algorithmString.isEmpty()) {
 			algorithm = Algorithm.valueOfIgnoreCase(algorithmString);
 			if (algorithm == null) {
-				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						PARAM_ALGORITHM, algorithmString));
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+								PARAM_ALGORITHM, algorithmString).getMessage());
 			}
 		}
 
@@ -145,7 +148,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			String[] split = titleStrings[i].split("\\|");
 			for (int j = 0; j < split.length; j++) {
 				final String title = unescapeMediawikiTitle(split[j]);
-				if (title.isEmpty()) {
+				if (title == null || title.isEmpty()) {
 					throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleEmpty"));
 				}
 				titles.add(title);
@@ -169,12 +172,15 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			try {
 				namespace = Integer.parseInt(namespaceString);
 			} catch (NumberFormatException e) {
-				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
-						PARAM_NAMESPACE, namespaceString), e);
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
+								PARAM_NAMESPACE, namespaceString).getMessage(),
+						e);
 			}
 			if (this.metadata.getAllNames(namespace).isEmpty()) {
-				throw new VCatException(String.format(
-						Messages.getString("AbstractAllParams.Exception.NamespaceDoesNotExist"), namespace));
+				throw new VCatException(MessageFormatter
+						.format(Messages.getString("AbstractAllParams.Exception.NamespaceDoesNotExist"), namespace)
+						.getMessage());
 			}
 			for (String title : titles) {
 				titleNamespaceList.add(new TitleNamespaceParam(title, namespace));
@@ -187,12 +193,16 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			try {
 				depth = Integer.parseInt(depthString);
 			} catch (NumberFormatException e) {
-				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
-						PARAM_DEPTH, depthString), e);
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
+								PARAM_DEPTH, depthString).getMessage(),
+						e);
 			}
 			if (depth < 1) {
-				throw new VCatException(String.format(
-						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), PARAM_DEPTH, 1));
+				throw new VCatException(MessageFormatter
+						.format(Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), PARAM_DEPTH,
+								1)
+						.getMessage());
 			}
 		}
 
@@ -203,15 +213,20 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			try {
 				limit = Integer.parseInt(limitString);
 			} catch (NumberFormatException e) {
-				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
-						PARAM_LIMIT, limitString), e);
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.InvalidNumber"),
+								PARAM_LIMIT, limitString).getMessage(),
+						e);
 			}
 			if (limit < 1) {
-				throw new VCatException(String.format(
-						Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), PARAM_LIMIT, 1));
+				throw new VCatException(MessageFormatter
+						.format(Messages.getString("AbstractAllParams.Exception.MustBeGreaterThanOrEqual"), PARAM_LIMIT,
+								1)
+						.getMessage());
 			} else if (limit > maxLimit) {
-				throw new VCatException(String.format(
-						Messages.getString("AbstractAllParams.Exception.MustBeLessThanOrEqual"), PARAM_LIMIT, maxLimit));
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.MustBeLessThanOrEqual"),
+								PARAM_LIMIT, maxLimit).getMessage());
 			}
 		}
 
@@ -234,13 +249,16 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			} else if (relation == Relation.Subcategory) {
 				for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
 					if (titleNamespace.getNamespace() != Metadata.NS_CATEGORY) {
-						throw new VCatException(String.format(
-								Messages.getString("AbstractAllParams.Exception.RelOnlyForCategories"), relationString));
+						throw new VCatException(MessageFormatter
+								.format(Messages.getString("AbstractAllParams.Exception.RelOnlyForCategories"),
+										relationString)
+								.getMessage());
 					}
 				}
 			} else {
-				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						PARAM_RELATION, relationString));
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+								PARAM_RELATION, relationString).getMessage());
 			}
 		}
 
@@ -249,8 +267,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		if (linksString != null) {
 			links = Links.valueOfIgnoreCase(linksString);
 			if (links == null) {
-				throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
-						PARAM_LINKS, linksString));
+				throw new VCatException(
+						MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
+								PARAM_LINKS, linksString).getMessage());
 			}
 		}
 
@@ -270,8 +289,9 @@ public abstract class AbstractAllParams<W extends IWiki> {
 		//
 
 		if (!params.isEmpty()) {
-			throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.UnknownParameters"),
-					'\'' + StringUtils.join(params.keySet(), "', '") + '\''));
+			throw new VCatException(
+					MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.UnknownParameters"),
+							'\'' + StringUtils.join(params.keySet(), "', '") + '\'').getMessage());
 		}
 
 	}
@@ -287,18 +307,15 @@ public abstract class AbstractAllParams<W extends IWiki> {
 			params.remove(key);
 			return values[0];
 		} else {
-			throw new VCatException(String.format(Messages.getString("AbstractAllParams.Exception.ParameterRepeated"),
-					key));
+			throw new VCatException(MessageFormatter
+					.format(Messages.getString("AbstractAllParams.Exception.ParameterRepeated"), key).getMessage());
 		}
 	}
 
-	protected static String[] getAndRemoveMulti(Map<String, String[]> params, String key) throws VCatException {
+	protected static String[] getAndRemoveMulti(Map<String, String[]> params, String key) {
 		String[] values = params.get(key);
 		if (values == null) {
 			return null;
-		} else if (values.length == 0) {
-			params.remove(key);
-			return values;
 		} else {
 			params.remove(key);
 			return values;

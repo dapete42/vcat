@@ -1,6 +1,6 @@
 package vcat.cache.file;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import vcat.cache.CacheException;
 import vcat.mediawiki.IWiki;
@@ -8,11 +8,13 @@ import vcat.params.VCatParams;
 
 public class GraphFileCache<W extends IWiki> extends AbstractFileCache<VCatParams<W>> {
 
-	private final static String PREFIX = "Graph-";
+	private static final long serialVersionUID = -5892996784504997579L;
 
-	private final static String SUFFIX = ".gv";
+	private static final String PREFIX = "Graph-";
 
-	public GraphFileCache(final File cacheDirectory, final int maxAgeInSeconds) throws CacheException {
+	private static final String SUFFIX = ".gv";
+
+	public GraphFileCache(final Path cacheDirectory, final int maxAgeInSeconds) throws CacheException {
 		super(cacheDirectory, PREFIX, SUFFIX, maxAgeInSeconds);
 	}
 

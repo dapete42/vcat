@@ -9,6 +9,8 @@ import vcat.cache.IMetadataCache;
 
 public class CachedMetadataProvider implements IMetadataProvider {
 
+	private static final long serialVersionUID = 5966985791741996909L;
+
 	/** Log4j2 Logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(CachedMetadataProvider.class);
 

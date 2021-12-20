@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.slf4j.helpers.MessageFormatter;
+
 import java.util.Set;
 
 import vcat.Messages;
@@ -42,7 +45,8 @@ public class Metadata implements Serializable {
 	public String fullTitle(final String title, final int namespace) throws ApiException {
 		String namespaceName = this.getAuthoritativeName(namespace);
 		if (namespaceName == null) {
-			throw new ApiException(String.format(Messages.getString("Metadata.Exception.ArticleTitle"), namespace));
+			throw new ApiException(MessageFormatter
+					.format(Messages.getString("Metadata.Exception.ArticleTitle"), namespace).getMessage());
 		} else if (namespaceName.isEmpty()) {
 			return title;
 		} else {

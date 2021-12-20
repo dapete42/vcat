@@ -1,6 +1,8 @@
 package vcat.renderer;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import vcat.VCatException;
 import vcat.cache.CacheException;
@@ -16,32 +18,33 @@ import vcat.params.VCatParams;
 
 public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
 
+	private static final long serialVersionUID = -5780692757065984451L;
+
 	private final GraphFileCache<W> graphCache;
 
 	private final int purge;
 
 	private final RenderedFileCache<W> renderedCache;
 
-	public CachedVCatRenderer(final Graphviz graphviz, final File tempDir, final ICategoryProvider<W> categoryProvider,
-			final File cacheDir) throws VCatException {
+	public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final ICategoryProvider<W> categoryProvider,
+			final Path cacheDir) throws VCatException {
 		this(graphviz, tempDir, categoryProvider, cacheDir, 600);
 	}
 
-	public CachedVCatRenderer(final Graphviz graphviz, final File tempDir, final ICategoryProvider<W> categoryProvider,
-			final File cacheDir, final int purge) throws VCatException {
+	public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final ICategoryProvider<W> categoryProvider,
+			final Path cacheDir, final int purge) throws VCatException {
 		super(graphviz, tempDir, categoryProvider);
 		this.purge = purge;
 
-		File graphCacheDir = new File(cacheDir, "graphFile");
-		File renderedFileCacheDir = new File(cacheDir, "renderedFile");
-
-		graphCacheDir.mkdirs();
-		renderedFileCacheDir.mkdirs();
+		Path graphCacheDir = cacheDir.resolve("graphFile");
+		Path renderedFileCacheDir = cacheDir.resolve("renderedFile");
 
 		try {
+			Files.createDirectories(graphCacheDir);
 			this.graphCache = new GraphFileCache<>(graphCacheDir, this.purge);
+			Files.createDirectories(renderedFileCacheDir);
 			this.renderedCache = new RenderedFileCache<>(renderedFileCacheDir, this.purge);
-		} catch (CacheException e) {
+		} catch (CacheException | IOException e) {
 			throw new VCatException("Error while setting up caches", e);
 		}
 
@@ -49,10 +52,10 @@ public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
 	}
 
 	@Override
-	protected File createGraphFile(final AbstractAllParams<W> all) throws VCatException {
+	protected Path createGraphFile(final AbstractAllParams<W> all) throws VCatException {
 		final VCatParams<W> vCatParams = all.getVCat();
 		if (!this.graphCache.containsKey(vCatParams)) {
-			final File otherFile = super.createGraphFile(all);
+			final Path otherFile = super.createGraphFile(all);
 			try {
 				this.graphCache.putFile(vCatParams, otherFile, true);
 			} catch (CacheException e) {
@@ -63,11 +66,11 @@ public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
 	}
 
 	@Override
-	protected File createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
+	protected Path createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
 			throws VCatException {
 		final CombinedParams<W> combinedParams = all.getCombined();
 		if (!this.renderedCache.containsKey(combinedParams)) {
-			final File otherFile = super.createImagemapHtmlFile(all, imageFormat);
+			final Path otherFile = super.createImagemapHtmlFile(all, imageFormat);
 			try {
 				this.renderedCache.putFile(combinedParams, otherFile, true);
 			} catch (CacheException e) {
@@ -78,11 +81,11 @@ public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
 	}
 
 	@Override
-	protected File createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final File graphFile)
+	protected Path createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final Path graphFile)
 			throws VCatException {
 		final CombinedParams<W> combinedParams = all.getCombined();
 		if (!this.renderedCache.containsKey(combinedParams)) {
-			final File otherFile = super.createRenderedFileFromGraphFile(all, graphFile);
+			final Path otherFile = super.createRenderedFileFromGraphFile(all, graphFile);
 			try {
 				this.renderedCache.putFile(combinedParams, otherFile, true);
 			} catch (CacheException e) {
@@ -92,9 +95,25 @@ public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
 		return this.renderedCache.getCacheFile(combinedParams);
 	}
 
-	private void purge() {
-		this.graphCache.purge();
-		this.renderedCache.purge();
+	private void purge() throws VCatException {
+		VCatException e = null;
+		try {
+			this.graphCache.purge();
+		} catch (CacheException ee) {
+			e = new VCatException("Error purging caches", ee);
+		}
+		try {
+			this.renderedCache.purge();
+		} catch (CacheException ee) {
+			if (e == null) {
+				e = new VCatException("Error purging caches", ee);
+			} else {
+				e.addSuppressed(ee);
+			}
+		}
+		if (e != null) {
+			throw e;
+		}
 	}
 
 	@Override

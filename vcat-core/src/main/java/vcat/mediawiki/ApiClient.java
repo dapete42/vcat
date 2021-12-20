@@ -25,6 +25,7 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.slf4j.helpers.MessageFormatter;
 
 import com.google.common.collect.Lists;
 
@@ -32,8 +33,10 @@ import vcat.Messages;
 
 public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetadataProvider {
 
+	private static final long serialVersionUID = -3737560080769969852L;
+
 	/** Maximum number of titles parameters to use in one request. */
-	private final static int TITLES_MAX = 50;
+	private static final int TITLES_MAX = 50;
 
 	private final HttpClientBuilder clientBuilder;
 
@@ -91,12 +94,13 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
 			return jsonReader.readObject();
 		} catch (IllegalStateException | IOException e) {
 			// IOException will be thrown for all HTTP problems
-			throw new ApiException(
-					String.format(Messages.getString("ApiClient.Exception.HTTP"), request.getURI().toString()), e);
-		} catch (JsonException e) {
-			throw new ApiException(
-					String.format(Messages.getString("ApiClient.Exception.ParsingJSON"), request.getURI().toString()),
+			throw new ApiException(MessageFormatter
+					.format(Messages.getString("ApiClient.Exception.HTTP"), request.getURI().toString()).getMessage(),
 					e);
+		} catch (JsonException e) {
+			throw new ApiException(MessageFormatter
+					.format(Messages.getString("ApiClient.Exception.ParsingJSON"), request.getURI().toString())
+					.getMessage(), e);
 		}
 	}
 

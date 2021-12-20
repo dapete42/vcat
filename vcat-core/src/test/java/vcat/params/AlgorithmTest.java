@@ -4,27 +4,25 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import vcat.params.Algorithm;
-
 /**
  * JUnit tests for the {@link Algorithm} enumeration.
  * 
  * @author Peter Schlömer
  */
-public class AlgorithmTest {
+class AlgorithmTest {
 
 	/**
 	 * Test for all getter methods of the {@link Algorithm} enumeration.
 	 */
 	@Test
-	public void testGetters() {
+	void testGetters() {
 		for (Algorithm algorithm : Algorithm.values()) {
-			algorithm.getProgram();
+			assertNotNull(algorithm.getProgram());
 		}
 	}
 
 	@Test
-	public void testValueOfIgnoreCase() {
+	void testValueOfIgnoreCase() {
 		for (Algorithm algorithm : Algorithm.values()) {
 			final String name = algorithm.name();
 			assertEquals(algorithm, Algorithm.valueOfIgnoreCase(name));

@@ -4,20 +4,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import vcat.params.OutputFormat;
-
 /**
  * JUnit tests for the {@link OutputFormat} enumeration.
  * 
  * @author Peter Schlömer
  */
-public class OutputFormatTest {
+class OutputFormatTest {
 
 	/**
 	 * Test for the {@link OutputFormat#valueOfIgnoreCase(String)} method.
 	 */
 	@Test
-	public void testValueOfIgnoreCase() {
+	void testValueOfIgnoreCase() {
 		for (OutputFormat format : OutputFormat.values()) {
 			for (String name : format.getParameterNames()) {
 				// Get all parameter names for all values with upper/lower case
@@ -34,14 +32,31 @@ public class OutputFormatTest {
 	 * Test for all getter methods of the {@link OutputFormat} enumeration.
 	 */
 	@Test
-	public void testGetters() {
+	void testGetters() {
 		for (OutputFormat format : OutputFormat.values()) {
-			format.getFileExtension();
-			format.getGraphvizTypeParameter();
-			format.getImageMapOutputFormat();
-			format.getMimeType();
-			format.getParameterNames();
-			format.hasImageMapOutputFormat();
+			assertNotNull(format.getFileExtension());
+			assertNotNull(format.getParameterNames());
+			switch (format) {
+			case _HTMLGIF:
+			case _HTMLPNG:
+			case GraphvizRaw:
+				assertNull(format.getGraphvizTypeParameter());
+				break;
+			default:
+				assertNotNull(format.getGraphvizTypeParameter());
+			}
+			switch (format) {
+			case _Imagemap:
+				assertNull(format.getMimeType());
+				break;
+			default:
+				assertNotNull(format.getMimeType());
+			}
+			if (format.hasImageMapOutputFormat()) {
+				assertNotNull(format.getImageMapOutputFormat());
+			} else {
+				assertNull(format.getImageMapOutputFormat());
+			}
 		}
 	}
 

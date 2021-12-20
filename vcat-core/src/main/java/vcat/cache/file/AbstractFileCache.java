@@ -1,20 +1,20 @@
 package vcat.cache.file;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -29,13 +29,15 @@ import vcat.util.HashHelper;
  * @param <K>
  *            Class used for key.
  */
-public abstract class AbstractFileCache<K extends Serializable> {
+public abstract class AbstractFileCache<K extends Serializable> implements Serializable {
+
+	private static final long serialVersionUID = -1626880286588890986L;
 
 	/** Log4j2 Logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileCache.class);
 
 	/** The cache directory. */
-	protected final File cacheDirectory;
+	protected final Path cacheDirectory;
 
 	/** Maximum age of cached items in seconds */
 	protected int maxAgeInSeconds;
@@ -60,11 +62,12 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	 * @throws CacheException
 	 *             If the directory does not exist or is not writeable.
 	 */
-	protected AbstractFileCache(File cacheDirectory, String prefix, String suffix, final int maxAgeInSeconds)
+	protected AbstractFileCache(Path cacheDirectory, String prefix, String suffix, final int maxAgeInSeconds)
 			throws CacheException {
-		if (!cacheDirectory.exists() || !cacheDirectory.isDirectory() || !cacheDirectory.canWrite()) {
-			throw new CacheException(String.format(Messages.getString("AbstractFileCache.Exception.DirMustExist"),
-					cacheDirectory.getAbsolutePath()));
+		if (!Files.exists(cacheDirectory) || !Files.isDirectory(cacheDirectory) || !Files.isWritable(cacheDirectory)) {
+			throw new CacheException(MessageFormatter
+					.format(Messages.getString("AbstractFileCache.Exception.DirMustExist"), cacheDirectory)
+					.getMessage());
 		}
 		this.cacheDirectory = cacheDirectory;
 		this.prefix = prefix;
@@ -72,33 +75,34 @@ public abstract class AbstractFileCache<K extends Serializable> {
 		this.maxAgeInSeconds = maxAgeInSeconds;
 	}
 
-	public synchronized void clear() {
+	public synchronized void clear() throws CacheException {
 		int clearedFiles = 0;
-		for (File file : this.getAllFiles()) {
-			if (file.delete()) {
+		for (Path path : this.getAllFiles()) {
+			try {
+				Files.delete(path);
 				clearedFiles++;
-			} else {
-				LOGGER.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeleteClearing"),
-						file.getAbsolutePath()));
+			} catch (IOException e) {
+				LOGGER.warn(Messages.getString("AbstractFileCache.Warn.CouldNotDeleteClearing"), path, e);
 			}
 		}
 		if (clearedFiles > 0) {
-			LOGGER.info(String.format(Messages.getString("AbstractFileCache.Info.Cleared"), clearedFiles));
+			LOGGER.info(Messages.getString("AbstractFileCache.Info.Cleared"), clearedFiles);
 		}
 	}
 
 	public synchronized boolean containsKey(K key) {
-		return this.getCacheFile(key).exists();
+		return Files.exists(this.getCacheFile(key));
 	}
 
 	public synchronized byte[] get(K key) throws CacheException {
-		File cacheFile = this.getCacheFile(key);
-		if (cacheFile.exists()) {
-			try (InputStream inputStream = new FileInputStream(cacheFile)) {
+		Path cacheFile = this.getCacheFile(key);
+		if (Files.exists(cacheFile)) {
+			try (InputStream inputStream = Files.newInputStream(cacheFile)) {
 				return IOUtils.toByteArray(inputStream);
 			} catch (FileNotFoundException e) {
-				throw new CacheException(String.format(Messages.getString("AbstractFileCache.Exception.FileNotFound"),
-						cacheFile.getAbsolutePath()));
+				throw new CacheException(MessageFormatter
+						.format(Messages.getString("AbstractFileCache.Exception.FileNotFound"), cacheFile)
+						.getMessage());
 			} catch (IOException e) {
 				throw new CacheException(e);
 			}
@@ -108,20 +112,23 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	}
 
 	/**
-	 * @return Array of all files used by the cache.
+	 * @return List of all files used by the cache.
 	 */
-	private File[] getAllFiles() {
-		return this.cacheDirectory.listFiles((FilenameFilter) FileFilterUtils.prefixFileFilter(this.prefix));
+	private List<Path> getAllFiles() throws CacheException {
+		try (Stream<Path> pathStream = Files.list(cacheDirectory)) {
+			return pathStream.filter(s -> s.getFileName().toString().startsWith(this.prefix))
+					.collect(Collectors.toList());
+		} catch (IOException e) {
+			throw new CacheException("Error reading list of files", e);
+		}
 	}
 
 	public synchronized InputStream getAsInputStream(K key) throws CacheException {
 		if (this.containsKey(key)) {
 			try {
-				return new FileInputStream(this.getCacheFile(key));
-			} catch (FileNotFoundException e) {
-				String message = Messages.getString("AbstractFileCache.Exception.FileNotFoundShouldNotHappen");
-				LOGGER.error(message, e);
-				throw new CacheException(message, e);
+				return Files.newInputStream(this.getCacheFile(key));
+			} catch (Exception e) {
+				throw new CacheException(Messages.getString("AbstractFileCache.Exception.IOReading"), e);
 			}
 		} else {
 			return null;
@@ -131,7 +138,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	/**
 	 * @return The cache directory.
 	 */
-	public File getCacheDirectory() {
+	public Path getCacheDirectory() {
 		return this.cacheDirectory;
 	}
 
@@ -140,8 +147,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
 	 *            Key.
 	 * @return The file the item with the specified key is stored in.
 	 */
-	public File getCacheFile(K key) {
-		return new File(this.cacheDirectory, this.getCacheFilename(key));
+	public Path getCacheFile(K key) {
+		return this.cacheDirectory.resolve(this.getCacheFilename(key));
 	}
 
 	/**
@@ -164,53 +171,61 @@ public abstract class AbstractFileCache<K extends Serializable> {
 		return HashHelper.sha256Hex(key);
 	}
 
-	public synchronized void purge() {
+	public synchronized void purge() throws CacheException {
 		long lastModifiedThreshold = System.currentTimeMillis() - (1000L * this.maxAgeInSeconds);
 		int purgedFiles = 0;
-		for (File file : this.getAllFiles()) {
-			if (file.lastModified() < lastModifiedThreshold) {
-				if (file.delete()) {
+		for (Path path : this.getAllFiles()) {
+			if (path.toFile().lastModified() < lastModifiedThreshold) {
+				try {
+					Files.delete(path);
 					purgedFiles++;
-				} else {
-					LOGGER.warn(String.format(Messages.getString("AbstractFileCache.Warn.CouldNotDeletePurging"),
-							file.getAbsolutePath()));
+				} catch (IOException e) {
+					LOGGER.warn(Messages.getString("AbstractFileCache.Warn.CouldNotDeletePurging"), path, e);
 				}
 			}
 		}
 		if (purgedFiles > 0) {
-			LOGGER.info(String.format(Messages.getString("AbstractFileCache.Info.Purged"), purgedFiles));
+			LOGGER.info(Messages.getString("AbstractFileCache.Info.Purged"), purgedFiles);
 		}
 	}
 
 	public synchronized void put(K key, byte[] value) throws CacheException {
-		try (FileOutputStream outputStream = new FileOutputStream(this.getCacheFile(key))) {
+		try (OutputStream outputStream = Files.newOutputStream(this.getCacheFile(key))) {
 			this.writeValueToStream(value, outputStream);
 		} catch (IOException e) {
 			throw new CacheException(Messages.getString("AbstractFileCache.Exception.WriteFailed"), e);
 		}
 	}
 
-	public synchronized void putFile(K key, File file, boolean move) throws CacheException {
-		File cacheFile = this.getCacheFile(key);
+	public synchronized void putFile(K key, Path file, boolean move) throws CacheException {
+		Path cacheFile = this.getCacheFile(key);
 		// Delete file in cache, if it exists
-		cacheFile.delete();
+		try {
+			Files.deleteIfExists(cacheFile);
+		} catch (IOException e) {
+			throw new CacheException(Messages.getString("AbstractFileCache.Exception.DeleteFailed"), e);
+		}
 		if (move) {
 			try {
-				FileUtils.moveFile(file, cacheFile);
+				Files.move(file, cacheFile);
 			} catch (IOException e) {
 				throw new CacheException(Messages.getString("AbstractFileCache.Exception.MoveFailed"), e);
 			}
 		} else {
 			try {
-				FileUtils.copyFile(file, cacheFile);
+				Files.copy(file, cacheFile);
 			} catch (IOException e) {
 				throw new CacheException(Messages.getString("AbstractFileCache.Exception.MoveFailed"), e);
 			}
 		}
 	}
 
-	public synchronized void remove(K key) {
-		this.getCacheFile(key).delete();
+	public synchronized void remove(K key) throws CacheException {
+		try {
+			Files.delete(this.getCacheFile(key));
+		} catch (IOException e) {
+			throw new CacheException(Messages.getString("AbstractFileCache.Exception.DeleteFailed"), e);
+		}
 	}
 
 	protected synchronized void writeValueToStream(byte[] value, OutputStream outputStream) throws CacheException {

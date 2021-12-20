@@ -1,5 +1,9 @@
 package vcat.params;
 
+import java.io.Serializable;
+
+import org.slf4j.helpers.MessageFormatter;
+
 import vcat.AbstractVCat;
 import vcat.Messages;
 import vcat.VCatException;
@@ -8,7 +12,9 @@ import vcat.VCatForSubcategories;
 import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IWiki;
 
-public class VCatFactory<W extends IWiki> {
+public class VCatFactory<W extends IWiki> implements Serializable {
+
+	private static final long serialVersionUID = 5190043989637851420L;
 
 	private final ICategoryProvider<W> categoryProvider;
 
@@ -24,8 +30,9 @@ public class VCatFactory<W extends IWiki> {
 		case Subcategory:
 			return new VCatForSubcategories<>(all, this.categoryProvider);
 		default:
-			throw new VCatException(String.format(Messages.getString("VCatFactory.Exception.RelationTypeNotSupported"),
-					relation.name()));
+			throw new VCatException(MessageFormatter
+					.format(Messages.getString("VCatFactory.Exception.RelationTypeNotSupported"), relation.name())
+					.getMessage());
 		}
 	}
 

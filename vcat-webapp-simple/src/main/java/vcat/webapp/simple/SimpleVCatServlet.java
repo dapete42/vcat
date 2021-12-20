@@ -1,6 +1,10 @@
 package vcat.webapp.simple;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -17,7 +21,6 @@ import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
-import vcat.mediawiki.ICategoryProvider;
 import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.SimpleWikimediaWiki;
 import vcat.params.AllParams;
@@ -32,15 +35,13 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 
 	private static final long serialVersionUID = 8952525278394777354L;
 
-	private static int PURGE = 600;
+	private static final int PURGE = 600;
 
-	private static int PURGE_METADATA = 86400;
+	private static final int PURGE_METADATA = 86400;
 
-	private ICategoryProvider<SimpleWikimediaWiki> categoryProvider;
+	private static IMetadataProvider metadataProvider;
 
-	private IMetadataProvider metadataProvider;
-
-	private IVCatRenderer<SimpleWikimediaWiki> vCatRenderer;
+	private static IVCatRenderer<SimpleWikimediaWiki> vCatRenderer;
 
 	@Override
 	public String getServletInfo() {
@@ -49,22 +50,21 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 
 	@Override
 	public void init() throws ServletException {
-		final File cacheDir = new File(Config.getString(Config.CONFIG_CACHEDIR));
-		final File apiDir = new File(cacheDir, "api");
-		final File metadataDir = new File(cacheDir, "metadata");
-		final File tempDir = (File) this.getServletContext().getAttribute(ServletContext.TEMPDIR);
-		apiDir.mkdirs();
-		metadataDir.mkdirs();
+		final Path cacheDir = Paths.get(Config.getString(Config.CONFIG_CACHEDIR));
+		final Path apiDir = cacheDir.resolve("api");
+		final Path metadataDir = cacheDir.resolve("metadata");
+		final Path tempDir = ((File) this.getServletContext().getAttribute(ServletContext.TEMPDIR)).toPath();
 		try {
-			final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(new File("/usr/bin")), 1);
+			final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(Paths.get("/usr/bin")), 1);
+			Files.createDirectories(apiDir);
 			final IApiCache apiCache = new ApiFileCache(apiDir, PURGE);
 			final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<>(apiCache);
-			this.categoryProvider = apiClient;
+			Files.createDirectories(metadataDir);
 			final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, PURGE_METADATA);
-			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-			this.vCatRenderer = new QueuedVCatRenderer<>(
-					new CachedVCatRenderer<>(graphviz, tempDir, this.categoryProvider, cacheDir, PURGE), 10);
-		} catch (CacheException | VCatException e) {
+			metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
+			vCatRenderer = new QueuedVCatRenderer<>(
+					new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir, PURGE), 10);
+		} catch (CacheException | IOException | VCatException e) {
 			throw new ServletException(e);
 		}
 	}
@@ -72,8 +72,7 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 	@Override
 	protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
 		try {
-			return this.vCatRenderer
-					.render(new AllParams(req.getParameterMap(), req.getRequestURI(), this.metadataProvider));
+			return vCatRenderer.render(new AllParams(req.getParameterMap(), req.getRequestURI(), metadataProvider));
 		} catch (VCatException e) {
 			throw new ServletException(e);
 		}

@@ -1,6 +1,8 @@
 package vcat.mediawiki;
 
-public interface IMetadataProvider {
+import java.io.Serializable;
+
+public interface IMetadataProvider extends Serializable {
 
 	public abstract Metadata requestMetadata(IWiki wiki) throws ApiException;
 

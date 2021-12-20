@@ -1,15 +1,18 @@
 package vcat.toolforge.base;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import vcat.VCatException;
 
@@ -20,41 +23,50 @@ public class MyCnfConfig {
 
 	private static final String MY_CNF = "replica.my.cnf";
 
-	public String user;
+	private String user;
 
-	public String password;
+	private String password;
+
+	public String getUser() {
+		return user;
+	}
+
+	public String getPassword() {
+		return password;
+	}
 
 	public boolean readFromMyCnf() throws VCatException {
 
-		File myCnfFile = new File(System.getProperty("user.home"), MY_CNF);
+		Path myCnfFile = Paths.get(System.getProperty("user.home"), MY_CNF);
 
 		Properties properties = new Properties();
-		try {
-			BufferedReader propertiesReader = new BufferedReader(
-					new InputStreamReader(new FileInputStream(myCnfFile), StandardCharsets.UTF_8));
-			properties.load(propertiesReader);
+		try (InputStream inputStream = Files.newInputStream(myCnfFile);
+				InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+				BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+			properties.load(bufferedReader);
 		} catch (IOException e) {
-			throw new VCatException(String.format("Error reading file '%s'", myCnfFile.getAbsolutePath()), e);
+			throw new VCatException(
+					MessageFormatter.format("Error reading file '{}'", myCnfFile.toAbsolutePath()).getMessage(), e);
 		}
 
 		int errors = 0;
 
-		this.user = properties.getProperty("user");
-		if (this.user == null || this.user.isEmpty()) {
-			LOGGER.error(String.format("Property '%s' missing or empty", "user"));
+		user = properties.getProperty("user");
+		if (user == null || user.isEmpty()) {
+			LOGGER.error("Property '{}' missing or empty", "user");
 			errors++;
 		}
-		if (this.user.startsWith("'") && this.user.endsWith("'")) {
-			this.user = this.user.substring(1, this.user.length() - 1);
+		if (user != null && user.startsWith("'") && user.endsWith("'")) {
+			user = user.substring(1, user.length() - 1);
 		}
 
-		this.password = properties.getProperty("password");
-		if (this.password == null || this.password.isEmpty()) {
-			LOGGER.error(String.format("Property '%s' missing or empty", "password"));
+		password = properties.getProperty("password");
+		if (password == null || password.isEmpty()) {
+			LOGGER.error("Property '{}' missing or empty", "password");
 			errors++;
 		}
-		if (this.password.startsWith("'") && this.password.endsWith("'")) {
-			this.password = this.password.substring(1, this.password.length() - 1);
+		if (password != null && password.startsWith("'") && password.endsWith("'")) {
+			password = password.substring(1, password.length() - 1);
 		}
 
 		return errors == 0;

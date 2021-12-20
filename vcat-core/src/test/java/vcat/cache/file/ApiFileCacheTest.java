@@ -9,34 +9,39 @@ import java.nio.file.Path;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.apache.commons.io.file.PathUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import vcat.cache.CacheException;
 
-public class ApiFileCacheTest {
+class ApiFileCacheTest {
 
 	private Path tempDirectory;
 
 	private ApiFileCache underTest;
 
 	@BeforeEach
-	public void setUp() throws IOException, CacheException {
+	void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
-		underTest = new ApiFileCache(tempDirectory.toFile(), 10);
+		underTest = new ApiFileCache(tempDirectory, 10);
 	}
 
 	@AfterEach
-	public void tearDown() throws IOException {
-		underTest.clear();
+	void tearDown() throws IOException {
+		try {
+			underTest.clear();
+		} catch (CacheException e) {
+			// ignore
+		}
 		if (tempDirectory != null) {
-			Files.delete(tempDirectory);
+			PathUtils.deleteDirectory(tempDirectory);
 		}
 	}
 
 	@Test
-	public void testPutAndGetJSONObject() throws CacheException {
+	void testPutAndGetJSONObject() throws CacheException {
 
 		final JsonObject testObject = Json.createObjectBuilder().add("test", 123).build();
 

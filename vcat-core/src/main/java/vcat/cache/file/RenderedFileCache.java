@@ -1,6 +1,6 @@
 package vcat.cache.file;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import vcat.cache.CacheException;
 import vcat.mediawiki.IWiki;
@@ -8,11 +8,13 @@ import vcat.params.CombinedParams;
 
 public class RenderedFileCache<W extends IWiki> extends AbstractFileCache<CombinedParams<W>> {
 
+	private static final long serialVersionUID = 6473652038986724784L;
+
 	private static final String PREFIX = "RenderedFile-";
 
 	private static final String SUFFIX = "";
 
-	public RenderedFileCache(final File cacheDirectory, final int maxAgeInSeconds) throws CacheException {
+	public RenderedFileCache(final Path cacheDirectory, final int maxAgeInSeconds) throws CacheException {
 		super(cacheDirectory, PREFIX, SUFFIX, maxAgeInSeconds);
 	}
 

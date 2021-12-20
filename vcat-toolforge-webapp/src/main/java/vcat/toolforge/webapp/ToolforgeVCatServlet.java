@@ -1,7 +1,10 @@
 package vcat.toolforge.webapp;
 
 import java.beans.PropertyVetoException;
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -10,11 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import vcat.VCatException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
@@ -66,11 +68,11 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
 	private static final int VCAT_MAX_QUEUE = 20;
 
-	private QueuedVCatRenderer<ToolforgeWiki> vCatRenderer;
+	private static QueuedVCatRenderer<ToolforgeWiki> vCatRenderer;
 
-	private IMetadataProvider metadataProvider;
+	private static IMetadataProvider metadataProvider;
 
-	private ToolforgeWikiProvider toolforgeWikiProvider;
+	private static ToolforgeWikiProvider toolforgeWikiProvider;
 
 	@Override
 	public String getServletInfo() {
@@ -94,8 +96,8 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 			} catch (PropertyVetoException e) {
 				// ignore
 			}
-			cpds.setUser(configMyCnf.user);
-			cpds.setPassword(configMyCnf.password);
+			cpds.setUser(configMyCnf.getUser());
+			cpds.setPassword(configMyCnf.getPassword());
 			// Stay small and close connections quickly - this is only used for metadata for now, so it's not used much
 			cpds.setInitialPoolSize(1);
 			cpds.setMinPoolSize(0);
@@ -105,10 +107,10 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 			cpds.setMaxConnectionAge(3600);
 
 			// Provider for Wikimedia Toolforge wiki information
-			this.toolforgeWikiProvider = new ToolforgeWikiProvider(cpds);
+			toolforgeWikiProvider = new ToolforgeWikiProvider(cpds);
 
 			// Use database credentials to create a secret prefix for caches
-			final String redisSecret = DigestUtils.sha256Hex(configMyCnf.user + ':' + configMyCnf.password);
+			final String redisSecret = DigestUtils.sha256Hex(configMyCnf.getUser() + ':' + configMyCnf.getPassword());
 
 			final String redisApiCacheKeyPrefix = redisSecret + "-vcat-cache-api-";
 			final String redisMetadataCacheKeyPrefix = redisSecret + "-vcat-cache-metadata-";
@@ -136,27 +138,28 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 			final CachedApiClient<ToolforgeWiki> apiClient = new CachedApiClient<>(apiCache);
 
 			// Metadata provider
-			this.metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
+			metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
 
 			// Home directory
-			final File homeDirectory = new File(System.getProperty("user.home"));
+			final Path homeDirectory = Paths.get("user.home");
 
 			// For cache of Graphviz files and rendered images, use this directory
-			final File cacheDir = new File(homeDirectory, HOME_CACHE_DIR);
-			cacheDir.mkdirs();
+			final Path cacheDir = homeDirectory.resolve(HOME_CACHE_DIR);
 			// Temporary directory for Graphviz files and rendered images
-			final File tempDir = new File(homeDirectory, HOME_TEMP_DIR);
-			tempDir.mkdirs();
+			final Path tempDir = homeDirectory.resolve(HOME_TEMP_DIR);
+
+			Files.createDirectories(cacheDir);
+			Files.createDirectories(tempDir);
 
 			// Use gridserver to render Graphviz files. The vCat is already queued, so this one does not have to be.
-			final Graphviz graphviz = new GraphvizGridClient(jedisPool, redisSecret, new File(homeDirectory, "bin"),
-					new File(GRAPHVIZ_DIR));
+			final Graphviz graphviz = new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"),
+					Paths.get(GRAPHVIZ_DIR));
 
 			// Create renderer
-			this.vCatRenderer = new QueuedVCatRenderer<>(
-					new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir), VCAT_THREADS);
+			vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir),
+					VCAT_THREADS);
 
-		} catch (VCatException e) {
+		} catch (IOException | VCatException e) {
 			throw new ServletException(e);
 		}
 
@@ -165,7 +168,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 	@Override
 	protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
 
-		if (this.vCatRenderer.getNumberOfQueuedJobs() > VCAT_MAX_QUEUE) {
+		if (vCatRenderer.getNumberOfQueuedJobs() > VCAT_MAX_QUEUE) {
 			throw new ServletException(Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
 		}
 
@@ -178,8 +181,8 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 		}
 
 		try {
-			return this.vCatRenderer.render(new AllParamsToolforge(parameterMap, this.getHttpRequestURI(req),
-					this.metadataProvider, this.toolforgeWikiProvider));
+			return vCatRenderer.render(new AllParamsToolforge(parameterMap, this.getHttpRequestURI(req),
+					metadataProvider, toolforgeWikiProvider));
 		} catch (VCatException e) {
 			throw new ServletException(e);
 		}
