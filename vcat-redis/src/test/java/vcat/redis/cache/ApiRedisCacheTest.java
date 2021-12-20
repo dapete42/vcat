@@ -11,12 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 
+import redis.clients.jedis.Connection;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
 import vcat.cache.CacheException;
 
-public class ApiRedisCacheTest {
+class ApiRedisCacheTest {
 
 	private final static String REDIS_PREFIX = "prefix-";
 
@@ -27,7 +28,7 @@ public class ApiRedisCacheTest {
 	private ApiRedisCache underTest;
 
 	@BeforeEach
-	public void beforeEach() {
+	void beforeEach() {
 
 		jedisPoolMock = mock(JedisPool.class, Answers.RETURNS_DEEP_STUBS);
 
@@ -39,7 +40,7 @@ public class ApiRedisCacheTest {
 	}
 
 	@Test
-	public void getJSONObject() throws CacheException {
+	void getJSONObject() throws CacheException {
 
 		final JsonObject jsonIn = Json.createObjectBuilder().add("test1", 1).add("test2", 2).build();
 
@@ -53,7 +54,7 @@ public class ApiRedisCacheTest {
 	}
 
 	@Test
-	public void getJSONObjectInvalid() throws CacheException {
+	void getJSONObjectInvalid() throws CacheException {
 
 		when(jedisMock.get(eq(underTest.jedisKey("abc")))).thenReturn("not json");
 
@@ -64,26 +65,25 @@ public class ApiRedisCacheTest {
 	}
 
 	@Test
-	public void getJSONObjectNull() throws CacheException {
+	void getJSONObjectNull() throws CacheException {
 
 		assertNull(underTest.getJSONObject("abc"));
 
 	}
 
 	@Test
-	public void put() throws CacheException {
+	void put() throws CacheException {
 
-		final Transaction transactionMock = mock(Transaction.class);
-		when(jedisMock.multi()).thenReturn(transactionMock);
+		final Connection connectionMock = mock(Connection.class);
+		final Transaction transactionSpy = spy(new Transaction(connectionMock, true));
+		doReturn(transactionSpy).when(underTest).newTransaction(any(Connection.class));
 		final JsonObject json = Json.createObjectBuilder().add("test1", 1).add("test2", 2).build();
 
 		underTest.put("abc", json);
 
 		final String key = underTest.jedisKey("abc");
-		verify(jedisMock).multi();
-		verify(transactionMock).set(eq(key), eq(json.toString()));
-		verify(transactionMock).expire(eq(key), eq(1000));
-		verify(transactionMock).exec();
+		verify(transactionSpy).set(eq(key), eq(json.toString()));
+		verify(transactionSpy).expire(eq(key), eq(1000L));
 
 	}
 

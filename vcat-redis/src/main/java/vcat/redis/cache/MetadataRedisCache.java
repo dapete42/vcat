@@ -54,12 +54,10 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 	@Override
 	public synchronized void put(IWiki wiki, Metadata metadata) throws CacheException {
 		final byte[] keyBytes = this.jedisKeyBytes(wiki.getApiUrl());
-		try (Jedis jedis = this.jedisPool.getResource()) {
-			Transaction t = jedis.multi();
+		transaction(t -> {
 			t.set(keyBytes, SerializationUtils.serialize(metadata));
 			t.expire(keyBytes, this.maxAgeInSeconds);
-			t.exec();
-		}
+		});
 	}
 
 }

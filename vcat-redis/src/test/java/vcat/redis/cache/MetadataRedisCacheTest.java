@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 
+import redis.clients.jedis.Connection;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Transaction;
@@ -19,9 +20,11 @@ import vcat.cache.CacheException;
 import vcat.mediawiki.IWiki;
 import vcat.mediawiki.Metadata;
 
-public class MetadataRedisCacheTest {
+class MetadataRedisCacheTest {
 
 	private class TestWiki implements IWiki {
+
+		private static final long serialVersionUID = -824931148265479616L;
 
 		private final String apiUrl;
 
@@ -55,7 +58,7 @@ public class MetadataRedisCacheTest {
 	private MetadataRedisCache underTest;
 
 	@BeforeEach
-	public void beforeEach() {
+	void beforeEach() {
 
 		jedisPoolMock = mock(JedisPool.class, Answers.RETURNS_DEEP_STUBS);
 
@@ -67,8 +70,8 @@ public class MetadataRedisCacheTest {
 	}
 
 	@Test
-	@Disabled
-	public void getMetadata() throws CacheException {
+	@Disabled("test does not work")
+	void getMetadata() throws CacheException {
 
 		final Metadata metadataIn = new Metadata("articlepath", "server", Collections.singletonMap(0, "0"),
 				Collections.singletonMap("1", 1));
@@ -84,8 +87,8 @@ public class MetadataRedisCacheTest {
 	}
 
 	@Test
-	@Disabled
-	public void getMetadataInvalid() throws CacheException {
+	@Disabled("test does not work")
+	void getMetadataInvalid() throws CacheException {
 
 		final IWiki wiki = new TestWiki("apiUrl");
 		when(jedisMock.get(eq(underTest.jedisKeyBytes(wiki.getApiUrl())))).thenReturn(new byte[] { 1, 2, 3 });
@@ -97,7 +100,7 @@ public class MetadataRedisCacheTest {
 	}
 
 	@Test
-	public void getMetadataNull() throws CacheException {
+	void getMetadataNull() throws CacheException {
 
 		final IWiki wiki = new TestWiki("apiUrl");
 
@@ -106,10 +109,11 @@ public class MetadataRedisCacheTest {
 	}
 
 	@Test
-	public void put() throws CacheException {
+	void put() throws CacheException {
 
-		final Transaction transactionMock = mock(Transaction.class);
-		when(jedisMock.multi()).thenReturn(transactionMock);
+		final Connection connectionMock = mock(Connection.class);
+		final Transaction transactionSpy = spy(new Transaction(connectionMock, true));
+		doReturn(transactionSpy).when(underTest).newTransaction(any(Connection.class));
 		final Metadata metadata = new Metadata("articlepath", "server", Collections.singletonMap(0, "0"),
 				Collections.singletonMap("1", 1));
 		final IWiki wiki = new TestWiki("apiUrl");
@@ -117,10 +121,8 @@ public class MetadataRedisCacheTest {
 		underTest.put(wiki, metadata);
 
 		final byte[] keyBytes = underTest.jedisKeyBytes(wiki.getApiUrl());
-		verify(jedisMock).multi();
-		verify(transactionMock).set(eq(keyBytes), eq(SerializationUtils.serialize(metadata)));
-		verify(transactionMock).expire(eq(keyBytes), eq(1000));
-		verify(transactionMock).exec();
+		verify(transactionSpy).set(eq(keyBytes), eq(SerializationUtils.serialize(metadata)));
+		verify(transactionSpy).expire(eq(keyBytes), eq(1000L));
 
 	}
 
