@@ -19,6 +19,8 @@ import vcat.util.HashHelper;
 
 public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
+	private static final long serialVersionUID = 7817745519732907506L;
+
 	/** Log4j2 Logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(QueuedVCatRenderer.class);
 
@@ -89,7 +91,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 			if (this.jobs.containsKey(jobId)) {
 				// If the job is alread queued or running, we need to record that we are also waiting for it to finish.
 				this.jobs.put(jobId, this.jobs.get(jobId) + 1);
-				LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId));
+				LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId);
 				// Get lock
 				lock = jobLocks.get(jobId);
 			} else {
@@ -101,7 +103,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
 				this.executorService.execute(() -> runJob(jobId, all));
 
-				LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId));
+				LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId);
 			}
 		}
 
@@ -111,7 +113,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 				try {
 					lock.wait();
 				} catch (InterruptedException e) {
-					// ignore
+					Thread.currentThread().interrupt();
 				}
 			}
 		}
@@ -153,7 +155,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 	 */
 	private void runJob(final String jobId, final AbstractAllParams<W> all) {
 
-		LOGGER.info(String.format(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId));
+		LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId);
 
 		Object lock = jobLocks.get(jobId);
 		synchronized (lock) {

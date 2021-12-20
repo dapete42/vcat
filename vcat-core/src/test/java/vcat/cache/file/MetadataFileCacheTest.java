@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 
+import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,28 +17,33 @@ import vcat.cache.CacheException;
 import vcat.mediawiki.Metadata;
 import vcat.test.TestWiki;
 
-public class MetadataFileCacheTest {
+class MetadataFileCacheTest {
 
 	private Path tempDirectory;
 
 	private MetadataFileCache underTest;
 
 	@BeforeEach
-	public void setUp() throws IOException, CacheException {
+	void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
-		underTest = new MetadataFileCache(tempDirectory.toFile(), 10);
+		underTest = new MetadataFileCache(tempDirectory, 10);
 	}
 
 	@AfterEach
-	public void tearDown() throws IOException {
-		underTest.clear();
-		if (tempDirectory != null) {
-			Files.delete(tempDirectory);
+	void tearDown() throws IOException {
+		try {
+			underTest.clear();
+		} catch (CacheException e) {
+			// ignore
 		}
+		if (tempDirectory != null) {
+			PathUtils.deleteDirectory(tempDirectory);
+		}
+
 	}
 
 	@Test
-	public void testGetMetadataInvalidData() throws CacheException {
+	void testGetMetadataInvalidData() throws CacheException {
 
 		TestWiki wiki = new TestWiki();
 
@@ -50,7 +56,7 @@ public class MetadataFileCacheTest {
 	}
 
 	@Test
-	public void testGetMetadataNull() throws CacheException {
+	void testGetMetadataNull() throws CacheException {
 
 		TestWiki wiki = new TestWiki();
 
@@ -59,7 +65,7 @@ public class MetadataFileCacheTest {
 	}
 
 	@Test
-	public void testGetMetadataWrongType() throws CacheException {
+	void testGetMetadataWrongType() throws CacheException {
 
 		TestWiki wiki = new TestWiki();
 
@@ -72,7 +78,7 @@ public class MetadataFileCacheTest {
 	}
 
 	@Test
-	public void testPutAndGetMetadata() throws CacheException {
+	void testPutAndGetMetadata() throws CacheException {
 
 		Metadata testMetadata = new Metadata("articlepath", "server", Collections.singletonMap(1, "test"),
 				Collections.singletonMap("test", 1));

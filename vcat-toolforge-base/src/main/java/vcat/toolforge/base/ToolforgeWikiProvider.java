@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.slf4j.helpers.MessageFormatter;
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import vcat.VCatException;
@@ -18,14 +20,14 @@ public class ToolforgeWikiProvider {
 	}
 
 	public ToolforgeWiki fromDbname(final String dbnameParam) throws VCatException {
-		try (Connection connection = this.cpds.getConnection()) {
-			final PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?");
+		try (Connection connection = this.cpds.getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?")) {
 			statement.setString(1, dbnameParam);
 			try (ResultSet rs = statement.executeQuery()) {
 				if (!rs.first()) {
-					rs.close();
-					throw new VCatException(String.format(
-							Messages.getString("ToolforgeWikiProvider.Exception.DbnameNotFound"), dbnameParam));
+					throw new VCatException(MessageFormatter
+							.format(Messages.getString("ToolforgeWikiProvider.Exception.DbnameNotFound"), dbnameParam)
+							.getMessage());
 				}
 				final String dbname = rs.getString("dbname");
 				final String name = rs.getString("name");
@@ -33,8 +35,9 @@ public class ToolforgeWikiProvider {
 				return new ToolforgeWiki(dbname, name, url);
 			}
 		} catch (SQLException e) {
-			throw new VCatException(String.format(Messages.getString("ToolforgeWikiProvider.Exception.ReadingMetaInfo"),
-					dbnameParam), e);
+			throw new VCatException(MessageFormatter
+					.format(Messages.getString("ToolforgeWikiProvider.Exception.ReadingMetaInfo"), dbnameParam)
+					.getMessage(), e);
 		}
 	}
 

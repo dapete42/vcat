@@ -1,6 +1,8 @@
 package vcat;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,23 +55,23 @@ public abstract class AbstractVCat<W extends IWiki> {
 	/** Log4j2 Logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractVCat.class);
 
-	private final static String GRAPH_FONT = "DejaVu Sans";
+	private static final String GRAPH_FONT = "DejaVu Sans";
 
-	private final static String GROUP_EXCEED = "exceed";
+	private static final String GROUP_EXCEED = "exceed";
 
-	private final static String GROUP_ROOT = "rootGroup";
+	private static final String GROUP_ROOT = "rootGroup";
 
-	private final static String LABEL_DEPTH_PREFIX = "d:";
+	private static final String LABEL_DEPTH_PREFIX = "d:";
 
-	private final static String LABEL_HIDDEN = "hidden";
+	private static final String LABEL_HIDDEN = "hidden";
 
-	private final static String LABEL_REL_PREFIX = "rel=";
+	private static final String LABEL_REL_PREFIX = "rel=";
 
-	protected final static String NODE_EXCEED_LABEL = "…";
+	protected static final String NODE_EXCEED_LABEL = "…";
 
-	protected final static String NODE_EXCEED_SUFFIX = "_more";
+	protected static final String NODE_EXCEED_SUFFIX = "_more";
 
-	private final static String ROOT_NODE_PREFIX = "ROOT";
+	private static final String ROOT_NODE_PREFIX = "ROOT";
 
 	protected final AbstractAllParams<W> all;
 
@@ -210,8 +212,8 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 		long endMillis = System.currentTimeMillis();
 
-		LOGGER.info(String.format(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(),
-				endMillis - startMillis));
+		LOGGER.info(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(),
+				endMillis - startMillis);
 
 		return graph;
 
@@ -249,12 +251,16 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 	protected abstract GroupRank renderGraphRootRank();
 
-	public void renderToFile(File outputFile) throws VCatException, GraphvizException {
+	public void renderToFile(Path outputFile) throws VCatException, GraphvizException {
 		Graph graph = this.renderGraph();
 		try {
 			GraphWriter.writeGraphToFile(graph, outputFile);
 		} catch (GraphvizException e) {
-			outputFile.delete();
+			try {
+				Files.delete(outputFile);
+			} catch (IOException ee) {
+				e.addSuppressed(ee);
+			}
 			throw e;
 		}
 	}

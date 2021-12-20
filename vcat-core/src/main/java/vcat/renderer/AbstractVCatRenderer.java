@@ -1,6 +1,6 @@
 package vcat.renderer;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import vcat.VCatException;
 import vcat.mediawiki.IWiki;
@@ -10,23 +10,25 @@ import vcat.params.OutputFormat;
 
 public abstract class AbstractVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
-	protected abstract File createGraphFile(final AbstractAllParams<W> all) throws VCatException;
+	private static final long serialVersionUID = 6181737937496899531L;
 
-	protected abstract File createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
+	protected abstract Path createGraphFile(final AbstractAllParams<W> all) throws VCatException;
+
+	protected abstract Path createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
 			throws VCatException;
 
-	protected File createRenderedFile(final AbstractAllParams<W> all) throws VCatException {
-		final File graphFile = this.createGraphFile(all);
+	protected Path createRenderedFile(final AbstractAllParams<W> all) throws VCatException {
+		final Path graphFile = this.createGraphFile(all);
 		return this.createRenderedFileFromGraphFile(all, graphFile);
 	}
 
-	protected abstract File createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final File graphFile)
+	protected abstract Path createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final Path graphFile)
 			throws VCatException;
 
 	@Override
 	public RenderedFileInfo render(final AbstractAllParams<W> all) throws VCatException {
 		// Get and, if necessary, create result file
-		final File resultFile;
+		final Path resultFile;
 		OutputFormat outputFormat = all.getGraphviz().getOutputFormat();
 		if (outputFormat == OutputFormat.GraphvizRaw) {
 			// GraphvizRaw returns just the graph file

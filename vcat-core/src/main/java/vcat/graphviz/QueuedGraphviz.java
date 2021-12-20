@@ -1,6 +1,6 @@
 package vcat.graphviz;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -23,17 +23,17 @@ public class QueuedGraphviz implements Graphviz {
 
 	class Job {
 
-		Job(File inputFile, File outputFile, GraphvizParams params) {
+		final Path inputFile;
+
+		final Path outputFile;
+
+		final GraphvizParams params;
+
+		Job(Path inputFile, Path outputFile, GraphvizParams params) {
 			this.inputFile = inputFile;
 			this.outputFile = outputFile;
 			this.params = params;
 		}
-
-		final File inputFile;
-
-		final File outputFile;
-
-		final GraphvizParams params;
 
 		@Override
 		public boolean equals(Object o) {
@@ -70,14 +70,14 @@ public class QueuedGraphviz implements Graphviz {
 
 	/**
 	 * Map of Exceptions for jobs. If a job causes an exception during the call to
-	 * {@link Graphviz#render(File, File, GraphvizParams) Graphviz.render} (on the {@link Graphviz} instance passed in
-	 * the constructor), it will be saved in this Map and later thrown by {@link #render(File, File, GraphvizParams)}.
+	 * {@link Graphviz#render(Path, Path, GraphvizParams) Graphviz.render} (on the {@link Graphviz} instance passed in
+	 * the constructor), it will be saved in this Map and later thrown by {@link #render(Path, Path, GraphvizParams)}.
 	 */
 	private final Map<Job, Exception> jobExceptions = new HashMap<>();
 
 	/**
 	 * Map of all jobs. The value is an object we use to lockthe number number of calls to
-	 * {@link #render(File, File, GraphvizParams)} currently waiting for each Job. Each Job will be in this Map while
+	 * {@link #render(Path, Path, GraphvizParams)} currently waiting for each Job. Each Job will be in this Map while
 	 * being processed.
 	 * <p>
 	 * This is also used to synchronize all operations on this Map or any of these other Collections to make the code
@@ -90,7 +90,7 @@ public class QueuedGraphviz implements Graphviz {
 
 	/**
 	 * Set of finished Jobs. Jobs are added to this when their Runnable instance has finished. This causes calls to
-	 * {@link #render(File, File, GraphvizParams)} currently waiting for this Job to continue.
+	 * {@link #render(Path, Path, GraphvizParams)} currently waiting for this Job to continue.
 	 */
 	private final Set<Job> jobsFinished = new HashSet<>();
 
@@ -123,7 +123,7 @@ public class QueuedGraphviz implements Graphviz {
 	}
 
 	@Override
-	public void render(File inputFile, File outputFile, GraphvizParams params) throws GraphvizException {
+	public void render(Path inputFile, Path outputFile, GraphvizParams params) throws GraphvizException {
 
 		// Build a Job instance for the parameters.
 		final Job job = new Job(inputFile, outputFile, params);
@@ -134,7 +134,7 @@ public class QueuedGraphviz implements Graphviz {
 			if (this.jobs.containsKey(job)) {
 				// If the job is alread queued or running, we need to record that we are also waiting for it to finish.
 				this.jobs.put(job, this.jobs.get(job) + 1);
-				LOGGER.info(String.format(Messages.getString("QueuedGraphviz.Info.AlreadyScheduled"), job.hashCode()));
+				LOGGER.info(Messages.getString("QueuedGraphviz.Info.AlreadyScheduled"), job.hashCode());
 				// Get lock
 				lock = jobLocks.get(job);
 			} else {
@@ -144,16 +144,9 @@ public class QueuedGraphviz implements Graphviz {
 				lock = new Object();
 				this.jobLocks.put(job, lock);
 
-				this.executorService.execute(new Runnable() {
+				this.executorService.execute(() -> runJob(job));
 
-					@Override
-					public void run() {
-						runJob(job);
-					}
-
-				});
-
-				LOGGER.info(String.format(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode()));
+				LOGGER.info(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode());
 			}
 		}
 
@@ -163,7 +156,7 @@ public class QueuedGraphviz implements Graphviz {
 				try {
 					lock.wait();
 				} catch (InterruptedException e) {
-					// ignore
+					Thread.currentThread().interrupt();
 				}
 			}
 		}
@@ -199,7 +192,7 @@ public class QueuedGraphviz implements Graphviz {
 	 */
 	private void runJob(Job job) {
 
-		LOGGER.info(String.format(Messages.getString("QueuedGraphviz.Info.ThreadStarted"), job.hashCode()));
+		LOGGER.info(Messages.getString("QueuedGraphviz.Info.ThreadStarted"), job.hashCode());
 
 		Object lock = jobLocks.get(job);
 		synchronized (lock) {

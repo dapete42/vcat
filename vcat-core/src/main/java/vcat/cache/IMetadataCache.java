@@ -7,7 +7,7 @@ public interface IMetadataCache {
 
 	Metadata getMetadata(IWiki wiki) throws CacheException;
 
-	void purge();
+	void purge() throws CacheException;
 
 	void put(IWiki wiki, Metadata metadata) throws CacheException;
 

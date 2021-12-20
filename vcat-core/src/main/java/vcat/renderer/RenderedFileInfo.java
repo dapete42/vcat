@@ -1,19 +1,19 @@
 package vcat.renderer;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public class RenderedFileInfo {
 
-	private final File file;
+	private final Path file;
 
 	private final String mimeType;
 
-	public RenderedFileInfo(File file, String mimeType) {
+	public RenderedFileInfo(Path file, String mimeType) {
 		this.file = file;
 		this.mimeType = mimeType;
 	}
 
-	public File getFile() {
+	public Path getFile() {
 		return file;
 	}
 

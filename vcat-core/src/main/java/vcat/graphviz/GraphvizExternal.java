@@ -1,14 +1,16 @@
 package vcat.graphviz;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.LogManager;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import vcat.Messages;
 import vcat.params.GraphvizParams;
@@ -23,39 +25,39 @@ public class GraphvizExternal implements Graphviz {
 	/** Log4j2 Logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphvizExternal.class);
 
-	private final File programPath;
+	private final Path programPath;
 
-	public GraphvizExternal(File programPath) {
-		if (!programPath.exists() || !programPath.isDirectory() || !programPath.canRead()) {
-			throw new InvalidParameterException(String.format(
-					Messages.getString("GraphvizExternal.Exception.ProgramPath"), programPath.getAbsolutePath()));
+	public GraphvizExternal(Path programPath) {
+		if (!Files.exists(programPath) || !Files.isDirectory(programPath) || !Files.isReadable(programPath)) {
+			throw new InvalidParameterException(MessageFormatter
+					.format(Messages.getString("GraphvizExternal.Exception.ProgramPath"), programPath.toAbsolutePath())
+					.getMessage());
 		}
 		this.programPath = programPath;
 	}
 
-	public List<String> buildCommandParts(final String command, GraphvizParams params, File inputFile,
-			File outputFile) {
+	public List<String> buildCommandParts(final String command, GraphvizParams params, Path inputFile,
+			Path outputFile) {
 		ArrayList<String> commandParts = new ArrayList<>(4);
 		commandParts.add(command);
 		commandParts.add("-T" + params.getOutputFormat().getGraphvizTypeParameter());
-		commandParts.add("-o" + outputFile.getAbsolutePath());
-		commandParts.add(inputFile.getAbsolutePath());
+		commandParts.add("-o" + outputFile.toAbsolutePath().toString());
+		commandParts.add(inputFile.toAbsolutePath().toString());
 		return commandParts;
 	}
 
 	@Override
-	public void render(File inputFile, File outputFile, GraphvizParams params) throws GraphvizException {
+	public void render(Path inputFile, Path outputFile, GraphvizParams params) throws GraphvizException {
 		final Runtime runtime = Runtime.getRuntime();
 
 		final long startMillis = System.currentTimeMillis();
 
-		final File programFile = new File(programPath, params.getAlgorithm().getProgram());
-		if (!programFile.exists() || !programFile.canExecute()) {
-			throw new InvalidParameterException(String.format(
-					Messages.getString("GraphvizExternal.Exception.ProgramFile"), programFile.getAbsolutePath()));
+		final Path programFile = programPath.resolve(params.getAlgorithm().getProgram());
+		final String command = programFile.toAbsolutePath().toString();
+		if (!Files.exists(programFile) || !Files.isExecutable(programFile)) {
+			throw new InvalidParameterException(MessageFormatter
+					.format(Messages.getString("GraphvizExternal.Exception.ProgramFile"), command).getMessage());
 		}
-
-		final String command = programFile.getAbsolutePath();
 
 		final List<String> commandList = buildCommandParts(command, params, inputFile, outputFile);
 		final int len = commandList.size();
@@ -68,15 +70,15 @@ public class GraphvizExternal implements Graphviz {
 		try {
 			graphvizProcess = runtime.exec(commandArray);
 		} catch (IOException e) {
-			throw new GraphvizException(
-					String.format(Messages.getString("GraphvizExternal.Exception.Running"), command), e);
+			throw new GraphvizException(MessageFormatter
+					.format(Messages.getString("GraphvizExternal.Exception.Running"), command).getMessage(), e);
 		}
 		try {
 			// Close stdin
 			graphvizProcess.getOutputStream().close();
 		} catch (IOException e) {
-			throw new GraphvizException(String.format(Messages.getString("GraphvizExternal.Exception.Stdin"), command),
-					e);
+			throw new GraphvizException(MessageFormatter
+					.format(Messages.getString("GraphvizExternal.Exception.Stdin"), command).getMessage(), e);
 		}
 		boolean running = true;
 		int exitValue = 0;
@@ -87,9 +89,9 @@ public class GraphvizExternal implements Graphviz {
 			} catch (IllegalThreadStateException e) {
 				// still running
 				try {
-					Thread.sleep(10);
+					TimeUnit.MILLISECONDS.sleep(10);
 				} catch (InterruptedException ee) {
-					// ignore
+					Thread.currentThread().interrupt();
 				}
 			}
 		} while (running);
@@ -97,14 +99,17 @@ public class GraphvizExternal implements Graphviz {
 		long endMillis = System.currentTimeMillis();
 
 		if (exitValue == 0) {
-			LOGGER.info(String.format(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.getAbsolutePath(),
-					endMillis - startMillis));
+			LOGGER.info(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.toAbsolutePath(),
+					endMillis - startMillis);
 		} else {
-			LOGGER.error(String.format(Messages.getString("GraphvizExternal.Error.ExitCode"),
-					inputFile.getAbsolutePath(), exitValue));
-			outputFile.delete();
-			throw new GraphvizException(
-					String.format(Messages.getString("GraphvizExternal.Exception.ExitCode"), exitValue));
+			LOGGER.error(Messages.getString("GraphvizExternal.Error.ExitCode"), inputFile.toAbsolutePath(), exitValue);
+			try {
+				Files.delete(outputFile);
+			} catch (IOException e) {
+				LOGGER.error("Could not remove output file '{}' after error", outputFile, e);
+			}
+			throw new GraphvizException(MessageFormatter
+					.format(Messages.getString("GraphvizExternal.Exception.ExitCode"), exitValue).getMessage());
 		}
 	}
 

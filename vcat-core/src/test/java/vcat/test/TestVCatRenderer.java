@@ -1,8 +1,9 @@
 package vcat.test;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import vcat.VCatException;
 import vcat.params.AbstractAllParams;
@@ -10,6 +11,8 @@ import vcat.params.OutputFormat;
 import vcat.renderer.AbstractVCatRenderer;
 
 public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
+
+	private static final long serialVersionUID = -7348028299089897262L;
 
 	public static class ImagemapHtmlFileEntry {
 
@@ -23,7 +26,7 @@ public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
 
 		public AbstractAllParams<TestWiki> all;
 
-		public File graphFile;
+		public Path graphFile;
 
 	}
 
@@ -36,14 +39,14 @@ public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
 	private long delay = 0L;
 
 	@Override
-	protected File createGraphFile(AbstractAllParams<TestWiki> all) throws VCatException {
+	protected Path createGraphFile(AbstractAllParams<TestWiki> all) throws VCatException {
 		delay();
 		createdGraphFiles.add(all);
 		return null;
 	}
 
 	@Override
-	protected File createImagemapHtmlFile(AbstractAllParams<TestWiki> all, OutputFormat imageFormat)
+	protected Path createImagemapHtmlFile(AbstractAllParams<TestWiki> all, OutputFormat imageFormat)
 			throws VCatException {
 		delay();
 		ImagemapHtmlFileEntry entry = new ImagemapHtmlFileEntry();
@@ -54,7 +57,7 @@ public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
 	}
 
 	@Override
-	protected File createRenderedFileFromGraphFile(AbstractAllParams<TestWiki> all, File graphFile)
+	protected Path createRenderedFileFromGraphFile(AbstractAllParams<TestWiki> all, Path graphFile)
 			throws VCatException {
 		delay();
 		RenderedFileFromGraphFileEntry entry = new RenderedFileFromGraphFileEntry();
@@ -67,9 +70,9 @@ public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
 	private void delay() {
 		if (delay > 0L) {
 			try {
-				Thread.sleep(delay);
+				TimeUnit.MILLISECONDS.sleep(delay);
 			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
+				// do nothing
 			}
 		}
 	}

@@ -17,20 +17,20 @@ import vcat.params.OutputFormat;
 import vcat.params.VCatParams;
 import vcat.test.TestWiki;
 
-public class RenderedFileCacheTest {
+class RenderedFileCacheTest {
 
 	private Path tempDirectory;
 
 	private RenderedFileCache<TestWiki> underTest;
 
 	@BeforeEach
-	public void setUp() throws IOException, CacheException {
+	void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
-		underTest = new RenderedFileCache<>(tempDirectory.toFile(), 10);
+		underTest = new RenderedFileCache<>(tempDirectory, 10);
 	}
 
 	@AfterEach
-	public void tearDown() throws IOException {
+	void tearDown() throws CacheException, IOException {
 		underTest.clear();
 		if (tempDirectory != null) {
 			Files.delete(tempDirectory);
@@ -38,7 +38,7 @@ public class RenderedFileCacheTest {
 	}
 
 	@Test
-	public void testgetCacheFilename() throws CacheException {
+	void testgetCacheFilename() throws CacheException {
 
 		VCatParams<TestWiki> vCatParams = new VCatParams<>();
 		GraphvizParams graphvizParams = new GraphvizParams();

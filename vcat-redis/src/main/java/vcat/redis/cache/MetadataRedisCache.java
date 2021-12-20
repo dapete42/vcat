@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Transaction;
 import vcat.cache.CacheException;
 import vcat.cache.IMetadataCache;
 import vcat.mediawiki.IWiki;
@@ -30,7 +29,7 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 			try (Jedis jedis = this.jedisPool.getResource()) {
 				final byte[] metadataObjectData = jedis.get(this.jedisKeyBytes(key));
 				final Object metadataObject = SerializationUtils.deserialize(metadataObjectData);
-				if (metadataObject != null && metadataObject instanceof Metadata) {
+				if (metadataObject instanceof Metadata) {
 					return (Metadata) metadataObject;
 				} else {
 					// Wrong type
@@ -42,9 +41,7 @@ public class MetadataRedisCache extends StringRedisCache implements IMetadataCac
 			} catch (SerializationException e) {
 				// Error during deserializing
 				this.remove(key);
-				String message = Messages.getString("MetadataRedisCache.Error.Deserialize");
-				LOGGER.warn(message, e);
-				throw new CacheException(message, e);
+				throw new CacheException(Messages.getString("MetadataRedisCache.Error.Deserialize"), e);
 			}
 		} else {
 			return null;

@@ -5,15 +5,19 @@ import java.io.StringReader;
 import javax.json.Json;
 import javax.json.JsonException;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
+
+import org.slf4j.helpers.MessageFormatter;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Transaction;
 import vcat.cache.CacheException;
 import vcat.cache.IApiCache;
 import vcat.redis.Messages;
 
 public class ApiRedisCache extends StringRedisCache implements IApiCache {
+
+	private static final long serialVersionUID = -1779929219116057263L;
 
 	public ApiRedisCache(final JedisPool jedisPool, final String redisPrefix, final int maxAgeInSeconds) {
 		super(jedisPool, redisPrefix, maxAgeInSeconds);
@@ -29,10 +33,13 @@ public class ApiRedisCache extends StringRedisCache implements IApiCache {
 			return null;
 		} else {
 			try {
-				return Json.createReader(new StringReader(jsonString)).readObject();
+				try (StringReader stringReader = new StringReader(jsonString);
+						JsonReader jsonReader = Json.createReader(stringReader)) {
+					return jsonReader.readObject();
+				}
 			} catch (JsonException e) {
-				throw new CacheException(
-						String.format(Messages.getString("ApiRedisCache.Exception.ReadJSON"), jsonString), e);
+				throw new CacheException(MessageFormatter
+						.format(Messages.getString("ApiRedisCache.Exception.ReadJSON"), jsonString).getMessage(), e);
 			}
 		}
 	}

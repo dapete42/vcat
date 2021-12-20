@@ -2,25 +2,28 @@ package vcat.cache.file;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.file.PathUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import vcat.cache.CacheException;
 
-public class AbstractFileCacheTest {
+class AbstractFileCacheTest {
 
 	private class FileCacheImpl extends AbstractFileCache<String> {
 
-		protected FileCacheImpl(File cacheDirectory, int maxAgeInSeconds) throws CacheException {
+		private static final long serialVersionUID = -2886582260646788088L;
+
+		protected FileCacheImpl(Path cacheDirectory, int maxAgeInSeconds) throws CacheException {
 			super(cacheDirectory, "AbstractFileCacheTest-FileCacheImpl", "", maxAgeInSeconds);
 		}
 
@@ -33,19 +36,23 @@ public class AbstractFileCacheTest {
 	@BeforeEach
 	public void setUp() throws IOException, CacheException {
 		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
-		underTest = new FileCacheImpl(tempDirectory.toFile(), 10);
+		underTest = new FileCacheImpl(tempDirectory, 10);
 	}
 
 	@AfterEach
 	public void tearDown() throws IOException {
-		underTest.clear();
+		try {
+			underTest.clear();
+		} catch (CacheException e) {
+			// ignore
+		}
 		if (tempDirectory != null) {
-			Files.delete(tempDirectory);
+			PathUtils.deleteDirectory(tempDirectory);
 		}
 	}
 
 	@Test
-	public void testClear() throws CacheException {
+	void testClear() throws CacheException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
@@ -59,7 +66,7 @@ public class AbstractFileCacheTest {
 	}
 
 	@Test
-	public void testRemove() throws CacheException {
+	void testRemove() throws CacheException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
@@ -73,7 +80,7 @@ public class AbstractFileCacheTest {
 	}
 
 	@Test
-	public void testPurge() throws CacheException, InterruptedException {
+	void testPurge() throws CacheException, InterruptedException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 		underTest.maxAgeInSeconds = 1;
@@ -85,7 +92,7 @@ public class AbstractFileCacheTest {
 		assertTrue(underTest.containsKey("test1"));
 		assertTrue(underTest.containsKey("test2"));
 
-		Thread.sleep(1500);
+		TimeUnit.MILLISECONDS.sleep(1500);
 		underTest.put("test3", testBytes);
 		underTest.purge();
 
@@ -96,7 +103,7 @@ public class AbstractFileCacheTest {
 	}
 
 	@Test
-	public void testContainsKey() throws CacheException {
+	void testContainsKey() throws CacheException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
@@ -107,7 +114,7 @@ public class AbstractFileCacheTest {
 	}
 
 	@Test
-	public void testGetAsInputStream() throws CacheException, IOException {
+	void testGetAsInputStream() throws CacheException, IOException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
@@ -123,14 +130,14 @@ public class AbstractFileCacheTest {
 	}
 
 	@Test
-	public void testGetAsInputStreamNull() throws CacheException, IOException {
+	void testGetAsInputStreamNull() throws CacheException, IOException {
 
 		assertNull(underTest.getAsInputStream("test"));
 
 	}
 
 	@Test
-	public void testPutAndGet() throws CacheException {
+	void testPutAndGet() throws CacheException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
@@ -142,7 +149,7 @@ public class AbstractFileCacheTest {
 	}
 
 	@Test
-	public void testPutFile() throws CacheException, IOException {
+	void testPutFile() throws CacheException, IOException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
@@ -154,7 +161,7 @@ public class AbstractFileCacheTest {
 				outputStream.write(testBytes);
 			}
 
-			underTest.putFile("test", tempFile.toFile(), false);
+			underTest.putFile("test", tempFile, false);
 			byte[] resultBytes = underTest.get("test");
 
 			assertTrue(Files.exists(tempFile));
@@ -169,7 +176,7 @@ public class AbstractFileCacheTest {
 	}
 
 	@Test
-	public void testPutFileMove() throws CacheException, IOException {
+	void testPutFileMove() throws CacheException, IOException {
 
 		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
@@ -181,7 +188,7 @@ public class AbstractFileCacheTest {
 				outputStream.write(testBytes);
 			}
 
-			underTest.putFile("test", tempFile.toFile(), true);
+			underTest.putFile("test", tempFile, true);
 			byte[] resultBytes = underTest.get("test");
 
 			assertFalse(Files.exists(tempFile));

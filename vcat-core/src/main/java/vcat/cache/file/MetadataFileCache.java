@@ -1,6 +1,6 @@
 package vcat.cache.file;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
@@ -15,6 +15,8 @@ import vcat.mediawiki.Metadata;
 
 public class MetadataFileCache extends AbstractFileCache<String> implements IMetadataCache {
 
+	private static final long serialVersionUID = 8857473945212943389L;
+
 	/** Log4j2 Logger */
 	private static final Logger LOGGER = LoggerFactory.getLogger(MetadataFileCache.class);
 
@@ -22,7 +24,7 @@ public class MetadataFileCache extends AbstractFileCache<String> implements IMet
 
 	private static final String SUFFIX = "";
 
-	public MetadataFileCache(final File cacheDirectory, final int maxAgeInSeconds) throws CacheException {
+	public MetadataFileCache(final Path cacheDirectory, final int maxAgeInSeconds) throws CacheException {
 		super(cacheDirectory, PREFIX, SUFFIX, maxAgeInSeconds);
 	}
 
@@ -47,9 +49,7 @@ public class MetadataFileCache extends AbstractFileCache<String> implements IMet
 			} catch (SerializationException e) {
 				// Error during deserializing
 				this.remove(key);
-				String message = Messages.getString("MetadataFileCache.Error.Deserialize");
-				LOGGER.warn(message, e);
-				throw new CacheException(message, e);
+				throw new CacheException(Messages.getString("MetadataFileCache.Error.Deserialize"), e);
 			}
 		} else {
 			return null;

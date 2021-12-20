@@ -1,10 +1,11 @@
 package vcat.mediawiki;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface ICategoryProvider<W extends IWiki> {
+public interface ICategoryProvider<W extends IWiki> extends Serializable {
 
 	/**
 	 * Get categories for the supplied collection of pages.

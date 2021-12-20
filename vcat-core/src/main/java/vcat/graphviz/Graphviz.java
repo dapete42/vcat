@@ -1,6 +1,6 @@
 package vcat.graphviz;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import vcat.params.GraphvizParams;
 
@@ -11,6 +11,6 @@ import vcat.params.GraphvizParams;
  */
 public interface Graphviz {
 
-	public abstract void render(File inputFile, File outputFile, GraphvizParams params) throws GraphvizException;
+	public abstract void render(Path inputFile, Path outputFile, GraphvizParams params) throws GraphvizException;
 
 }

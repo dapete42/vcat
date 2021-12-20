@@ -1,8 +1,9 @@
 package vcat.webapp.base;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -42,30 +43,29 @@ public abstract class AbstractVCatServlet extends HttpServlet {
 			RenderedFileInfo renderedFileInfo = this.renderedFileFromRequest(req);
 
 			// Get finished rendered file
-			File resultFile = renderedFileInfo.getFile();
+			Path resultFile = renderedFileInfo.getFile();
 
 			// Content-type
 			String contentType = renderedFileInfo.getMimeType();
 			resp.setContentType(contentType);
 
 			// Content-length
-			long length = resultFile.length();
+			long length = Files.size(resultFile);
 			if (length < Integer.MAX_VALUE) {
 				resp.setContentLength((int) length);
 			}
 
 			// Content-disposition (for file name)
-			String filename = resultFile.getName();
+			String filename = resultFile.getFileName().toString();
 			resp.setHeader("Content-disposition", "filename=\"" + filename + '"');
 
 			// Serve file to browser
-			try (FileInputStream renderedInput = new FileInputStream(resultFile);
+			try (InputStream renderedInput = Files.newInputStream(resultFile);
 					ServletOutputStream output = resp.getOutputStream()) {
 				IOUtils.copy(renderedInput, output);
 			}
 
-			LOGGER.info(String.format("File sent: '%s' sent as '%s', %d bytes", resultFile.getAbsolutePath(),
-					contentType, length));
+			LOGGER.info("File sent: '{}' sent as '{}', {} bytes", resultFile.toAbsolutePath(), contentType, length);
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}

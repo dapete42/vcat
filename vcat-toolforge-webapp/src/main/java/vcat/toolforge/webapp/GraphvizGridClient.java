@@ -1,14 +1,16 @@
 package vcat.toolforge.webapp;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.helpers.MessageFormatter;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -40,9 +42,9 @@ public class GraphvizGridClient implements Graphviz {
 			} catch (IllegalThreadStateException e) {
 				// still running
 				try {
-					Thread.sleep(10);
+					TimeUnit.MILLISECONDS.sleep(10);
 				} catch (InterruptedException ee) {
-					// ignore
+					Thread.currentThread().interrupt();
 				}
 			}
 		} while (true);
@@ -53,12 +55,12 @@ public class GraphvizGridClient implements Graphviz {
 
 	private final String redisSecret;
 
-	private final File scriptPath;
+	private final Path scriptPath;
 
-	private final File programPath;
+	private final Path programPath;
 
-	public GraphvizGridClient(final JedisPool jedisPool, final String redisSecret, final File scriptPath,
-			final File programPath) {
+	public GraphvizGridClient(final JedisPool jedisPool, final String redisSecret, final Path scriptPath,
+			final Path programPath) {
 		this.jedisPool = jedisPool;
 		this.redisSecret = redisSecret;
 		this.scriptPath = scriptPath;
@@ -91,9 +93,11 @@ public class GraphvizGridClient implements Graphviz {
 				// Nobody is listening, so we spawn a new instance of the gridserver, telling it to immediately run the
 				// command we just submitted. We assume it will run and return when it's finished.
 				try {
-					runtimeExec(new File(scriptPath, "gridserverStart").toString(), id);
+					runtimeExec(scriptPath.resolve("gridserverStart").toString(), id);
 				} catch (IOException e) {
-					throw new GraphvizException("Nobody listening, starting gridserver for id %s", e);
+					throw new GraphvizException(
+							MessageFormatter.format("Nobody listening, starting gridserver for id {}", id).getMessage(),
+							e);
 				}
 			}
 
@@ -146,7 +150,7 @@ public class GraphvizGridClient implements Graphviz {
 			abortTimer.cancel();
 
 			if (execStatus.aborted) {
-				throw new GraphvizException(String.format("Timeout in vCat grid job %s", id));
+				throw new GraphvizException(MessageFormatter.format("Timeout in vCat grid job {}", id).getMessage());
 			}
 
 		}
@@ -154,12 +158,12 @@ public class GraphvizGridClient implements Graphviz {
 	}
 
 	@Override
-	public void render(final File inputFile, final File outputFile, final GraphvizParams params)
+	public void render(final Path inputFile, final Path outputFile, final GraphvizParams params)
 			throws GraphvizException {
 		try {
-			this.exec(new File(programPath, params.getAlgorithm().getProgram()).getAbsolutePath(),
-					"-T" + params.getOutputFormat().getGraphvizTypeParameter(), "-o" + outputFile.getAbsolutePath(),
-					inputFile.getAbsolutePath());
+			this.exec(programPath.resolve(params.getAlgorithm().getProgram()).toAbsolutePath().toString(),
+					"-T" + params.getOutputFormat().getGraphvizTypeParameter(),
+					"-o" + outputFile.toAbsolutePath().toString(), inputFile.toAbsolutePath().toString());
 		} catch (GraphvizException e) {
 			throw new GraphvizException(e);
 		}
