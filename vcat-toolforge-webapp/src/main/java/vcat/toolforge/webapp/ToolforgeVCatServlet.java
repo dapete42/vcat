@@ -49,7 +49,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 	private static final String HOME_TEMP_DIR = "work/temp";
 
 	/** JDBC URL for MySQL/MariaDB access to wiki table. */
-	private static final String JDBC_URL = "jdbc:mysql://s7.web.db.svc.wikimedia.cloud:3306/meta_p";
+	private static final String JDBC_URL = "jdbc:mariadb://s7.web.db.svc.wikimedia.cloud:3306/meta_p";
 
 	/** Purge caches after (seconds). */
 	private static final int PURGE = 600;
