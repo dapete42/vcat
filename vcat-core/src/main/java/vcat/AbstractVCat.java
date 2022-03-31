@@ -171,7 +171,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 						categoryNamespacePrefixLength, showhidden, exceedDepth);
 
 				if (limit != null && graph.getNodeCount() > limit && curDepth > 1) {
-					return renderGraphForDepth(curDepth - 1);
+					return renderGraphForDepth(curDepth);
 				}
 			}
 
