@@ -22,7 +22,11 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
         cache: maven
-    - name: Maven verify
-      run: mvn -B verify
+    - name: Maven package
+      run: mvn -B package
     - name: Trigger Codecov
       run: bash <(curl -s https://codecov.io/bash)
+    - uses: actions/upload-artifact@v3
+      with:
+        name: vcat-toolforge
+        path: vcat-toolforge-webapp/target/vcat-toolforge.war
