@@ -14,25 +14,4 @@
 		<url-pattern>/status</url-pattern>
 	</servlet-mapping>
 
-	<!-- JavaMelody access restrictions -->
-	<!-- For Tomcat, a tomcat-users.xml with a user for the "monitoring" role 
-		must be set up to be able to access it. -->
-
-	<login-config>
-		<auth-method>BASIC</auth-method>
-		<realm-name>Monitoring</realm-name>
-	</login-config>
-	<security-role>
-		<role-name>monitoring</role-name>
-	</security-role>
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>Monitoring</web-resource-name>
-			<url-pattern>/monitoring</url-pattern>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>monitoring</role-name>
-		</auth-constraint>
-	</security-constraint>
-
 </web-app>
