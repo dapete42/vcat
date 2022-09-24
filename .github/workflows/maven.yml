@@ -24,8 +24,9 @@ jobs:
         cache: maven
     - name: Maven package
       run: mvn -B package
-    - name: Trigger Codecov
-      run: bash <(curl -s https://codecov.io/bash)
+    # TODO Codecov not working as of 2022-09-24, disable for now
+    #- name: Trigger Codecov
+    #  run: bash <(curl -s https://codecov.io/bash)
     - uses: actions/upload-artifact@v3
       with:
         name: vcat-toolforge
