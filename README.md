@@ -1,7 +1,7 @@
 [![Maven](https://github.com/dapete42/vcat/actions/workflows/maven.yml/badge.svg)](https://github.com/dapete42/vcat/actions/workflows/maven.yml)
 [![CodeQL](https://github.com/dapete42/vcat/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/dapete42/vcat/actions/workflows/codeql-analysis.yml)
 [![CodeFactor](https://www.codefactor.io/repository/github/dapete42/vcat/badge)](https://www.codefactor.io/repository/github/dapete42/vcat)
-[![codecov](https://codecov.io/gh/dapete42/vcat/branch/master/graph/badge.svg)](https://codecov.io/gh/dapete42/vcat)
+[![codecov](https://codecov.io/gh/dapete42/vcat/branch/main/graph/badge.svg)](https://codecov.io/gh/dapete42/vcat)
 
 vcat
 ====
