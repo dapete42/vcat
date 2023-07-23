@@ -6,19 +6,19 @@ fonts-dejavu-core
 fonts-ipafont-gothic
 fonts-unfonts-core
 # former ttf-indic-fonts package
-fonts-lohit-beng-assamese (2.91.5-2)
-fonts-lohit-beng-bengali (2.91.5-2)
-fonts-lohit-deva (2.95.4-4)
-fonts-lohit-deva-marathi (2.94.2-3) [universe]
-fonts-lohit-deva-nepali (2.94.2-3) [universe]
-fonts-lohit-gujr (2.92.4-4)
-fonts-lohit-guru (2.91.2-2build1)
-fonts-lohit-knda (2.5.4-3)
-fonts-lohit-mlym (2.92.2-2)
-fonts-lohit-orya (2.91.2-2)
-fonts-lohit-taml (2.91.3-2)
-fonts-lohit-taml-classical (2.5.4-2)
-fonts-lohit-telu (2.5.5-2build1)
+fonts-lohit-beng-assamese
+fonts-lohit-beng-bengali
+fonts-lohit-deva
+fonts-lohit-deva-marathi
+fonts-lohit-deva-nepali
+fonts-lohit-gujr
+fonts-lohit-guru
+fonts-lohit-knda
+fonts-lohit-mlym
+fonts-lohit-orya
+fonts-lohit-taml
+fonts-lohit-taml-classical
+fonts-lohit-telu
 
 # gridserver script
 libjson-perl
