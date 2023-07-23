@@ -27,5 +27,5 @@ jobs:
     - uses: codecov/codecov-action@v3
     - uses: actions/upload-artifact@v3
       with:
-        name: vcat-toolforge
+        name: vcat-toolforge-runner
         path: vcat-toolforge-webapp/target/vcat-toolforge-runner.jar
