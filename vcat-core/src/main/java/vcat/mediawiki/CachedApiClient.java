@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import vcat.Messages;
 import vcat.cache.CacheException;

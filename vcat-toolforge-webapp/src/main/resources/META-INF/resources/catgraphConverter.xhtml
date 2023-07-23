@@ -1,0 +1,108 @@
+<ui:composition template="../frame.xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <ui:define name="extra-navigation">
+
+        <strong>
+            <h:outputText value="#{catgraphConverter.msg('menu_languages')}"/>
+        </strong>
+        <ul>
+            <li>
+                <a href="#{request.contextPath}/catgraphConvert?lang=de" lang="de">Deutsch</a>
+            </li>
+            <li>
+                <a href="#{request.contextPath}/catgraphConvert" lang="en">English</a>
+            </li>
+        </ul>
+
+    </ui:define>
+
+    <ui:define name="main">
+
+        <h:form id="convert">
+            <h2>
+                <h:outputText value="#{catgraphConverter.msg('heading_convert')}"/>
+            </h2>
+            <div class="formline">
+                <h:outputLabel for="inputUrl"
+                               value="#{catgraphConverter.msg('label_url')}"/>
+            </div>
+            <div class="formline">
+                <h:inputText id="inputUrl" type="url"
+                             value="#{catgraphConverter.inputUrl}"
+                             styleClass="formfullwidth"/>
+            </div>
+            <p>
+                <h:outputText value="#{catgraphConverter.msg('warning_url')}"/>
+            </p>
+            <div class="formline">
+                <h:commandButton actionExpression="#{catgraphConverter.convert()}"
+                                 value="#{catgraphConverter.msg('button_convert')}"/>
+            </div>
+        </h:form>
+
+        <h:panelGroup id="result" rendered="#{catgraphConverter.hasResult}">
+            <div id="result">
+                <h2>
+                    <h:outputText value="#{catgraphConverter.msg('heading_result')}"/>
+                </h2>
+                <table class="result">
+                    <tbody>
+                    <tr>
+                        <th scope="row">
+                            <h:outputText value="#{catgraphConverter.msg('th_input_url')}"/>
+                        </th>
+                        <td>
+                            <h:outputText value="#{catgraphConverter.inputUrl}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <h:outputText value="#{catgraphConverter.msg('th_input_parameters')}"/>
+                        </th>
+                        <td>
+                            <ul class="oneline">
+                                <ui:repeat var="entry" value="#{catgraphConverter.inputParameters.entrySet()}">
+                                    <ui:repeat var="value" value="#{entry.value}">
+                                        <li>
+                                            <h:outputText value="#{entry.key}=#{value}"/>
+                                        </li>
+                                    </ui:repeat>
+                                </ui:repeat>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <h:outputText value="#{catgraphConverter.msg('th_output_parameters')}"/>
+                        </th>
+                        <td>
+                            <ul class="oneline">
+                                <ui:repeat var="entry" value="#{catgraphConverter.outputParameters.entrySet()}">
+                                    <ui:repeat var="value" value="#{entry.value}">
+                                        <li>
+                                            <h:outputText value="#{entry.key}=#{value}"/>
+                                        </li>
+                                    </ui:repeat>
+                                </ui:repeat>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr class="highlight">
+                        <th scope="row">
+                            <h:outputText value="#{catgraphConverter.msg('th_output_url')}"/>
+                        </th>
+                        <td>
+                            <a href="#{catgraphConverter.outputUrl}" target="catgraphConvertOutput">
+                                <h:outputText value="#{catgraphConverter.outputUrl}"/>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </h:panelGroup>
+
+    </ui:define>
+
+</ui:composition>
