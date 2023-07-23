@@ -1,0 +1,4 @@
+# used by Toolforge Build Service
+libjson-perl
+libredis-perl
+graphviz
