@@ -22,15 +22,13 @@ It consists of five Maven submodules:
   category information from the wiki and render it into an image.
 * vcat-redis: An addition which allows the use of Redis (through the Jedis
   library) to store the API and metadata caches.
-* vcat-webapp-base: Base classes to create Servlets which render graphs using
-  vCat.
 * vcat-webapp-simple: A simple Servlet version of vCat which expects
   parameters as GET or POST parameters.
 * vcat-toolforge-base: Base classes for the vCat Servlet as used on Wikimedia
   Toolforge.
-* vcat-toolforge-webapp: A Servlet version of vCat which uses the meta_p.wiki
-  table to look up wikis, and Redis for caching, as used on Wikimedia
-  Toolforge.
+* vcat-toolforge-webapp: A version of vCat which uses the meta_p.wiki table
+  to look up wikis, and Redis for caching, as used on Wikimedia Toolforge.
+  Builds an executable JAR file based on Quarkus (https://quarkus.io/).
 
 Copyright notice
 ----------------
