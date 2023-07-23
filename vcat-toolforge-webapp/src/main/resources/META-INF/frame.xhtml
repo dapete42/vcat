@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" type="text/css" href="#{request.contextPath}/res/vcat.css"/>
+    <title>vCat</title>
+</h:head>
+<h:body>
+    <div class="colmask leftmenu">
+        <div class="colright">
+            <div class="col1wrap">
+                <div class="col1">
+                    <header>
+                        <h1>vCat</h1>
+                    </header>
+                    <ui:insert name="main"/>
+                </div>
+            </div>
+            <div class="col2">
+
+                <div id="logo">
+                    <div>
+                        <a href="//tools.wmflabs.org/"><img
+                                src="//tools-static.wmflabs.org/toolforge/logos/logo-with-text.png"
+                                alt="Wikimedia Toolforge" height="125" width="125"/></a>
+                    </div>
+                    <div>
+                        <img src="#{request.contextPath}/res/vcat.png" alt="vCat"/>
+                    </div>
+                </div>
+
+                <ui:insert name="extra-navigation"/>
+
+                <strong>Links</strong>
+                <ul>
+                    <li><a href="//meta.wikimedia.org/wiki/User:Dapete/vCat">User:Dapete/vCat</a>
+                        (Meta)
+                    </li>
+                    <li><a href="https://github.com/dapete42/vcat">dapete42/vcat</a>
+                        (GitHub)
+                    </li>
+                    <li><a href="https://github.com/dapete42/vcat-deployed">dapete42/vcat-deployed</a>
+                        (GitHub)
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+</h:body>
+</html>

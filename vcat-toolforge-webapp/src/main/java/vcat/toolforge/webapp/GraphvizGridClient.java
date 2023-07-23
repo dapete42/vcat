@@ -6,8 +6,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.helpers.MessageFormatter;
@@ -21,7 +21,7 @@ import vcat.redis.SimplePubSub;
 
 public class GraphvizGridClient implements Graphviz {
 
-	private class ExecStatus {
+	private static class ExecStatus {
 
 		boolean aborted = false;
 

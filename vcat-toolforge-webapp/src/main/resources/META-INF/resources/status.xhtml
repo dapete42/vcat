@@ -1,0 +1,115 @@
+<ui:composition template="../frame.xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <ui:define name="main">
+
+        <h2>Status</h2>
+
+        <table class="status">
+            <caption>System properties</caption>
+            <tbody>
+            <tr>
+                <th scope="col">JRE vendor/version</th>
+                <td>
+                    <h:outputText value="#{status.getSystemProperty('java.vendor')}"/>
+                    <h:outputText value=" "/>
+                    <h:outputText value="#{status.getSystemProperty('java.version')}"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col">Operating system architecture</th>
+                <td>
+                    <h:outputText value="#{status.getSystemProperty('os.arch')}"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col">Operation system name/version</th>
+                <td>
+                    <h:outputText value="#{status.getSystemProperty('os.name')}"/>
+                    <h:outputText value=" "/>
+                    <h:outputText value="#{status.getSystemProperty('os.version')}"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col">User name</th>
+                <td>
+                    <h:outputText value="#{status.getSystemProperty('user.name')}"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="status">
+            <caption>Server properties</caption>
+            <tbody>
+            <tr>
+                <th scope="col">Server info</th>
+                <td>
+                    <h:outputText value="#{status.serverInfo}"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="status">
+            <caption>Memory</caption>
+            <tbody>
+            <tr>
+                <th scope="col">Allocated memory</th>
+                <td class="number">
+                    <h:outputText value="#{status.totalMemory}"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col">Free allocated memory</th>
+                <td class="number">
+                    <h:outputText value="#{status.freeMemory}"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col">Maximum memory</th>
+                <td class="number">
+                    <h:outputText value="#{status.maxMemory}"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="col">Free total memory</th>
+                <td class="number">
+                    <h:outputText value="#{status.freeMemory + status.maxMemory - status.totalMemory}"/>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <table class="status">
+            <caption>Threads</caption>
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Priority</th>
+                <th>State</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ui:repeat var="thread" value="#{status.threads}">
+                <tr>
+                    <td class="number">
+                        <h:outputText value="#{thread.id}"/>
+                    </td>
+                    <td>
+                        <h:outputText value="#{thread.name}"/>
+                    </td>
+                    <td class="number">
+                        <h:outputText value="#{thread.priority}"/>
+                    </td>
+                    <td>
+                        <h:outputText value="#{thread.state.toString()}"/>
+                    </td>
+                </tr>
+            </ui:repeat>
+            </tbody>
+        </table>
+
+    </ui:define>
+</ui:composition>

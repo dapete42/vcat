@@ -2,10 +2,10 @@ package vcat.redis.cache;
 
 import java.io.StringReader;
 
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import jakarta.json.Json;
+import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 
 import org.slf4j.helpers.MessageFormatter;
 
