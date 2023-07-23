@@ -1,5 +1,10 @@
 package vcat.toolforge.base;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
+import vcat.VCatException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,65 +15,82 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.MessageFormatter;
-
-import vcat.VCatException;
-
 public class MyCnfConfig {
 
-	/** Log4j2 Logger */
-	private static final Logger LOGGER = LoggerFactory.getLogger(MyCnfConfig.class);
+    /**
+     * Log4j2 Logger
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyCnfConfig.class);
 
-	private static final String MY_CNF = "replica.my.cnf";
+    private static final String MY_CNF = "replica.my.cnf";
 
-	private String user;
+    private String user;
 
-	private String password;
+    private String password;
 
-	public String getUser() {
-		return user;
-	}
+    public String getUser() {
+        return user;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public boolean readFromMyCnf() throws VCatException {
+    public boolean readFromMyCnf() throws VCatException {
 
-		Path myCnfFile = Paths.get(System.getProperty("user.home"), MY_CNF);
+        String userHome = System.getProperty("user.home");
+        String toolDataDir = System.getenv("TOOL_DATA_DIR");
 
-		Properties properties = new Properties();
-		try (InputStream inputStream = Files.newInputStream(myCnfFile);
-				InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-				BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-			properties.load(bufferedReader);
-		} catch (IOException e) {
-			throw new VCatException(
-					MessageFormatter.format("Error reading file '{}'", myCnfFile.toAbsolutePath()).getMessage(), e);
-		}
+        // Primary: from $HOME
+        Path myCnfFile = Paths.get(userHome, MY_CNF);
+        if (Files.exists(myCnfFile)) {
+            LOGGER.info("Using {} from {}", MY_CNF, myCnfFile);
+        } else {
+            // Secondary: from $TOOL_DATA_DIR (within container built by Build Service)
+            if (toolDataDir != null) {
+                myCnfFile = Paths.get(toolDataDir, MY_CNF);
+                if (Files.exists(myCnfFile)) {
+                    LOGGER.info("Using {} from {}", MY_CNF, myCnfFile);
+                } else {
+                    throw new VCatException(
+                            MessageFormatter.format("{} not found in home or $TOOL_DATA_DIR", MY_CNF).getMessage());
+                }
+            } else {
+                throw new VCatException(
+                        MessageFormatter.format("{} not found in home", MY_CNF).getMessage());
+            }
+        }
 
-		int errors = 0;
+        Properties properties = new Properties();
+        try (InputStream inputStream = Files.newInputStream(myCnfFile);
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            properties.load(bufferedReader);
+        } catch (IOException e) {
+            throw new VCatException(
+                    MessageFormatter.format("Error reading file '{}'", myCnfFile.toAbsolutePath()).getMessage(), e);
+        }
 
-		user = properties.getProperty("user");
-		if (user == null || user.isEmpty()) {
-			LOGGER.error("Property '{}' missing or empty", "user");
-			errors++;
-		}
-		if (user != null && user.startsWith("'") && user.endsWith("'")) {
-			user = user.substring(1, user.length() - 1);
-		}
+        int errors = 0;
 
-		password = properties.getProperty("password");
-		if (password == null || password.isEmpty()) {
-			LOGGER.error("Property '{}' missing or empty", "password");
-			errors++;
-		}
-		if (password != null && password.startsWith("'") && password.endsWith("'")) {
-			password = password.substring(1, password.length() - 1);
-		}
+        user = properties.getProperty("user");
+        if (user == null || user.isEmpty()) {
+            LOGGER.error("Property '{}' missing or empty", "user");
+            errors++;
+        }
+        if (user != null && user.startsWith("'") && user.endsWith("'")) {
+            user = user.substring(1, user.length() - 1);
+        }
 
-		return errors == 0;
-	}
+        password = properties.getProperty("password");
+        if (password == null || password.isEmpty()) {
+            LOGGER.error("Property '{}' missing or empty", "password");
+            errors++;
+        }
+        if (password != null && password.startsWith("'") && password.endsWith("'")) {
+            password = password.substring(1, password.length() - 1);
+        }
+
+        return errors == 0;
+    }
 }
