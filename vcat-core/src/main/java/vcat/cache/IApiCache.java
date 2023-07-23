@@ -2,7 +2,7 @@ package vcat.cache;
 
 import java.io.Serializable;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public interface IApiCache extends Serializable {
 
