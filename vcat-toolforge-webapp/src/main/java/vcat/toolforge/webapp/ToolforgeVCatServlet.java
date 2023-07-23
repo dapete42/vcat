@@ -154,7 +154,15 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
 
             // Home directory
-            final Path homeDirectory = Paths.get(System.getProperty("user.home"));
+            final Path homeDirectory;
+            final String toolDataDir = System.getenv("TOOL_DATA_DIR");
+            if (toolDataDir != null) {
+                // Primary: from $TOOL_DATA_DIR (within container built by Build Service)
+                homeDirectory = Paths.get(toolDataDir);
+            } else {
+                // Secordary: from $HOME
+                homeDirectory = Paths.get(System.getProperty("user.home"));
+            }
 
             // For cache of Graphviz files and rendered images, use this directory
             final Path cacheDir = homeDirectory.resolve(HOME_CACHE_DIR);
