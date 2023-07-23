@@ -1,6 +1,7 @@
 package vcat;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,8 +29,9 @@ import vcat.params.VCatParams;
 
 public abstract class AbstractVCat<W extends IWiki> {
 
-	class Root extends TitleNamespaceParam {
+	static class Root extends TitleNamespaceParam {
 
+		@Serial
 		private static final long serialVersionUID = -1206610398197602542L;
 
 		private final String fullTitle;
@@ -53,7 +55,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 	}
 
 	/** Log4j2 Logger */
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractVCat.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractVCat.class);
 
 	private static final String GRAPH_FONT = "DejaVu Sans";
 
@@ -171,6 +173,10 @@ public abstract class AbstractVCat<W extends IWiki> {
 						categoryNamespacePrefixLength, showhidden, exceedDepth);
 
 				if (limit != null && graph.getNodeCount() > limit && curDepth > 1) {
+					// If curDepth and maxDepth end up the same, reduce curDepth by one
+					if (maxDepth != null && curDepth == maxDepth) {
+						curDepth--;
+					}
 					return renderGraphForDepth(curDepth);
 				}
 			}
@@ -212,7 +218,7 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 		long endMillis = System.currentTimeMillis();
 
-		LOGGER.info(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(),
+		LOG.info(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(),
 				endMillis - startMillis);
 
 		return graph;
