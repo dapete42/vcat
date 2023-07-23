@@ -28,4 +28,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: vcat-toolforge
-        path: vcat-toolforge-webapp/target/vcat-toolforge.war
+        path: vcat-toolforge-webapp/target/vcat-toolforge-runner.jar
