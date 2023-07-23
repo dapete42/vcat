@@ -82,7 +82,7 @@ public class CatgraphConverterBean {
                 }
             }
         }
-        outputUrl = "http://tools.wmflabs.org/vcat/render?"
+        outputUrl = "https://vcat.toolforge.org/render?"
                 + StringUtils.join(outputParameterList, '&');
         hasResult = true;
     }
