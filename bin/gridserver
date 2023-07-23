@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# This is meant to run on Wikimedia Toolforge within an image generated from this repository
+
 use strict;
 use warnings;
 
@@ -8,7 +10,7 @@ use Encode;
 use JSON;
 use Redis;
 
-my $MYCNF = $ENV{'HOME'} . '/replica.my.cnf';
+my $MYCNF = $ENV{'TOOL_DATA_DIR'} . '/replica.my.cnf';
 my $REDIS_HOST = 'tools-redis:6379';
 
 if (!-e $MYCNF) {
