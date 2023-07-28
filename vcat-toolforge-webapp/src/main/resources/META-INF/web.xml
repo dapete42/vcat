@@ -4,16 +4,8 @@
 
     <module-name>vCat</module-name>
 
-    <!--
-    <servlet>
-        <servlet-name>status</servlet-name>
-        <jsp-file>/WEB-INF/status.jsp</jsp-file>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>status</servlet-name>
-        <url-pattern>/status</url-pattern>
-    </servlet-mapping>
-    -->
+    <welcome-file-list>
+            <welcome-file>index.xhtml</welcome-file>
+    </welcome-file-list>
 
 </web-app>
