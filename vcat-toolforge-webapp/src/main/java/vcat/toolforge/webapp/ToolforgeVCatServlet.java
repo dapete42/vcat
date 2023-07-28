@@ -11,6 +11,8 @@ import vcat.VCatException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
 import vcat.graphviz.Graphviz;
+import vcat.graphviz.GraphvizExternal;
+import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
 import vcat.mediawiki.IMetadataProvider;
@@ -43,7 +45,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     /**
      * Directory with Graphviz binaries (dot, fdp).
      */
-    private static final String GRAPHVIZ_DIR = "/usr/bin";
+    private static final String GRAPHVIZ_DIR = "/layers/fagiani_apt/apt/usr/bin";
 
     private static final String HOME_CACHE_DIR = "work/cache";
 
@@ -73,6 +75,11 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
      * Redis server port.
      */
     private static final int REDIS_PORT = 6379;
+
+    /**
+     * Maxim number of cuncurrent thrads running graphviz (0=unlimited).
+     */
+    private static final int GRAPHVIZ_THREADS = 2;
 
     /**
      * Maximum number of concurrent threads running vCat (0=unlimited).
@@ -173,8 +180,12 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             Files.createDirectories(tempDir);
 
             // Use gridserver to render Graphviz files. The vCat is already queued, so this one does not have to be.
-            final Graphviz graphviz = new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"),
-                    Paths.get(GRAPHVIZ_DIR));
+            //final Graphviz graphviz = new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"),
+            //        Paths.get(GRAPHVIZ_DIR));
+            // TODO for now use a direct graphviz within the new Build Service image
+            final Graphviz graphviz = new QueuedGraphviz(
+                    new GraphvizExternal(Paths.get(GRAPHVIZ_DIR)),
+                    GRAPHVIZ_THREADS);
 
             // Create renderer
             vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir),
