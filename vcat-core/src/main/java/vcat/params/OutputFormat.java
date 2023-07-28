@@ -17,11 +17,11 @@ public enum OutputFormat {
 	/** Raw Graphviz source, not passed through Graphviz. */
 	GraphvizRaw("gv", null, "text/plain; charset=UTF-8", null, "dot", "gv"),
 	/** GIF image (force rendering with cairo). */
-	GIF("gif", "gif:cairo", "image/gif", OutputFormat._HTMLGIF, "gif"),
+	GIF("gif", "gif", "image/gif", OutputFormat._HTMLGIF, "gif"),
 	/** PDF. */
 	PDF("pdf", "pdf", "application/pdf", null, "pdf"),
 	/** PNG image (force rendering with cairo). */
-	PNG("png", "png:cairo", "image/png", OutputFormat._HTMLPNG, "png"),
+	PNG("png", "png", "image/png", OutputFormat._HTMLPNG, "png"),
 	/** SVG image. */
 	SVG("svg", "svg", "image/svg+xml; charset=UTF-8", null, "svg");
 
