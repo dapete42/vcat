@@ -1,10 +1,13 @@
 package vcat.toolforge.webapp;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import vcat.VCatException;
@@ -34,6 +37,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+@ApplicationScoped
 @WebServlet(urlPatterns = {"/render", ToolforgeVCatServlet.CATGRAPH_REDIRECT_URL_PATTERN})
 public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
@@ -45,48 +49,77 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     /**
      * Directory with Graphviz binaries (dot, fdp).
      */
-    private static final String GRAPHVIZ_DIR = "/layers/fagiani_apt/apt/usr/bin";
+    @Inject
+    @ConfigProperty(name = "graphviz.dir", defaultValue = "/usr/bin")
+    String graphvizDir;
 
-    private static final String HOME_CACHE_DIR = "work/cache";
+    @Inject
+    @ConfigProperty(name = "home.cache.dir", defaultValue = "work/cache")
+    String homeCacheDir;
 
-    private static final String HOME_TEMP_DIR = "work/temp";
+    @Inject
+    @ConfigProperty(name = "home.temp.dir", defaultValue = "work/temp")
+    String homeTempDir;
 
     /**
      * JDBC URL for MySQL/MariaDB access to wiki table.
      */
-    private static final String JDBC_URL = "jdbc:mariadb://s7.web.db.svc.wikimedia.cloud:3306/meta_p";
+    @Inject
+    @ConfigProperty(name = "jdbc.url")
+    String jdbcUrl;
 
     /**
      * Purge caches after (seconds).
      */
-    private static final int PURGE = 600;
+    @Inject
+    @ConfigProperty(name = "cache.purge", defaultValue = "600")
+    Integer cachePurge;
 
     /**
      * Purge metadata after (seconds).
      */
-    private static final int PURGE_METADATA = 86400;
+    @Inject
+    @ConfigProperty(name = "cache.purge.metadata", defaultValue = "86400")
+    Integer cachePurgeMetadata;
 
     /**
      * Redis server hostname.
      */
-    private static final String REDIS_HOSTNAME = "tools-redis";
+    @Inject
+    @ConfigProperty(name = "redis.hostname")
+    String redisHostname = "tools-redis";
 
     /**
      * Redis server port.
      */
-    private static final int REDIS_PORT = 6379;
+    @Inject
+    @ConfigProperty(name = "redis.port")
+    Integer redisPort;
+
+    @Inject
+    @ConfigProperty(name = "graphviz.use.gridserver", defaultValue = "false")
+    Boolean graphvizUseGridserver;
 
     /**
-     * Maxim number of cuncurrent thrads running graphviz (0=unlimited).
+     * Maxim number of concurrent threads running graphviz (0=unlimited).
      */
-    private static final int GRAPHVIZ_THREADS = 2;
+    @Inject
+    @ConfigProperty(name = "graphviz.threads", defaultValue = "0")
+    Integer graphvizThreads;
 
     /**
      * Maximum number of concurrent threads running vCat (0=unlimited).
      */
-    private static final int VCAT_THREADS = 4;
+    @Inject
+    @ConfigProperty(name = "vcat.threads", defaultValue = "0")
+    Integer vcatThreads;
 
-    private static final int VCAT_MAX_QUEUE = 20;
+    /**
+     * Maximum number of processes to queue vor vCat
+     */
+    @Inject
+    @ConfigProperty(name = "vcat.queue", defaultValue = "100")
+    Integer vcatQueue;
 
     private static QueuedVCatRenderer<ToolforgeWiki> vCatRenderer;
 
@@ -109,7 +142,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
             // Pool for database connections
             final ComboPooledDataSource cpds = new ComboPooledDataSource();
-            cpds.setJdbcUrl(JDBC_URL);
+            cpds.setJdbcUrl(jdbcUrl);
             try {
                 // Fails for some reason unless explicitly set
                 cpds.setDriverClass(org.mariadb.jdbc.Driver.class.getName());
@@ -148,12 +181,12 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             poolConfig.setMinIdle(1);
 
             // Pool of Redis connections
-            final JedisPool jedisPool = new JedisPool(poolConfig, REDIS_HOSTNAME, REDIS_PORT);
+            final JedisPool jedisPool = new JedisPool(poolConfig, redisHostname, redisPort);
 
             // Use Redis for API and metadata caches
-            final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, PURGE);
+            final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, cachePurge);
             final IMetadataCache metadataCache = new MetadataRedisCache(jedisPool, redisMetadataCacheKeyPrefix,
-                    PURGE_METADATA);
+                    cachePurgeMetadata);
 
             final CachedApiClient<ToolforgeWiki> apiClient = new CachedApiClient<>(apiCache);
 
@@ -172,24 +205,29 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             }
 
             // For cache of Graphviz files and rendered images, use this directory
-            final Path cacheDir = homeDirectory.resolve(HOME_CACHE_DIR);
+            final Path cacheDir = homeDirectory.resolve(homeCacheDir);
             // Temporary directory for Graphviz files and rendered images
-            final Path tempDir = homeDirectory.resolve(HOME_TEMP_DIR);
+            final Path tempDir = homeDirectory.resolve(homeTempDir);
 
             Files.createDirectories(cacheDir);
             Files.createDirectories(tempDir);
 
-            // Use gridserver to render Graphviz files. The vCat is already queued, so this one does not have to be.
-            //final Graphviz graphviz = new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"),
-            //        Paths.get(GRAPHVIZ_DIR));
-            // TODO for now use a direct graphviz within the new Build Service image
-            final Graphviz graphviz = new QueuedGraphviz(
-                    new GraphvizExternal(Paths.get(GRAPHVIZ_DIR)),
-                    GRAPHVIZ_THREADS);
+            final Graphviz graphviz;
+            if (graphvizUseGridserver) {
+                // Use gridserver to render Graphviz files. The vCat is already queued, so this one does not have to be.
+                graphviz = new QueuedGraphviz(
+                        new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"), Paths.get(graphvizDir)),
+                        graphvizThreads);
+            } else {
+                // Run directly
+                graphviz = new QueuedGraphviz(
+                        new GraphvizExternal(Paths.get(graphvizDir)),
+                        graphvizThreads);
+            }
 
             // Create renderer
             vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir),
-                    VCAT_THREADS);
+                    vcatThreads);
 
         } catch (IOException | VCatException e) {
             throw new ServletException(e);
@@ -200,7 +238,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     @Override
     protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
 
-        if (vCatRenderer.getNumberOfQueuedJobs() > VCAT_MAX_QUEUE) {
+        if (vCatRenderer.getNumberOfQueuedJobs() > vcatQueue) {
             throw new ServletException(Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
         }
 
