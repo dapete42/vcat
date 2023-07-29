@@ -1,6 +1,6 @@
 # used by Toolforge Build Service
 
-# gripserver
+# gridserver
 graphviz
 fonts-dejavu-core
 fonts-ipafont-gothic

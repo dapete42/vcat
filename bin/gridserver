@@ -3,4 +3,4 @@
 # This is meant to run on Wikimedia Toolforge within an image generated from this repository
 
 mkdir -p "$TOOL_DATA_DIR/logs/"
-$( dirname $0)/gridserver.pl 2>&1 >> "$TOOL_DATA_DIR/logs/gripserver.log"
+$( dirname $0)/gridserver.pl 2>&1 >> "$TOOL_DATA_DIR/logs/gridserver.log"
