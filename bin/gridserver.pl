@@ -1,0 +1,98 @@
+#!/usr/bin/perl
+
+# This is meant to run on Wikimedia Toolforge within an image generated from this repository
+
+use strict;
+use warnings;
+
+use Digest::SHA qw(sha256_hex);
+use Encode;
+use JSON;
+use Redis;
+
+my $MYCNF = $ENV{'TOOL_DATA_DIR'} . '/replica.my.cnf';
+my $REDIS_HOST = 'tools-redis:6379';
+
+if (!-e $MYCNF) {
+	die("Configuration file '$MYCNF' not found");
+}
+
+my $user;
+my $password;
+
+open MYCNF, '<', $MYCNF;
+while (my $line = <MYCNF>) {
+	chomp $line;
+	if (my ($key, $value) = ($line =~ /^\s*([^#].*?)\s*=\s*(.*)$/)) {
+		if ($value =~ /^'(.*)'$/) {
+			$value = $1;
+		}
+		if ($key eq 'user') {
+			$user = $value;
+		} elsif ($key eq 'password') {
+			$password = $value;
+		}
+	}
+}
+close MYCNF;
+
+my $redisSecret = sha256_hex("$user:$password");
+
+my $requestChannel = $redisSecret . "-request";
+my $requestPrefix = $redisSecret . "-request-";
+my $responseChannel = $redisSecret . "-response";
+
+my $r1 = Redis->new(server => $REDIS_HOST, reconnect => 10);
+my $r2 = Redis->new(server => $REDIS_HOST, reconnect => 10);
+
+# Ids can be supplied on the command line, these are queued first
+my @requestIds = @ARGV;
+
+my $abort = 0;
+$r1->subscribe(
+	$requestChannel,
+	sub {
+		my ($message, $channel, $subscribedChannel) = @_;
+		push @requestIds, $message;
+	}
+);
+
+my $counter = 1000 + int(rand(1000));
+
+print "[$$] Gridserver started\n";
+print "[$$] This instance will serve $counter requests\n";
+
+while (!$abort and $counter > 0) {
+	my $foundAKey = 0;
+	while (@requestIds > 0 and !$foundAKey) {
+		my $id = shift @requestIds;
+		my $key = $requestPrefix . $id;
+		
+		$r2->multi;
+		$r2->exists($key);
+		$r2->get($key);
+		$r2->del($key);
+		my ($exists, $jsonString) = $r2->exec;
+		
+		if ($exists) {
+			$foundAKey = 1;
+#			print "$$\tJob with id $id still exists, running it\n";
+			my $json = decode_json($jsonString);
+			system @$json;
+			$r2->publish($responseChannel, $id);
+			$counter--;
+		} else {
+#			print "$$\tJob with id $id already gone, trying next one if possible\n";
+		}
+		
+	}
+	$r1->wait_for_messages(0.1);
+}
+
+if ($abort) {
+	print "[$$] Gridserver aborted\n";
+} else {
+	print "[$$] Gridserver stopped\n";
+}
+
+$r2->unsubscribe($requestChannel, sub {});
