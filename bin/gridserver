@@ -4,6 +4,9 @@
 
 mkdir -p "$TOOL_DATA_DIR/logs/"
 
+# Register Graphviz plugins
+/layers/fagiani_apt/apt/usr/bin/dot -c
+
 # Within the image, additional Perl libs will be here; add it to @INC
 export PERL5LIB=/layers/fagiani_apt/apt/usr/share/perl5
 
