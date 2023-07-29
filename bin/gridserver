@@ -7,7 +7,11 @@ mkdir -p "$TOOL_DATA_DIR/logs/"
 # Register Graphviz plugins
 /layers/fagiani_apt/apt/usr/bin/dot -c
 
-# Within the image, additional Perl libs will be here; add it to @INC
+# Within the image, additional Perl libs from the APT layer will be here; add it to @INC
 export PERL5LIB=/layers/fagiani_apt/apt/usr/share/perl5
+
+# Symlink fonts from the APT layer into $HOME/.fonts, so they are found by Graphviz
+mkdir -p "$HOME/.fonts"
+ln -s /layers/fagiani_apt/apt/usr/share/fonts/* "$HOME/.fonts/"
 
 $( dirname $0)/gridserver.pl >>"$TOOL_DATA_DIR/logs/gridserver.log" 2>&1
