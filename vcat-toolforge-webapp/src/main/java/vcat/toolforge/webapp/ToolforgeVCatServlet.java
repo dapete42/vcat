@@ -1,6 +1,5 @@
 package vcat.toolforge.webapp;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
@@ -28,7 +27,7 @@ import vcat.toolforge.base.MyCnfConfig;
 import vcat.toolforge.base.ToolforgeWiki;
 import vcat.toolforge.base.ToolforgeWikiProvider;
 
-import java.beans.PropertyVetoException;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Serial;
 import java.nio.file.Files;
@@ -59,13 +58,6 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     @Inject
     @ConfigProperty(name = "home.temp.dir", defaultValue = "work/temp")
     String homeTempDir;
-
-    /**
-     * JDBC URL for MySQL/MariaDB access to wiki table.
-     */
-    @Inject
-    @ConfigProperty(name = "jdbc.url")
-    String jdbcUrl;
 
     /**
      * Purge caches after (seconds).
@@ -116,6 +108,12 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     @ConfigProperty(name = "vcat.queue", defaultValue = "100")
     Integer vcatQueue;
 
+    /**
+     * Injected Quarkus data source
+     */
+    @Inject
+    DataSource dataSource;
+
     private static QueuedVCatRenderer<ToolforgeWiki> vCatRenderer;
 
     private static IMetadataProvider metadataProvider;
@@ -135,27 +133,8 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             MyCnfConfig configMyCnf = new MyCnfConfig();
             configMyCnf.readFromMyCnf();
 
-            // Pool for database connections
-            final ComboPooledDataSource cpds = new ComboPooledDataSource();
-            cpds.setJdbcUrl(jdbcUrl);
-            try {
-                // Fails for some reason unless explicitly set
-                cpds.setDriverClass(org.mariadb.jdbc.Driver.class.getName());
-            } catch (PropertyVetoException e) {
-                // ignore
-            }
-            cpds.setUser(configMyCnf.getUser());
-            cpds.setPassword(configMyCnf.getPassword());
-            // Stay small and close connections quickly - this is only used for metadata for now, so it's not used much
-            cpds.setInitialPoolSize(1);
-            cpds.setMinPoolSize(0);
-            cpds.setMaxPoolSize(10);
-            cpds.setAcquireIncrement(1);
-            cpds.setMaxIdleTime(600);
-            cpds.setMaxConnectionAge(3600);
-
             // Provider for Wikimedia Toolforge wiki information
-            toolforgeWikiProvider = new ToolforgeWikiProvider(cpds);
+            toolforgeWikiProvider = new ToolforgeWikiProvider(dataSource);
 
             // Use database credentials to create a secret prefix for caches
             final String redisSecret = DigestUtils.sha256Hex(configMyCnf.getUser() + ':' + configMyCnf.getPassword());
