@@ -14,7 +14,6 @@ import vcat.VCatException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
 import vcat.graphviz.Graphviz;
-import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
@@ -95,10 +94,6 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     @Inject
     @ConfigProperty(name = "redis.port")
     Integer redisPort;
-
-    @Inject
-    @ConfigProperty(name = "graphviz.use.gridserver", defaultValue = "false")
-    Boolean graphvizUseGridserver;
 
     /**
      * Maxim number of concurrent threads running graphviz (0=unlimited).
@@ -200,7 +195,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
                 // Primary: from $TOOL_DATA_DIR (within container built by Build Service)
                 homeDirectory = Paths.get(toolDataDir);
             } else {
-                // Secordary: from $HOME
+                // Secondary: from $HOME
                 homeDirectory = Paths.get(System.getProperty("user.home"));
             }
 
@@ -212,18 +207,10 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             Files.createDirectories(cacheDir);
             Files.createDirectories(tempDir);
 
-            final Graphviz graphviz;
-            if (graphvizUseGridserver) {
-                // Use gridserver to render Graphviz files. The vCat is already queued, so this one does not have to be.
-                graphviz = new QueuedGraphviz(
-                        new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"), Paths.get(graphvizDir)),
-                        graphvizThreads);
-            } else {
-                // Run directly
-                graphviz = new QueuedGraphviz(
-                        new GraphvizExternal(Paths.get(graphvizDir)),
-                        graphvizThreads);
-            }
+            // Use gridserver to render Graphviz files
+            final Graphviz graphviz = new QueuedGraphviz(
+                    new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"), Paths.get(graphvizDir)),
+                    graphvizThreads);
 
             // Create renderer
             vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir),
