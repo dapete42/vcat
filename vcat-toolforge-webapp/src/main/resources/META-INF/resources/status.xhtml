@@ -17,65 +17,47 @@
                 </td>
             </tr>
             <tr>
-                <th scope="col">Operating system architecture</th>
+                <th scope="col">Architecture</th>
                 <td>
                     <h:outputText value="#{status.getSystemProperty('os.arch')}"/>
                 </td>
             </tr>
             <tr>
-                <th scope="col">Operation system name/version</th>
+                <th scope="col">Operation system</th>
                 <td>
                     <h:outputText value="#{status.getSystemProperty('os.name')}"/>
                     <h:outputText value=" "/>
                     <h:outputText value="#{status.getSystemProperty('os.version')}"/>
                 </td>
             </tr>
-            <tr>
-                <th scope="col">User name</th>
-                <td>
-                    <h:outputText value="#{status.getSystemProperty('user.name')}"/>
-                </td>
-            </tr>
             </tbody>
         </table>
 
         <table class="status">
-            <caption>Server properties</caption>
+            <caption>JVM memory</caption>
             <tbody>
             <tr>
-                <th scope="col">Server info</th>
-                <td>
-                    <h:outputText value="#{status.serverInfo}"/>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <table class="status">
-            <caption>Memory</caption>
-            <tbody>
-            <tr>
-                <th scope="col">Allocated memory</th>
+                <th scope="col">Allocated</th>
                 <td class="number">
-                    <h:outputText value="#{status.totalMemory}"/>
+                    <h:outputText value="#{status.totalMemory} MiB"/>
                 </td>
             </tr>
             <tr>
-                <th scope="col">Free allocated memory</th>
+                <th scope="col">Free allocated</th>
                 <td class="number">
-                    <h:outputText value="#{status.freeMemory}"/>
+                    <h:outputText value="#{status.freeMemory} MiB"/>
                 </td>
             </tr>
             <tr>
-                <th scope="col">Maximum memory</th>
+                <th scope="col">Free total</th>
                 <td class="number">
-                    <h:outputText value="#{status.maxMemory}"/>
+                    <h:outputText value="#{status.freeMemory + status.maxMemory - status.totalMemory} MiB"/>
                 </td>
             </tr>
             <tr>
-                <th scope="col">Free total memory</th>
+                <th scope="col">Maximum</th>
                 <td class="number">
-                    <h:outputText value="#{status.freeMemory + status.maxMemory - status.totalMemory}"/>
+                    <h:outputText value="#{status.maxMemory} MiB"/>
                 </td>
             </tr>
             </tbody>

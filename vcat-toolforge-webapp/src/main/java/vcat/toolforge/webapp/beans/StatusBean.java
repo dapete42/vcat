@@ -2,9 +2,7 @@ package vcat.toolforge.webapp.beans;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
-import jakarta.servlet.ServletContext;
 import lombok.Getter;
 
 import java.io.Serial;
@@ -44,14 +42,9 @@ public class StatusBean implements Serializable {
         }
         this.threads = Arrays.asList(threads);
         final long mb = 1024 * 1024;
-        freeMemory = Runtime.getRuntime().freeMemory();
-        maxMemory = Runtime.getRuntime().maxMemory();
-        totalMemory = Runtime.getRuntime().totalMemory();
-    }
-
-    @SuppressWarnings("unchecked")
-    public String getServerInfo() {
-        return ((ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext()).getServerInfo();
+        freeMemory = Runtime.getRuntime().freeMemory() / (1024L * 1024L);
+        maxMemory = Runtime.getRuntime().maxMemory() / (1024L * 1024L);
+        totalMemory = Runtime.getRuntime().totalMemory() / (1024L * 1024L);
     }
 
     public String getSystemProperty(String key) {
