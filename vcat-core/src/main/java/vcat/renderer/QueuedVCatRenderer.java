@@ -9,6 +9,7 @@ import vcat.mediawiki.IWiki;
 import vcat.params.AbstractAllParams;
 import vcat.util.HashHelper;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -17,6 +18,7 @@ import java.util.concurrent.ThreadFactory;
 
 public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
 
+    @Serial
     private static final long serialVersionUID = 7817745519732907506L;
 
     /**

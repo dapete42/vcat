@@ -1,5 +1,6 @@
 package vcat.cache.file;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
  */
 public abstract class AbstractFileCache<K extends Serializable> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -1626880286588890986L;
 
     /**
@@ -33,6 +35,7 @@ public abstract class AbstractFileCache<K extends Serializable> implements Seria
     /**
      * The cache directory.
      */
+    @Getter
     protected final Path cacheDirectory;
 
     /**
@@ -130,13 +133,6 @@ public abstract class AbstractFileCache<K extends Serializable> implements Seria
         } else {
             return null;
         }
-    }
-
-    /**
-     * @return The cache directory.
-     */
-    public Path getCacheDirectory() {
-        return this.cacheDirectory;
     }
 
     /**

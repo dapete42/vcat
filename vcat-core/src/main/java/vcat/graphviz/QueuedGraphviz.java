@@ -1,7 +1,5 @@
 package vcat.graphviz;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,46 +17,7 @@ import java.util.concurrent.ThreadFactory;
 
 public class QueuedGraphviz implements Graphviz {
 
-    class Job {
-
-        final Path inputFile;
-
-        final Path outputFile;
-
-        final GraphvizParams params;
-
-        Job(Path inputFile, Path outputFile, GraphvizParams params) {
-            this.inputFile = inputFile;
-            this.outputFile = outputFile;
-            this.params = params;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null) {
-                return false;
-            }
-            if (o instanceof Job) {
-                Job j = (Job) o;
-                EqualsBuilder eb = new EqualsBuilder();
-                eb.append(j.inputFile, this.inputFile);
-                eb.append(j.outputFile, this.outputFile);
-                eb.append(j.params, this.params);
-                return eb.isEquals();
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            HashCodeBuilder hcb = new HashCodeBuilder(13, 17);
-            hcb.append(inputFile);
-            hcb.append(outputFile);
-            hcb.append(params);
-            return hcb.toHashCode();
-        }
-
+    record Job(Path inputFile, Path outputFile, GraphvizParams params) {
     }
 
     /**

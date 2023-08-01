@@ -15,13 +15,15 @@ import vcat.Messages;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 
 public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetadataProvider {
 
-    private static final long serialVersionUID = -3737560080769969852L;
+    @Serial
+    private static final long serialVersionUID = 2558987660016530790L;
 
     /**
      * Maximum number of titles parameters to use in one request.
@@ -138,11 +140,8 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
                             if (pagesData.containsKey("categories")) {
                                 JsonArray jsonCategories = pagesData.getJsonArray("categories");
                                 String pagesDataTitle = pagesData.getString("title");
-                                Collection<String> categories = categoryMap.get(pagesDataTitle);
-                                if (categories == null) {
-                                    categories = new ArrayList<>(jsonCategories.size());
-                                    categoryMap.put(pagesDataTitle, categories);
-                                }
+                                Collection<String> categories = categoryMap.computeIfAbsent(pagesDataTitle,
+                                        k -> new ArrayList<>(jsonCategories.size()));
                                 for (int i = 0; i < jsonCategories.size(); i++) {
                                     JsonObject category = jsonCategories.getJsonObject(i);
                                     categories.add(category.getString("title"));

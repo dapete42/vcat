@@ -1,5 +1,6 @@
 package vcat.params;
 
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.helpers.MessageFormatter;
 import vcat.Messages;
@@ -47,8 +48,10 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
     private final CombinedParams<W> combinedParams = new CombinedParams<>();
 
+    @Getter
     protected Metadata metadata;
 
+    @Getter
     private String renderUrl;
 
     protected final Map<String, String[]> requestParams = new HashMap<>();
@@ -137,10 +140,10 @@ public abstract class AbstractAllParams<W extends IWiki> {
         if (titleStrings == null) {
             throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleCategoryMissing"));
         }
-        for (int i = 0; i < titleStrings.length; i++) {
-            String[] split = titleStrings[i].split("\\|");
-            for (int j = 0; j < split.length; j++) {
-                final String title = unescapeMediawikiTitle(split[j]);
+        for (String titleString : titleStrings) {
+            String[] split = titleString.split("\\|");
+            for (String s : split) {
+                final String title = unescapeMediawikiTitle(s);
                 if (title == null || title.isEmpty()) {
                     throw new VCatException(Messages.getString("AbstractAllParams.Exception.TitleEmpty"));
                 }
@@ -201,7 +204,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
         // 'limit' - default is MAX_LIMIT, unless outputting raw graphviz test, and cannot be set higher
         int maxLimit = (format == OutputFormat.GraphvizRaw) ? Integer.MAX_VALUE : MAX_LIMIT;
-        Integer limit = MAX_LIMIT;
+        int limit = MAX_LIMIT;
         if (limitString != null) {
             try {
                 limit = Integer.parseInt(limitString);
@@ -338,14 +341,6 @@ public abstract class AbstractAllParams<W extends IWiki> {
 
     public GraphvizParams getGraphviz() {
         return this.combinedParams.getGraphviz();
-    }
-
-    public Metadata getMetadata() {
-        return this.metadata;
-    }
-
-    public String getRenderUrl() {
-        return this.renderUrl;
     }
 
     public Map<String, String[]> getRequestParams() {

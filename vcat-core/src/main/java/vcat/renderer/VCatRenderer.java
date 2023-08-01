@@ -21,6 +21,7 @@ import java.nio.file.StandardOpenOption;
 
 public class VCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
 
+    @Serial
     private static final long serialVersionUID = 7255644185587547207L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VCatRenderer.class);

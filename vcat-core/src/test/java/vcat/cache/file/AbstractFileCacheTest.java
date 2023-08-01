@@ -9,6 +9,7 @@ import vcat.cache.CacheException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,9 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AbstractFileCacheTest {
 
-    private class FileCacheImpl extends AbstractFileCache<String> {
+    private static class FileCacheImpl extends AbstractFileCache<String> {
 
-        private static final long serialVersionUID = -2886582260646788088L;
+        @Serial
+        private static final long serialVersionUID = 962489659800542366L;
 
         protected FileCacheImpl(Path cacheDirectory, int maxAgeInSeconds) throws CacheException {
             super(cacheDirectory, "AbstractFileCacheTest-FileCacheImpl", "", maxAgeInSeconds);
@@ -120,8 +122,8 @@ class AbstractFileCacheTest {
         underTest.put("test", testBytes);
 
         try (InputStream input = underTest.getAsInputStream("test")) {
-            for (int i = 0; i < testBytes.length; i++) {
-                assertEquals(input.read(), testBytes[i]);
+            for (byte testByte : testBytes) {
+                assertEquals(input.read(), testByte);
             }
             assertEquals(-1, input.read());
         }
@@ -129,7 +131,7 @@ class AbstractFileCacheTest {
     }
 
     @Test
-    void testGetAsInputStreamNull() throws CacheException, IOException {
+    void testGetAsInputStreamNull() throws CacheException {
 
         assertNull(underTest.getAsInputStream("test"));
 
