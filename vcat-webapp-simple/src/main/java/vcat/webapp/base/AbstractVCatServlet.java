@@ -1,6 +1,5 @@
 package vcat.webapp.base;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vcat.renderer.RenderedFileInfo;
@@ -62,7 +61,7 @@ public abstract class AbstractVCatServlet extends HttpServlet {
             // Serve file to browser
             try (InputStream renderedInput = Files.newInputStream(resultFile);
                  ServletOutputStream output = resp.getOutputStream()) {
-                IOUtils.copy(renderedInput, output);
+                renderedInput.transferTo(output);
             }
 
             LOGGER.info("File sent: '{}' sent as '{}', {} bytes", resultFile.toAbsolutePath(), contentType, length);

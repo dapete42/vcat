@@ -6,7 +6,6 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import vcat.toolforge.webapp.CatgraphConverter;
 import vcat.toolforge.webapp.Messages;
 
@@ -83,7 +82,7 @@ public class CatgraphConverterBean {
             }
         }
         outputUrl = "https://vcat.toolforge.org/render?"
-                + StringUtils.join(outputParameterList, '&');
+                + String.join("&", outputParameterList);
         hasResult = true;
     }
 

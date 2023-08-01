@@ -1,6 +1,10 @@
 package vcat.cache.file;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.io.file.PathUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import vcat.cache.CacheException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,196 +14,191 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.file.PathUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import vcat.cache.CacheException;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AbstractFileCacheTest {
 
-	private class FileCacheImpl extends AbstractFileCache<String> {
+    private class FileCacheImpl extends AbstractFileCache<String> {
 
-		private static final long serialVersionUID = -2886582260646788088L;
+        private static final long serialVersionUID = -2886582260646788088L;
 
-		protected FileCacheImpl(Path cacheDirectory, int maxAgeInSeconds) throws CacheException {
-			super(cacheDirectory, "AbstractFileCacheTest-FileCacheImpl", "", maxAgeInSeconds);
-		}
+        protected FileCacheImpl(Path cacheDirectory, int maxAgeInSeconds) throws CacheException {
+            super(cacheDirectory, "AbstractFileCacheTest-FileCacheImpl", "", maxAgeInSeconds);
+        }
 
-	}
+    }
 
-	private Path tempDirectory;
+    private Path tempDirectory;
 
-	private FileCacheImpl underTest;
+    private FileCacheImpl underTest;
 
-	@BeforeEach
-	public void setUp() throws IOException, CacheException {
-		tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
-		underTest = new FileCacheImpl(tempDirectory, 10);
-	}
+    @BeforeEach
+    public void setUp() throws IOException, CacheException {
+        tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
+        underTest = new FileCacheImpl(tempDirectory, 10);
+    }
 
-	@AfterEach
-	public void tearDown() throws IOException {
-		try {
-			underTest.clear();
-		} catch (CacheException e) {
-			// ignore
-		}
-		if (tempDirectory != null) {
-			PathUtils.deleteDirectory(tempDirectory);
-		}
-	}
+    @AfterEach
+    public void tearDown() throws IOException {
+        try {
+            underTest.clear();
+        } catch (CacheException e) {
+            // ignore
+        }
+        if (tempDirectory != null) {
+            PathUtils.deleteDirectory(tempDirectory);
+        }
+    }
 
-	@Test
-	void testClear() throws CacheException {
+    @Test
+    void testClear() throws CacheException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
-		underTest.put("test", testBytes);
-		underTest.clear();
+        underTest.put("test", testBytes);
+        underTest.clear();
 
-		byte[] resultBytes = underTest.get("test");
+        byte[] resultBytes = underTest.get("test");
 
-		assertNull(resultBytes);
+        assertNull(resultBytes);
 
-	}
+    }
 
-	@Test
-	void testRemove() throws CacheException {
+    @Test
+    void testRemove() throws CacheException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
-		underTest.put("test", testBytes);
-		underTest.put("test2", testBytes);
+        underTest.put("test", testBytes);
+        underTest.put("test2", testBytes);
 
-		underTest.remove("test");
+        underTest.remove("test");
 
-		assertTrue(underTest.containsKey("test2"));
+        assertTrue(underTest.containsKey("test2"));
 
-	}
+    }
 
-	@Test
-	void testPurge() throws CacheException, InterruptedException {
+    @Test
+    void testPurge() throws CacheException, InterruptedException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
-		underTest.maxAgeInSeconds = 1;
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        underTest.maxAgeInSeconds = 1;
 
-		underTest.put("test1", testBytes);
-		underTest.put("test2", testBytes);
-		underTest.purge();
+        underTest.put("test1", testBytes);
+        underTest.put("test2", testBytes);
+        underTest.purge();
 
-		assertTrue(underTest.containsKey("test1"));
-		assertTrue(underTest.containsKey("test2"));
+        assertTrue(underTest.containsKey("test1"));
+        assertTrue(underTest.containsKey("test2"));
 
-		TimeUnit.MILLISECONDS.sleep(1500);
-		underTest.put("test3", testBytes);
-		underTest.purge();
+        TimeUnit.MILLISECONDS.sleep(1500);
+        underTest.put("test3", testBytes);
+        underTest.purge();
 
-		assertFalse(underTest.containsKey("test1"));
-		assertFalse(underTest.containsKey("test2"));
-		assertTrue(underTest.containsKey("test3"));
+        assertFalse(underTest.containsKey("test1"));
+        assertFalse(underTest.containsKey("test2"));
+        assertTrue(underTest.containsKey("test3"));
 
-	}
+    }
 
-	@Test
-	void testContainsKey() throws CacheException {
+    @Test
+    void testContainsKey() throws CacheException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
-		underTest.put("test", testBytes);
+        underTest.put("test", testBytes);
 
-		assertTrue(underTest.containsKey("test"));
+        assertTrue(underTest.containsKey("test"));
 
-	}
+    }
 
-	@Test
-	void testGetAsInputStream() throws CacheException, IOException {
+    @Test
+    void testGetAsInputStream() throws CacheException, IOException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
-		underTest.put("test", testBytes);
+        underTest.put("test", testBytes);
 
-		try (InputStream input = underTest.getAsInputStream("test")) {
-			for (int i = 0; i < testBytes.length; i++) {
-				assertEquals(input.read(), testBytes[i]);
-			}
-			assertEquals(-1, input.read());
-		}
+        try (InputStream input = underTest.getAsInputStream("test")) {
+            for (int i = 0; i < testBytes.length; i++) {
+                assertEquals(input.read(), testBytes[i]);
+            }
+            assertEquals(-1, input.read());
+        }
 
-	}
+    }
 
-	@Test
-	void testGetAsInputStreamNull() throws CacheException, IOException {
+    @Test
+    void testGetAsInputStreamNull() throws CacheException, IOException {
 
-		assertNull(underTest.getAsInputStream("test"));
+        assertNull(underTest.getAsInputStream("test"));
 
-	}
+    }
 
-	@Test
-	void testPutAndGet() throws CacheException {
+    @Test
+    void testPutAndGet() throws CacheException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
-		underTest.put("test", testBytes);
-		byte[] resultBytes = underTest.get("test");
+        underTest.put("test", testBytes);
+        byte[] resultBytes = underTest.get("test");
 
-		assertArrayEquals(testBytes, resultBytes);
+        assertArrayEquals(testBytes, resultBytes);
 
-	}
+    }
 
-	@Test
-	void testPutFile() throws CacheException, IOException {
+    @Test
+    void testPutFile() throws CacheException, IOException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
-		Path tempFile = null;
-		try {
+        Path tempFile = null;
+        try {
 
-			tempFile = Files.createTempFile("AbstractFileCacheTest-testPutFileMove", "");
-			try (OutputStream outputStream = Files.newOutputStream(tempFile)) {
-				outputStream.write(testBytes);
-			}
+            tempFile = Files.createTempFile("AbstractFileCacheTest-testPutFileMove", "");
+            try (OutputStream outputStream = Files.newOutputStream(tempFile)) {
+                outputStream.write(testBytes);
+            }
 
-			underTest.putFile("test", tempFile, false);
-			byte[] resultBytes = underTest.get("test");
+            underTest.putFile("test", tempFile, false);
+            byte[] resultBytes = underTest.get("test");
 
-			assertTrue(Files.exists(tempFile));
-			assertArrayEquals(testBytes, resultBytes);
+            assertTrue(Files.exists(tempFile));
+            assertArrayEquals(testBytes, resultBytes);
 
-		} finally {
-			if (tempFile != null) {
-				Files.deleteIfExists(tempFile);
-			}
-		}
+        } finally {
+            if (tempFile != null) {
+                Files.deleteIfExists(tempFile);
+            }
+        }
 
-	}
+    }
 
-	@Test
-	void testPutFileMove() throws CacheException, IOException {
+    @Test
+    void testPutFileMove() throws CacheException, IOException {
 
-		byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
+        byte[] testBytes = "test".getBytes(StandardCharsets.US_ASCII);
 
-		Path tempFile = null;
-		try {
+        Path tempFile = null;
+        try {
 
-			tempFile = Files.createTempFile("AbstractFileCacheTest-testPutFileMove", "");
-			try (OutputStream outputStream = Files.newOutputStream(tempFile)) {
-				outputStream.write(testBytes);
-			}
+            tempFile = Files.createTempFile("AbstractFileCacheTest-testPutFileMove", "");
+            try (OutputStream outputStream = Files.newOutputStream(tempFile)) {
+                outputStream.write(testBytes);
+            }
 
-			underTest.putFile("test", tempFile, true);
-			byte[] resultBytes = underTest.get("test");
+            underTest.putFile("test", tempFile, true);
+            byte[] resultBytes = underTest.get("test");
 
-			assertFalse(Files.exists(tempFile));
-			assertArrayEquals(testBytes, resultBytes);
+            assertFalse(Files.exists(tempFile));
+            assertArrayEquals(testBytes, resultBytes);
 
-		} finally {
-			if (tempFile != null) {
-				Files.deleteIfExists(tempFile);
-			}
-		}
+        } finally {
+            if (tempFile != null) {
+                Files.deleteIfExists(tempFile);
+            }
+        }
 
-	}
+    }
 
 }

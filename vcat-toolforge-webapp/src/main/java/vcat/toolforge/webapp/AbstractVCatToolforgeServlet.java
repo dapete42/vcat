@@ -6,7 +6,6 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vcat.VCatException;
@@ -66,7 +65,7 @@ public abstract class AbstractVCatToolforgeServlet extends HttpServlet {
             // Serve file to browser
             try (InputStream renderedInput = Files.newInputStream(resultFile);
                  ServletOutputStream output = resp.getOutputStream()) {
-                IOUtils.copy(renderedInput, output);
+                renderedInput.transferTo(output);
             }
 
             LOG.info("File sent: '{}' sent as '{}', {} bytes", resultFile.toAbsolutePath(), contentType, length);

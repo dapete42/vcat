@@ -1,6 +1,5 @@
 package vcat.graphviz;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -82,7 +81,7 @@ public class GraphvizExternal implements Graphviz {
         int exitValue = 0;
         String processOutput = null;
         try {
-            processOutput = IOUtils.toString(graphvizProcess.getInputStream(), StandardCharsets.UTF_8);
+            processOutput = new String(graphvizProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             // If this fails, just log an error
             LOGGER.warn(Messages.getString("GraphvizExternal.Warn.Stdout"), command, e);
