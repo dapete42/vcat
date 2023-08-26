@@ -10,8 +10,6 @@
 	</parent>
 	<artifactId>vcat-webapp-simple</artifactId>
 
-	<packaging>war</packaging>
-
 	<name>vCat simple web application</name>
 	<description>A simple web application for vCat.</description>
 
@@ -29,37 +27,49 @@
 		</developer>
 	</developers>
 
+	<properties>
+		<skipITs>true</skipITs>
+		<quarkus.package.type>uber-jar</quarkus.package.type>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>vcat-core</artifactId>
 		</dependency>
+
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-arc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
+			<groupId>io.quarkus</groupId>
+			<artifactId>quarkus-undertow</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j2-impl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
+			<groupId>org.jboss.slf4j</groupId>
+			<artifactId>slf4j-jboss-logmanager</artifactId>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<finalName>vcat-simple</finalName>
+		<plugins>
+			<plugin>
+				<groupId>${quarkus.platform.group-id}</groupId>
+				<artifactId>quarkus-maven-plugin</artifactId>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<goals>
+							<goal>build</goal>
+							<goal>generate-code</goal>
+							<goal>generate-code-tests</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 </project>
