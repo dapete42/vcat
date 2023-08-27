@@ -1,6 +1,5 @@
 package vcat.renderer;
 
-import org.apache.commons.codec.binary.Base64OutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vcat.AbstractVCat;
@@ -18,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Base64;
 
 public class VCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
 
@@ -101,20 +101,10 @@ public class VCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
             writer.write(imageFormat.getMimeType());
             writer.write(";base64,");
 
-            // Input stream for the image file
-            try (InputStream imageInputStream = Files.newInputStream(imageRawFile)) {
-
-                // Base64 encoder for the data: URI, writing to the output file
-
-                // Flush the wirter to make sure we can write to outputStream directly
-                writer.flush();
-                Base64OutputStream base64Stream = new Base64OutputStream(outputStream, true, -1, null);
-                imageInputStream.transferTo(base64Stream);
-                // Flush the base64 stream to make sure we can use the writer again. We cannot close it because that
-                // would close the outputStream too.
-                base64Stream.flush();
-
-            }
+            // Read image file and output it as base64
+            final var imageBytes = Files.readAllBytes(imageRawFile);
+            final var base64String = Base64.getEncoder().encodeToString(imageBytes);
+            writer.write(base64String);
 
             writer.write("\" usemap=\"#cluster_vcat\"/>");
 
