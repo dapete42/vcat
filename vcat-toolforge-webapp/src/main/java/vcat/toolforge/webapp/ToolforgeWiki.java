@@ -1,4 +1,4 @@
-package vcat.toolforge.base;
+package vcat.toolforge.webapp;
 
 import vcat.mediawiki.IWiki;
 

@@ -30,7 +30,6 @@
     <modules>
         <module>vcat-core</module>
         <module>vcat-redis</module>
-        <module>vcat-toolforge-base</module>
         <module>vcat-toolforge-webapp</module>
         <module>vcat-webapp-simple</module>
     </modules>
@@ -59,11 +58,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>vcat-redis</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>vcat-toolforge-base</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

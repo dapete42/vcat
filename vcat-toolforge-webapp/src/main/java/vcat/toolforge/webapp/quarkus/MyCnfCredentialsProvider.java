@@ -5,7 +5,7 @@ import io.quarkus.credentials.CredentialsProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import vcat.VCatException;
-import vcat.toolforge.base.MyCnfConfig;
+import vcat.toolforge.webapp.MyCnfConfig;
 
 import java.util.Map;
 

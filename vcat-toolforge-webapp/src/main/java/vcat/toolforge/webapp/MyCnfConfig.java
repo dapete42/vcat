@@ -1,4 +1,4 @@
-package vcat.toolforge.base;
+package vcat.toolforge.webapp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

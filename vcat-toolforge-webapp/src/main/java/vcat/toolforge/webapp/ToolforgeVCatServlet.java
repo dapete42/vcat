@@ -22,10 +22,6 @@ import vcat.redis.cache.MetadataRedisCache;
 import vcat.renderer.CachedVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
-import vcat.toolforge.base.AllParamsToolforge;
-import vcat.toolforge.base.MyCnfConfig;
-import vcat.toolforge.base.ToolforgeWiki;
-import vcat.toolforge.base.ToolforgeWikiProvider;
 
 import javax.sql.DataSource;
 import java.io.IOException;
