@@ -134,7 +134,7 @@ public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
     private void purgeOutputDir() throws CacheException {
         final long lastModifiedThreshold = System.currentTimeMillis() - (1000L * purge);
         final List<Path> filesToPurge;
-        try (var pathStream = Files.walk(outputDir)) {
+        try (var pathStream = Files.list(outputDir)) {
             filesToPurge = pathStream
                     .filter(path -> path.getFileName().toString().endsWith(".gv"))
                     .filter(path -> path.toFile().lastModified() < lastModifiedThreshold)
