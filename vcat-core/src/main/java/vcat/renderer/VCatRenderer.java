@@ -28,7 +28,7 @@ public class VCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
 
     private final Graphviz graphviz;
 
-    private final Path outputDir;
+    protected final Path outputDir;
 
     private final VCatFactory<W> vCatFactory;
 

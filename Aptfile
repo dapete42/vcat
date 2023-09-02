@@ -1,6 +1,5 @@
 # used by Toolforge Build Service
 
-# gridserver
 graphviz
 fonts-dejavu-core
 fonts-ipafont-gothic
@@ -19,7 +18,3 @@ fonts-lohit-orya
 fonts-lohit-taml
 fonts-lohit-taml-classical
 fonts-lohit-telu
-
-# gridserver script
-libjson-perl
-libredis-perl

@@ -41,24 +41,12 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
     protected static final String CATGRAPH_REDIRECT_URL_PATTERN = "/catgraphRedirect";
 
-    @Inject
-    @ConfigProperty(name = "graphviz.use-gridserver", defaultValue = "false")
-    Boolean graphvizUseGridserver;
-
     /**
      * Directory with Graphviz binaries (dot, fdp).
      */
     @Inject
     @ConfigProperty(name = "graphviz.dir", defaultValue = "/usr/bin")
     String graphvizDir;
-
-    @Inject
-    @ConfigProperty(name = "home.cache.dir", defaultValue = "work/cache")
-    String homeCacheDir;
-
-    @Inject
-    @ConfigProperty(name = "home.temp.dir", defaultValue = "work/temp")
-    String homeTempDir;
 
     /**
      * Purge caches after (seconds).
@@ -168,37 +156,21 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             // Metadata provider
             metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
 
-            // Home directory
-            final Path homeDirectory;
-            final String toolDataDir = System.getenv("TOOL_DATA_DIR");
-            if (toolDataDir != null) {
-                // Primary: from $TOOL_DATA_DIR (within container built by Build Service)
-                homeDirectory = Paths.get(toolDataDir);
-            } else {
-                // Secondary: from $HOME
-                homeDirectory = Paths.get(System.getProperty("user.home"));
-            }
-
             // For cache of Graphviz files and rendered images, use this directory
-            final Path cacheDir = homeDirectory.resolve(homeCacheDir);
+            final Path cacheDir = Files.createTempDirectory("vcat-cache");
             // Temporary directory for Graphviz files and rendered images
-            final Path tempDir = homeDirectory.resolve(homeTempDir);
+            final Path tempDir = Files.createTempDirectory("vcat-temp");
 
             Files.createDirectories(cacheDir);
             Files.createDirectories(tempDir);
 
             final Path graphvizDirPath = Paths.get(graphvizDir);
-            final Graphviz baseGraphviz;
-            // Use gridserver to render Graphviz files?
-            if (graphvizUseGridserver) {
-                baseGraphviz = new GraphvizGridClient(jedisPool, redisSecret, graphvizDirPath);
-            } else {
-                baseGraphviz = new GraphvizExternal(graphvizDirPath);
-            }
+            final Graphviz baseGraphviz = new GraphvizExternal(graphvizDirPath);
             final Graphviz graphviz = new QueuedGraphviz(baseGraphviz, graphvizThreads);
 
             // Create renderer
-            vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir),
+            vCatRenderer = new QueuedVCatRenderer<>(
+                    new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir, cachePurge),
                     vcatThreads);
 
         } catch (IOException | VCatException e) {
