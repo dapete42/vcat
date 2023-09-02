@@ -97,12 +97,8 @@ public abstract class AbstractFileCache<K extends Serializable> implements Seria
     public synchronized byte[] get(K key) throws CacheException {
         Path cacheFile = this.getCacheFile(key);
         if (Files.exists(cacheFile)) {
-            try (InputStream inputStream = Files.newInputStream(cacheFile)) {
-                return inputStream.readAllBytes();
-            } catch (FileNotFoundException e) {
-                throw new CacheException(MessageFormatter
-                        .format(Messages.getString("AbstractFileCache.Exception.FileNotFound"), cacheFile)
-                        .getMessage());
+            try {
+                return Files.readAllBytes(cacheFile);
             } catch (IOException e) {
                 throw new CacheException(e);
             }
