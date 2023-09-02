@@ -13,6 +13,7 @@ import vcat.VCatException;
 import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
 import vcat.graphviz.Graphviz;
+import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
@@ -39,6 +40,10 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     private static final long serialVersionUID = -5655389767357096359L;
 
     protected static final String CATGRAPH_REDIRECT_URL_PATTERN = "/catgraphRedirect";
+
+    @Inject
+    @ConfigProperty(name = "graphviz.use-gridserver", defaultValue = "false")
+    Boolean graphvizUseGridserver;
 
     /**
      * Directory with Graphviz binaries (dot, fdp).
@@ -182,10 +187,15 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             Files.createDirectories(cacheDir);
             Files.createDirectories(tempDir);
 
-            // Use gridserver to render Graphviz files
-            final Graphviz graphviz = new QueuedGraphviz(
-                    new GraphvizGridClient(jedisPool, redisSecret, homeDirectory.resolve("bin"), Paths.get(graphvizDir)),
-                    graphvizThreads);
+            final Path graphvizDirPath = Paths.get(graphvizDir);
+            final Graphviz baseGraphviz;
+            // Use gridserver to render Graphviz files?
+            if (graphvizUseGridserver) {
+                baseGraphviz = new GraphvizGridClient(jedisPool, redisSecret, graphvizDirPath);
+            } else {
+                baseGraphviz = new GraphvizExternal(graphvizDirPath);
+            }
+            final Graphviz graphviz = new QueuedGraphviz(baseGraphviz, graphvizThreads);
 
             // Create renderer
             vCatRenderer = new QueuedVCatRenderer<>(new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir),

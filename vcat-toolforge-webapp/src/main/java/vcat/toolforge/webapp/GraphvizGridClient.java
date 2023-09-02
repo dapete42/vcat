@@ -1,17 +1,9 @@
 package vcat.toolforge.webapp;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
-
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.helpers.MessageFormatter;
-
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import vcat.graphviz.Graphviz;
@@ -19,154 +11,125 @@ import vcat.graphviz.GraphvizException;
 import vcat.params.GraphvizParams;
 import vcat.redis.SimplePubSub;
 
+import java.nio.file.Path;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class GraphvizGridClient implements Graphviz {
 
-	private static class ExecStatus {
+    private static class ExecStatus {
 
-		boolean aborted = false;
+        boolean aborted = false;
 
-		boolean finished = false;
+        boolean finished = false;
 
-	}
+    }
 
-	private static int runtimeExec(String... commandArray) throws IOException {
-		final Runtime runtime = Runtime.getRuntime();
+    private final JedisPool jedisPool;
 
-		final Process graphvizProcess = runtime.exec(commandArray);
-		// Close stdin for the process
-		graphvizProcess.getOutputStream().close();
+    private final String redisSecret;
 
-		do {
-			try {
-				return graphvizProcess.exitValue();
-			} catch (IllegalThreadStateException e) {
-				// still running
-				try {
-					TimeUnit.MILLISECONDS.sleep(10);
-				} catch (InterruptedException ee) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		} while (true);
+    private final Path programPath;
 
-	}
+    public GraphvizGridClient(final JedisPool jedisPool, final String redisSecret, final Path programPath) {
+        this.jedisPool = jedisPool;
+        this.redisSecret = redisSecret;
+        this.programPath = programPath;
+    }
 
-	private final JedisPool jedisPool;
+    private void exec(String... cmdarray) throws GraphvizException {
+        // Message to be sent to Redis
+        final JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        for (String cmd : cmdarray) {
+            jsonArrayBuilder.add(cmd);
+        }
+        final String message = jsonArrayBuilder.build().toString();
 
-	private final String redisSecret;
+        final String requestChannel = this.redisSecret + "-request";
+        final String responseChannel = this.redisSecret + "-response";
+        final String requestPrefix = this.redisSecret + "-request-";
 
-	private final Path scriptPath;
+        // Random ID for the request
+        final String id = RandomStringUtils.randomNumeric(16);
 
-	private final Path programPath;
+        try (Jedis jedis = this.jedisPool.getResource()) {
 
-	public GraphvizGridClient(final JedisPool jedisPool, final String redisSecret, final Path scriptPath,
-			final Path programPath) {
-		this.jedisPool = jedisPool;
-		this.redisSecret = redisSecret;
-		this.scriptPath = scriptPath;
-		this.programPath = programPath;
-	}
+            // Put message in Redis
+            jedis.set(requestPrefix + id, message);
+            // Publish id to Redis request channel
+            final long listening = jedis.publish(requestChannel, id);
 
-	private void exec(String... cmdarray) throws GraphvizException {
-		// Message to be sent to Redis
-		final JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-		for (String cmd : cmdarray) {
-			jsonArrayBuilder.add(cmd);
-		}
-		final String message = jsonArrayBuilder.build().toString();
+            if (listening == 0) {
+                throw new GraphvizException(
+                        MessageFormatter.format("There appear to be no gridservers running (id {})", id).getMessage());
+            }
 
-		final String requestChannel = this.redisSecret + "-request";
-		final String responseChannel = this.redisSecret + "-response";
-		final String requestPrefix = this.redisSecret + "-request-";
+            // Status of execution
+            final ExecStatus execStatus = new ExecStatus();
 
-		// Random ID for the request
-		final String id = RandomStringUtils.randomNumeric(16);
+            // Timer for aborting
+            final Timer abortTimer = new Timer();
 
-		try (Jedis jedis = this.jedisPool.getResource()) {
+            // PubSub to listen for Redis messages
+            final SimplePubSub jedisSubscribe = new SimplePubSub() {
 
-			// Put message in Redis
-			jedis.set(requestPrefix + id, message);
-			// Publish id to Redis request channel
-			final long listening = jedis.publish(requestChannel, id);
+                @Override
+                public void onMessage(final String channel, final String message) {
+                    synchronized (execStatus) {
+                        if (id.equals(message)) {
+                            if (!execStatus.aborted) {
+                                // If not already aborted, mark as finished and stop abort timer.
+                                execStatus.finished = true;
+                                abortTimer.cancel();
+                            }
+                            // Always unsubscribe
+                            this.unsubscribe();
+                        }
+                    }
+                }
 
-			if (listening == 0) {
-				// Nobody is listening, so we spawn a new instance of the gridserver, telling it to immediately run the
-				// command we just submitted. We assume it will run and return when it's finished.
-				try {
-					runtimeExec(scriptPath.resolve("gridserverStart").toString(), id);
-				} catch (IOException e) {
-					throw new GraphvizException(
-							MessageFormatter.format("Nobody listening, starting gridserver for id {}", id).getMessage(),
-							e);
-				}
-			}
+            };
 
-			// Status of execution
-			final ExecStatus execStatus = new ExecStatus();
+            // Set abort timer of 30 seconds
+            abortTimer.schedule(new TimerTask() {
 
-			// Timer for aborting
-			final Timer abortTimer = new Timer();
+                @Override
+                public void run() {
+                    synchronized (execStatus) {
+                        if (!execStatus.finished) {
+                            // If execStatus is not finished, mark as aborted and unsubscribe from Redis
+                            execStatus.aborted = true;
+                            jedisSubscribe.unsubscribe();
+                        }
+                    }
+                }
 
-			// PubSub to listen for Redis messages
-			final SimplePubSub jedisSubscribe = new SimplePubSub() {
+            }, 30000);
 
-				@Override
-				public void onMessage(final String channel, final String message) {
-					synchronized (execStatus) {
-						if (id.equals(message)) {
-							if (!execStatus.aborted) {
-								// If not already aborted, mark as finished and stop abort timer.
-								execStatus.finished = true;
-								abortTimer.cancel();
-							}
-							// Always unsubscribe
-							this.unsubscribe();
-						}
-					}
-				}
+            // Start listening for response
+            jedis.subscribe(jedisSubscribe, responseChannel);
 
-			};
+            // Just in case
+            abortTimer.cancel();
 
-			// Set abort timer of 30 seconds
-			abortTimer.schedule(new TimerTask() {
+            if (execStatus.aborted) {
+                throw new GraphvizException(MessageFormatter.format("Timeout in vCat grid job {}", id).getMessage());
+            }
 
-				@Override
-				public void run() {
-					synchronized (execStatus) {
-						if (!execStatus.finished) {
-							// If execStatus is not finished, mark as aborted and unsubscribe from Redis
-							execStatus.aborted = true;
-							jedisSubscribe.unsubscribe();
-						}
-					}
-				}
+        }
 
-			}, 30000);
+    }
 
-			// Start listening for response
-			jedis.subscribe(jedisSubscribe, responseChannel);
-
-			// Just in case
-			abortTimer.cancel();
-
-			if (execStatus.aborted) {
-				throw new GraphvizException(MessageFormatter.format("Timeout in vCat grid job {}", id).getMessage());
-			}
-
-		}
-
-	}
-
-	@Override
-	public void render(final Path inputFile, final Path outputFile, final GraphvizParams params)
-			throws GraphvizException {
-		try {
-			this.exec(programPath.resolve(params.getAlgorithm().getProgram()).toAbsolutePath().toString(),
-					"-T" + params.getOutputFormat().getGraphvizTypeParameter(),
-					"-o" + outputFile.toAbsolutePath().toString(), inputFile.toAbsolutePath().toString());
-		} catch (GraphvizException e) {
-			throw new GraphvizException(e);
-		}
-	}
+    @Override
+    public void render(final Path inputFile, final Path outputFile, final GraphvizParams params)
+            throws GraphvizException {
+        try {
+            this.exec(programPath.resolve(params.getAlgorithm().getProgram()).toAbsolutePath().toString(),
+                    "-T" + params.getOutputFormat().getGraphvizTypeParameter(),
+                    "-o" + outputFile.toAbsolutePath().toString(), inputFile.toAbsolutePath().toString());
+        } catch (GraphvizException e) {
+            throw new GraphvizException(e);
+        }
+    }
 
 }
