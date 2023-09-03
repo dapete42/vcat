@@ -28,8 +28,8 @@
     </developers>
 
     <modules>
+        <module>vcat-caffeine</module>
         <module>vcat-core</module>
-        <module>vcat-redis</module>
         <module>vcat-toolforge-webapp</module>
         <module>vcat-webapp-simple</module>
     </modules>
@@ -57,7 +57,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>vcat-redis</artifactId>
+                <artifactId>vcat-caffeine</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -132,9 +132,9 @@
                 <version>3.2.0</version>
             </dependency>
             <dependency>
-                <groupId>redis.clients</groupId>
-                <artifactId>jedis</artifactId>
-                <version>4.4.3</version>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>3.1.8</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>

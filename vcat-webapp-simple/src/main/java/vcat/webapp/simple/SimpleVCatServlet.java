@@ -7,11 +7,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import vcat.VCatException;
-import vcat.cache.CacheException;
-import vcat.cache.IApiCache;
 import vcat.cache.IMetadataCache;
-import vcat.cache.file.ApiFileCache;
-import vcat.cache.file.MetadataFileCache;
+import vcat.caffeine.ApiCaffeineCache;
+import vcat.caffeine.MetadataCaffeineCache;
 import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
@@ -26,10 +24,7 @@ import vcat.renderer.RenderedFileInfo;
 import vcat.webapp.base.AbstractVCatServlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serial;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @WebServlet(urlPatterns = "/render")
@@ -81,21 +76,17 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 
     @Override
     public void init() throws ServletException {
-        final Path cachePath = Paths.get(cacheDir);
-        final Path apiDir = cachePath.resolve("api");
-        final Path metadataDir = cachePath.resolve("metadata");
-        final Path tempDir = ((File) this.getServletContext().getAttribute(ServletContext.TEMPDIR)).toPath();
+        final var cachePath = Paths.get(cacheDir);
+        final var tempDir = ((File) this.getServletContext().getAttribute(ServletContext.TEMPDIR)).toPath();
         try {
-            final QueuedGraphviz graphviz = new QueuedGraphviz(new GraphvizExternal(Paths.get(graphvizDir)), 1);
-            Files.createDirectories(apiDir);
-            final IApiCache apiCache = new ApiFileCache(apiDir, cachePurge);
+            final var graphviz = new QueuedGraphviz(new GraphvizExternal(Paths.get(graphvizDir)), 1);
+            final var apiCache = new ApiCaffeineCache(10000, cachePurge);
             final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<>(apiCache);
-            Files.createDirectories(metadataDir);
-            final IMetadataCache metadataCache = new MetadataFileCache(metadataDir, cachePurgeMetadata);
+            final IMetadataCache metadataCache = new MetadataCaffeineCache(10000, cachePurgeMetadata);
             metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
             vCatRenderer = new QueuedVCatRenderer<>(
                     new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cachePath, cachePurge), vcatThreads);
-        } catch (CacheException | IOException | VCatException e) {
+        } catch (VCatException e) {
             throw new ServletException(e);
         }
     }

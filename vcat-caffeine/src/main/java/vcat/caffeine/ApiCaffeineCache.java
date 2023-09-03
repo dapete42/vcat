@@ -1,0 +1,41 @@
+package vcat.caffeine;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import jakarta.json.JsonObject;
+import vcat.cache.IApiCache;
+
+import java.time.Duration;
+
+public class ApiCaffeineCache implements IApiCache {
+
+    private final Cache<String, JsonObject> cache;
+
+    public ApiCaffeineCache(int size, int timeout) {
+        cache = Caffeine.newBuilder()
+                .maximumSize(size)
+                .expireAfterWrite(Duration.ofSeconds(timeout))
+                .build();
+    }
+
+    @Override
+    public boolean containsKey(String key) {
+        return cache.getIfPresent(key) != null;
+    }
+
+    @Override
+    public JsonObject getJSONObject(String key) {
+        return cache.getIfPresent(key);
+    }
+
+    @Override
+    public void purge() {
+        cache.cleanUp();
+    }
+
+    @Override
+    public void put(String key, JsonObject jsonObject) {
+        cache.put(key, jsonObject);
+    }
+
+}

@@ -15,8 +15,6 @@ import vcat.cache.IApiCache;
 
 public class ApiFileCache extends AbstractFileCache<String> implements IApiCache {
 
-	private static final long serialVersionUID = 2813106391864007540L;
-
 	private static final String PREFIX = "ApiRequest-";
 
 	private static final String SUFFIX = ".json";

@@ -37,6 +37,10 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>vcat-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>vcat-caffeine</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>io.quarkus</groupId>

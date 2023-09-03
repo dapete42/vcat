@@ -5,21 +5,15 @@ import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 import vcat.VCatException;
-import vcat.cache.IApiCache;
-import vcat.cache.IMetadataCache;
-import vcat.graphviz.Graphviz;
+import vcat.caffeine.ApiCaffeineCache;
+import vcat.caffeine.MetadataCaffeineCache;
 import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
 import vcat.mediawiki.IMetadataProvider;
-import vcat.redis.cache.ApiRedisCache;
-import vcat.redis.cache.MetadataRedisCache;
 import vcat.renderer.CachedVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
@@ -28,7 +22,6 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.Serial;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -61,21 +54,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     @Inject
     @ConfigProperty(name = "cache.purge.metadata", defaultValue = "86400")
     Integer cachePurgeMetadata;
-
-    /**
-     * Redis server hostname.
-     */
-    @Inject
-    @ConfigProperty(name = "redis.hostname")
-    String redisHostname = "tools-redis";
-
-    /**
-     * Redis server port.
-     */
-    @Inject
-    @ConfigProperty(name = "redis.port")
-    Integer redisPort;
-
+    
     /**
      * Maxim number of concurrent threads running graphviz (0=unlimited).
      */
@@ -119,37 +98,15 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
         try {
 
-            MyCnfConfig configMyCnf = new MyCnfConfig();
+            final var configMyCnf = new MyCnfConfig();
             configMyCnf.readFromMyCnf();
 
             // Provider for Wikimedia Toolforge wiki information
             toolforgeWikiProvider = new ToolforgeWikiProvider(dataSource);
 
-            // Use database credentials to create a secret prefix for caches
-            final String redisSecret = DigestUtils.sha256Hex(configMyCnf.getUser() + ':' + configMyCnf.getPassword());
-
-            final String redisApiCacheKeyPrefix = redisSecret + "-vcat-cache-api-";
-            final String redisMetadataCacheKeyPrefix = redisSecret + "-vcat-cache-metadata-";
-
-            // Conservative configuration for Redis connection pool - check connections as often as possible
-            final JedisPoolConfig poolConfig = new JedisPoolConfig();
-            poolConfig.setTestOnBorrow(true);
-            poolConfig.setTestOnReturn(true);
-            poolConfig.setTestWhileIdle(true);
-            // Allow some more concurrent connections
-            poolConfig.setMaxTotal(16);
-            // We expect low traffic most of the time, so don't keep many idle connections open
-            poolConfig.setMaxIdle(1);
-            // Keep one spare idle connection
-            poolConfig.setMinIdle(1);
-
-            // Pool of Redis connections
-            final JedisPool jedisPool = new JedisPool(poolConfig, redisHostname, redisPort);
-
-            // Use Redis for API and metadata caches
-            final IApiCache apiCache = new ApiRedisCache(jedisPool, redisApiCacheKeyPrefix, cachePurge);
-            final IMetadataCache metadataCache = new MetadataRedisCache(jedisPool, redisMetadataCacheKeyPrefix,
-                    cachePurgeMetadata);
+            // Use Caffeine for API and metadata caches
+            final var apiCache = new ApiCaffeineCache(10000, cachePurge);
+            final var metadataCache = new MetadataCaffeineCache(10000, cachePurgeMetadata);
 
             final CachedApiClient<ToolforgeWiki> apiClient = new CachedApiClient<>(apiCache);
 
@@ -157,16 +114,16 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
 
             // For cache of Graphviz files and rendered images, use this directory
-            final Path cacheDir = Files.createTempDirectory("vcat-cache");
+            final var cacheDir = Files.createTempDirectory("vcat-cache");
             // Temporary directory for Graphviz files and rendered images
-            final Path tempDir = Files.createTempDirectory("vcat-temp");
+            final var tempDir = Files.createTempDirectory("vcat-temp");
 
             Files.createDirectories(cacheDir);
             Files.createDirectories(tempDir);
 
-            final Path graphvizDirPath = Paths.get(graphvizDir);
-            final Graphviz baseGraphviz = new GraphvizExternal(graphvizDirPath);
-            final Graphviz graphviz = new QueuedGraphviz(baseGraphviz, graphvizThreads);
+            final var graphvizDirPath = Paths.get(graphvizDir);
+            final var baseGraphviz = new GraphvizExternal(graphvizDirPath);
+            final var graphviz = new QueuedGraphviz(baseGraphviz, graphvizThreads);
 
             // Create renderer
             vCatRenderer = new QueuedVCatRenderer<>(
@@ -186,7 +143,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             throw new ServletException(Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
         }
 
-        Map<String, String[]> parameterMap;
+        final Map<String, String[]> parameterMap;
         if (req.getRequestURI().endsWith(CATGRAPH_REDIRECT_URL_PATTERN)) {
             // If called as catgraphRedirect, convert from Catgraph parameters to vCat parameters
             parameterMap = CatgraphConverter.convertParameters(req.getParameterMap());

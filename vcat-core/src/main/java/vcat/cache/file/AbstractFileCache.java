@@ -8,7 +8,10 @@ import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.util.HashHelper;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -22,10 +25,7 @@ import java.util.stream.Stream;
  * @param <K> Class used for key.
  * @author Peter Schlömer
  */
-public abstract class AbstractFileCache<K extends Serializable> implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = -1626880286588890986L;
+public abstract class AbstractFileCache<K extends Serializable> {
 
     /**
      * Log4j2 Logger
