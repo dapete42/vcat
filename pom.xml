@@ -38,7 +38,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
 
-        <log4j.version>2.21.0</log4j.version>
+        <log4j.version>2.21.1</log4j.version>
         <slf4j.version>2.0.9</slf4j.version>
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
