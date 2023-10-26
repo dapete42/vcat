@@ -20,20 +20,17 @@ It consists of five Maven submodules:
 
 * vcat-core: The core library to evaluate parameters, get the necessary
   category information from the wiki and render it into an image.
-* vcat-redis: An addition which allows the use of Redis (through the Jedis
-  library) to store the API and metadata caches.
-* vcat-webapp-simple: A simple Servlet version of vCat which expects
-  parameters as GET or POST parameters.
-* vcat-toolforge-base: Base classes for the vCat Servlet as used on Wikimedia
-  Toolforge.
+* vcat-caffeine: An addition which allows the use of Caffeine to store the API
+  and metadata caches.
 * vcat-toolforge-webapp: A version of vCat which uses the meta_p.wiki table
-  to look up wikis, and Redis for caching, as used on Wikimedia Toolforge.
+  to look up wikis, and Caffeine for caching, as used on Wikimedia Toolforge.
   Builds an executable JAR file based on Quarkus (https://quarkus.io/).
+* vcat-webapp-simple: A simpler version of vCat for local testing.
 
 Copyright notice
 ----------------
 
-Copyright 2013-2019 Peter Schlömer
+Copyright 2013-2023 Peter Schlömer
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 the files in this project except in compliance with the License. You may obtain
