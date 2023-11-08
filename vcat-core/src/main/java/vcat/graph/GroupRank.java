@@ -1,5 +1,5 @@
 package vcat.graph;
 
 public enum GroupRank {
-	none, max, min, same;
+    none, max, min, same;
 }

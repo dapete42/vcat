@@ -1,7 +1,7 @@
 vcat-webapp-simple
 ==================
 
-This README assumes you are running Linux. Graphviz (https://graphviz.org/) must be installed. 
+This README assumes you are running Linux. Graphviz (https://graphviz.org/) must be installed.
 
 To get the web application running, first build it with `mwnv` (or `mvn` if you have Maven installed already) from the
 root directory of the repository:

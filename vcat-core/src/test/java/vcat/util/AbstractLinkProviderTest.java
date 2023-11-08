@@ -1,104 +1,104 @@
 package vcat.util;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.Collections;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import vcat.graph.Node;
 import vcat.mediawiki.Metadata;
 import vcat.params.Links;
 import vcat.test.TestAllParams;
 import vcat.test.TestLinkProvider;
 
+import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class AbstractLinkProviderTest {
 
-	private TestLinkProvider underTest;
+    private TestLinkProvider underTest;
 
-	@BeforeEach
-	public void setUp() {
-		underTest = new TestLinkProvider();
-	}
+    @BeforeEach
+    public void setUp() {
+        underTest = new TestLinkProvider();
+    }
 
-	@Test
-	public void testEscapeForUrl() {
-		assertEquals("abc%3A%C3%84%C3%B6%C3%BC_%C3%9F%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%9A%E3%83%BC%E3%82%B8",
-				AbstractLinkProvider.escapeForUrl("abc:Äöü ßメインページ"));
-	}
+    @Test
+    public void testEscapeForUrl() {
+        assertEquals("abc%3A%C3%84%C3%B6%C3%BC_%C3%9F%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%9A%E3%83%BC%E3%82%B8",
+                AbstractLinkProvider.escapeForUrl("abc:Äöü ßメインページ"));
+    }
 
-	@Test
-	public void testEscapeForUrlNull() {
-		assertEquals(null, AbstractLinkProvider.escapeForUrl(null));
-	}
+    @Test
+    public void testEscapeForUrlNull() {
+        assertEquals(null, AbstractLinkProvider.escapeForUrl(null));
+    }
 
-	@Test
-	public void testEscapeMediawikiTitleForUrl() {
-		assertEquals("abc:%C3%84%C3%B6%C3%BC_%C3%9F%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%9A%E3%83%BC%E3%82%B8",
-				AbstractLinkProvider.escapeMediawikiTitleForUrl("abc:Äöü ßメインページ"));
-	}
+    @Test
+    public void testEscapeMediawikiTitleForUrl() {
+        assertEquals("abc:%C3%84%C3%B6%C3%BC_%C3%9F%E3%83%A1%E3%82%A4%E3%83%B3%E3%83%9A%E3%83%BC%E3%82%B8",
+                AbstractLinkProvider.escapeMediawikiTitleForUrl("abc:Äöü ßメインページ"));
+    }
 
-	@Test
-	public void testEscapeMediawikiTitleForUrlNull() {
-		assertEquals(null, AbstractLinkProvider.escapeMediawikiTitleForUrl(null));
-	}
+    @Test
+    public void testEscapeMediawikiTitleForUrlNull() {
+        assertEquals(null, AbstractLinkProvider.escapeMediawikiTitleForUrl(null));
+    }
 
-	@Test
-	public void testFromParamsDefault() {
+    @Test
+    public void testFromParamsDefault() {
 
-		TestAllParams params = new TestAllParams();
-		params.getVCat().setLinks(Links.None);
+        TestAllParams params = new TestAllParams();
+        params.getVCat().setLinks(Links.None);
 
-		AbstractLinkProvider instance = AbstractLinkProvider.fromParams(params);
+        AbstractLinkProvider instance = AbstractLinkProvider.fromParams(params);
 
-		assertTrue(instance instanceof EmptyLinkProvider);
+        assertTrue(instance instanceof EmptyLinkProvider);
 
-	}
+    }
 
-	@Test
-	public void testAddLinkToNode() {
+    @Test
+    public void testAddLinkToNode() {
 
-		Node node = new Node("test");
+        Node node = new Node("test");
 
-		underTest.addLinkToNode(node, "linktitle");
+        underTest.addLinkToNode(node, "linktitle");
 
-		assertEquals("link:linktitle", node.getHref());
+        assertEquals("link:linktitle", node.getHref());
 
-	}
+    }
 
-	public void testAddLinkToNodeEmpty() {
+    public void testAddLinkToNodeEmpty() {
 
-	}
+    }
 
-	public void testAddLinkToNodeNull() {
+    public void testAddLinkToNodeNull() {
 
-	}
+    }
 
-	@Test
-	public void testFromParamsGraph() {
+    @Test
+    public void testFromParamsGraph() {
 
-		TestAllParams params = new TestAllParams();
-		params.getVCat().setLinks(Links.Graph);
+        TestAllParams params = new TestAllParams();
+        params.getVCat().setLinks(Links.Graph);
 
-		AbstractLinkProvider instance = AbstractLinkProvider.fromParams(params);
+        AbstractLinkProvider instance = AbstractLinkProvider.fromParams(params);
 
-		assertTrue(instance instanceof VCatLinkProvider);
+        assertTrue(instance instanceof VCatLinkProvider);
 
-	}
+    }
 
-	@Test
-	public void testFromParamsWiki() {
+    @Test
+    public void testFromParamsWiki() {
 
-		TestAllParams params = new TestAllParams();
-		Metadata metadata = new Metadata("articlepath", "server", Collections.emptyMap(), Collections.emptyMap());
-		params.setMetadata(metadata);
-		params.getVCat().setLinks(Links.Wiki);
+        TestAllParams params = new TestAllParams();
+        Metadata metadata = new Metadata("articlepath", "server", Collections.emptyMap(), Collections.emptyMap());
+        params.setMetadata(metadata);
+        params.getVCat().setLinks(Links.Wiki);
 
-		AbstractLinkProvider instance = AbstractLinkProvider.fromParams(params);
+        AbstractLinkProvider instance = AbstractLinkProvider.fromParams(params);
 
-		assertTrue(instance instanceof WikiLinkProvider);
+        assertTrue(instance instanceof WikiLinkProvider);
 
-	}
+    }
 
 }

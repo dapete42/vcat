@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 public interface Wiki extends Serializable {
 
-	String getApiUrl();
+    String getApiUrl();
 
-	String getDisplayName();
+    String getDisplayName();
 
-	String getName();
+    String getName();
 
 }

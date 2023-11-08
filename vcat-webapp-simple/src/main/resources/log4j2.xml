@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
-	<Appenders>
-		<RollingFile name="rollingVcatLog" fileName="logs/vcat.log"
-			filePattern="logs/vcat.%d{yyyy-MM-dd}.log">
-			<PatternLayout>
-				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
-			</PatternLayout>
-			<Policies>
-				<TimeBasedTriggeringPolicy />
-			</Policies>
-			<DefaultRolloverStrategy max="30" />
-		</RollingFile>
-	</Appenders>
-	<Loggers>
-		<Root level="info">
-			<AppenderRef ref="rollingVcatLog" />
-		</Root>
-	</Loggers>
+    <Appenders>
+        <RollingFile name="rollingVcatLog" fileName="logs/vcat.log"
+                     filePattern="logs/vcat.%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="rollingVcatLog"/>
+        </Root>
+    </Loggers>
 </Configuration>

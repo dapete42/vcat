@@ -6,9 +6,9 @@ import org.slf4j.helpers.MessageFormatter;
 import vcat.Messages;
 import vcat.VCatException;
 import vcat.mediawiki.ApiException;
+import vcat.mediawiki.Metadata;
 import vcat.mediawiki.interfaces.MetadataProvider;
 import vcat.mediawiki.interfaces.Wiki;
-import vcat.mediawiki.Metadata;
 import vcat.util.AbstractLinkProvider;
 
 import java.util.*;

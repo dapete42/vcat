@@ -12,20 +12,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        # for Codecov
-        fetch-depth: 2
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'adopt'
-        cache: maven
-    - name: Maven package
-      run: mvn -B package
-    - uses: codecov/codecov-action@v3
-    - uses: actions/upload-artifact@v3
-      with:
-        name: vcat-toolforge-runner
-        path: vcat-toolforge-webapp/target/vcat-toolforge-runner.jar
+      - uses: actions/checkout@v3
+        with:
+          # for Codecov
+          fetch-depth: 2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: maven
+      - name: Maven package
+        run: mvn -B package
+      - uses: codecov/codecov-action@v3
+      - uses: actions/upload-artifact@v3
+        with:
+          name: vcat-toolforge-runner
+          path: vcat-toolforge-webapp/target/vcat-toolforge-runner.jar

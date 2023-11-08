@@ -18,9 +18,9 @@ import vcat.mediawiki.SimpleWikimediaWiki;
 import vcat.mediawiki.interfaces.MetadataProvider;
 import vcat.params.AllParams;
 import vcat.renderer.CachedVCatRenderer;
-import vcat.renderer.interfaces.VCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
+import vcat.renderer.interfaces.VCatRenderer;
 import vcat.webapp.base.AbstractVCatServlet;
 
 import java.io.File;

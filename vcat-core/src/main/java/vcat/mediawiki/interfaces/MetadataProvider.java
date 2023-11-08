@@ -7,6 +7,6 @@ import java.io.Serializable;
 
 public interface MetadataProvider extends Serializable {
 
-	Metadata requestMetadata(Wiki wiki) throws ApiException;
+    Metadata requestMetadata(Wiki wiki) throws ApiException;
 
 }

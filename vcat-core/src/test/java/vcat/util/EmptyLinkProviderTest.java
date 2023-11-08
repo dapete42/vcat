@@ -1,24 +1,24 @@
 package vcat.util;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 public class EmptyLinkProviderTest {
 
-	private EmptyLinkProvider underTest;
+    private EmptyLinkProvider underTest;
 
-	@BeforeEach
-	public void setUp() {
-		underTest = new EmptyLinkProvider();
-	}
+    @BeforeEach
+    public void setUp() {
+        underTest = new EmptyLinkProvider();
+    }
 
-	@Test
-	public void testProviceLink() {
+    @Test
+    public void testProviceLink() {
 
-		assertNull(underTest.provideLink("test"));
+        assertNull(underTest.provideLink("test"));
 
-	}
+    }
 
 }

@@ -54,7 +54,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     @Inject
     @ConfigProperty(name = "cache.purge.metadata", defaultValue = "86400")
     Integer cachePurgeMetadata;
-    
+
     /**
      * Maxim number of concurrent threads running graphviz (0=unlimited).
      */
