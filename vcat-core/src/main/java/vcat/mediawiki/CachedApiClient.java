@@ -1,29 +1,28 @@
 package vcat.mediawiki;
 
 import jakarta.json.JsonObject;
+import lombok.Getter;
 import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.interfaces.ApiCache;
 import vcat.mediawiki.interfaces.Wiki;
 
-import java.io.UnsupportedEncodingException;
+import java.io.Serial;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 
+@Getter
 public class CachedApiClient<W extends Wiki> extends ApiClient<W> {
 
-    private static final long serialVersionUID = -391353677303504163L;
+    @Serial
+    private static final long serialVersionUID = -4286304620124061421L;
 
     private final ApiCache cache;
 
     public CachedApiClient(ApiCache cache) {
         this.cache = cache;
-    }
-
-    public ApiCache getCache() {
-        return cache;
     }
 
     @Override
@@ -32,13 +31,9 @@ public class CachedApiClient<W extends Wiki> extends ApiClient<W> {
         requestStuff.append(apiUrl);
         requestStuff.append('&');
         for (Entry<String, String> param : params.entrySet()) {
-            try {
-                requestStuff.append(URLEncoder.encode(param.getKey(), StandardCharsets.UTF_8.name()));
-                requestStuff.append('&');
-                requestStuff.append(URLEncoder.encode(param.getValue(), StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException e) {
-                throw new ApiException(Messages.getString("Exception.UTF8"), e);
-            }
+            requestStuff.append(URLEncoder.encode(param.getKey(), StandardCharsets.UTF_8));
+            requestStuff.append('&');
+            requestStuff.append(URLEncoder.encode(param.getValue(), StandardCharsets.UTF_8));
         }
         String cacheKey = requestStuff.toString();
 

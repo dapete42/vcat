@@ -5,8 +5,8 @@ import vcat.params.AbstractAllParams;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Abstract base class for link providers, used to make nodes on the graph link to various things.
@@ -22,11 +22,7 @@ public abstract class AbstractLinkProvider implements Serializable {
         if (string == null) {
             return null;
         }
-        try {
-            return URLEncoder.encode(string.replace(' ', '_'), "UTF8");
-        } catch (UnsupportedEncodingException e) {
-            return null;
-        }
+        return URLEncoder.encode(string.replace(' ', '_'), StandardCharsets.UTF_8);
     }
 
     protected static String escapeMediawikiTitleForUrl(final String title) {
@@ -38,14 +34,11 @@ public abstract class AbstractLinkProvider implements Serializable {
      * @return Link provider fitting for the requested parameters.
      */
     public static AbstractLinkProvider fromParams(final AbstractAllParams<?> all) {
-        switch (all.getVCat().getLinks()) {
-            case Graph:
-                return new VCatLinkProvider(all);
-            case Wiki:
-                return new WikiLinkProvider(all);
-            default:
-                return new EmptyLinkProvider();
-        }
+        return switch (all.getVCat().getLinks()) {
+            case Graph -> new VCatLinkProvider(all);
+            case Wiki -> new WikiLinkProvider(all);
+            default -> new EmptyLinkProvider();
+        };
     }
 
     /**

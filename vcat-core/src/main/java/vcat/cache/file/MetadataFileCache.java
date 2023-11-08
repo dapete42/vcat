@@ -14,8 +14,6 @@ import java.nio.file.Path;
 
 public class MetadataFileCache extends AbstractFileCache<String> implements MetadataCache {
 
-    private static final long serialVersionUID = 8857473945212943389L;
-
     /**
      * Log4j2 Logger
      */
@@ -33,13 +31,12 @@ public class MetadataFileCache extends AbstractFileCache<String> implements Meta
     public synchronized Metadata getMetadata(Wiki wiki) throws CacheException {
         final String key = wiki.getApiUrl();
         if (this.containsKey(key)) {
-            Object metadataObject = null;
             try {
-                metadataObject = SerializationUtils.deserialize(this.get(key));
+                final Object metadataObject = SerializationUtils.deserialize(this.get(key));
                 if (metadataObject == null) {
                     return null;
-                } else if (metadataObject instanceof Metadata) {
-                    return (Metadata) metadataObject;
+                } else if (metadataObject instanceof Metadata metadata) {
+                    return metadata;
                 } else {
                     // Wrong type
                     this.remove(key);

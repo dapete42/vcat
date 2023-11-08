@@ -15,16 +15,13 @@ import java.util.Map;
  */
 public class AllParams extends AbstractAllParams<SimpleWikimediaWiki> {
 
-    protected AllParams() {
-    }
-
     public AllParams(final Map<String, String[]> requestParams, final String renderUrl,
                      final MetadataProvider metadataProvider) throws VCatException {
         this.init(requestParams, renderUrl, metadataProvider);
     }
 
     @Override
-    protected SimpleWikimediaWiki initWiki(final String wikiString) throws VCatException {
+    protected SimpleWikimediaWiki initWiki(final String wikiString) {
         return new SimpleWikimediaWiki(wikiString);
     }
 

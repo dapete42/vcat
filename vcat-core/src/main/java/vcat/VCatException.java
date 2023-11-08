@@ -1,19 +1,13 @@
 package vcat;
 
+import lombok.experimental.StandardException;
+
+import java.io.Serial;
+
+@StandardException
 public class VCatException extends Exception {
 
-	private static final long serialVersionUID = -8424059815740621682L;
-
-	public VCatException(String message) {
-		super(message);
-	}
-
-	public VCatException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public VCatException(Throwable cause) {
-		super(cause);
-	}
+    @Serial
+    private static final long serialVersionUID = 6124065735324812010L;
 
 }

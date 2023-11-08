@@ -2,8 +2,11 @@ package vcat.mediawiki;
 
 import vcat.mediawiki.interfaces.Wiki;
 
+import java.io.Serial;
+
 public class SimpleWikimediaWiki implements Wiki {
 
+    @Serial
     private static final long serialVersionUID = -7792081905551487036L;
 
     private final String host;

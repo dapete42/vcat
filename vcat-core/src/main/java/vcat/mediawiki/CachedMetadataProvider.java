@@ -8,8 +8,11 @@ import vcat.cache.interfaces.MetadataCache;
 import vcat.mediawiki.interfaces.MetadataProvider;
 import vcat.mediawiki.interfaces.Wiki;
 
+import java.io.Serial;
+
 public class CachedMetadataProvider implements MetadataProvider {
 
+    @Serial
     private static final long serialVersionUID = 5966985791741996909L;
 
     /**

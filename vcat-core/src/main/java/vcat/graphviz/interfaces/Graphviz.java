@@ -12,6 +12,6 @@ import java.nio.file.Path;
  */
 public interface Graphviz {
 
-    public abstract void render(Path inputFile, Path outputFile, GraphvizParams params) throws GraphvizException;
+    void render(Path inputFile, Path outputFile, GraphvizParams params) throws GraphvizException;
 
 }

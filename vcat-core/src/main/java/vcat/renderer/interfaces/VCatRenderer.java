@@ -9,6 +9,6 @@ import java.io.Serializable;
 
 public interface VCatRenderer<W extends Wiki> extends Serializable {
 
-    public abstract RenderedFileInfo render(AbstractAllParams<W> all) throws VCatException;
+    RenderedFileInfo render(AbstractAllParams<W> all) throws VCatException;
 
 }

@@ -1,5 +1,23 @@
 package vcat;
 
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import vcat.graph.Graph;
+import vcat.graph.Group;
+import vcat.graph.GroupRank;
+import vcat.graph.Node;
+import vcat.graphviz.GraphWriter;
+import vcat.graphviz.GraphvizException;
+import vcat.mediawiki.ApiException;
+import vcat.mediawiki.Metadata;
+import vcat.mediawiki.interfaces.CategoryProvider;
+import vcat.mediawiki.interfaces.Wiki;
+import vcat.params.AbstractAllParams;
+import vcat.params.Relation;
+import vcat.params.TitleNamespaceParam;
+import vcat.params.VCatParams;
+
 import java.io.IOException;
 import java.io.Serial;
 import java.nio.file.Files;
@@ -9,266 +27,243 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import vcat.graph.Graph;
-import vcat.graph.Group;
-import vcat.graph.GroupRank;
-import vcat.graph.Node;
-import vcat.graphviz.GraphWriter;
-import vcat.graphviz.GraphvizException;
-import vcat.mediawiki.ApiException;
-import vcat.mediawiki.interfaces.CategoryProvider;
-import vcat.mediawiki.interfaces.Wiki;
-import vcat.mediawiki.Metadata;
-import vcat.params.AbstractAllParams;
-import vcat.params.Relation;
-import vcat.params.TitleNamespaceParam;
-import vcat.params.VCatParams;
-
 public abstract class AbstractVCat<W extends Wiki> {
 
-	static class Root extends TitleNamespaceParam {
+    @Getter
+    protected static class Root extends TitleNamespaceParam {
 
-		@Serial
-		private static final long serialVersionUID = -1206610398197602542L;
+        @Serial
+        private static final long serialVersionUID = 8946252039152427686L;
 
-		private final String fullTitle;
+        private final String fullTitle;
 
-		private final Node node;
+        private final Node node;
 
-		public Root(Node node, String title, int namespace, String fullTitle) {
-			super(title, namespace);
-			this.fullTitle = fullTitle;
-			this.node = node;
-		}
+        public Root(Node node, String title, int namespace, String fullTitle) {
+            super(title, namespace);
+            this.fullTitle = fullTitle;
+            this.node = node;
+        }
 
-		public String getFullTitle() {
-			return this.fullTitle;
-		}
+    }
 
-		public Node getNode() {
-			return this.node;
-		}
+    /**
+     * Log4j2 Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractVCat.class);
 
-	}
+    private static final String GRAPH_FONT = "DejaVu Sans";
 
-	/** Log4j2 Logger */
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractVCat.class);
+    private static final String GROUP_EXCEED = "exceed";
 
-	private static final String GRAPH_FONT = "DejaVu Sans";
+    private static final String GROUP_ROOT = "rootGroup";
 
-	private static final String GROUP_EXCEED = "exceed";
+    private static final String LABEL_DEPTH_PREFIX = "d:";
 
-	private static final String GROUP_ROOT = "rootGroup";
+    private static final String LABEL_HIDDEN = "hidden";
 
-	private static final String LABEL_DEPTH_PREFIX = "d:";
+    private static final String LABEL_REL_PREFIX = "rel=";
 
-	private static final String LABEL_HIDDEN = "hidden";
+    protected static final String NODE_EXCEED_LABEL = "…";
 
-	private static final String LABEL_REL_PREFIX = "rel=";
+    protected static final String NODE_EXCEED_SUFFIX = "_more";
 
-	protected static final String NODE_EXCEED_LABEL = "…";
+    private static final String ROOT_NODE_PREFIX = "ROOT";
 
-	protected static final String NODE_EXCEED_SUFFIX = "_more";
+    protected final AbstractAllParams<W> all;
 
-	private static final String ROOT_NODE_PREFIX = "ROOT";
+    protected final CategoryProvider<W> categoryProvider;
 
-	protected final AbstractAllParams<W> all;
+    protected AbstractVCat(final AbstractAllParams<W> all, final CategoryProvider<W> categoryProvider) {
+        this.all = all;
+        this.categoryProvider = categoryProvider;
+    }
 
-	protected final CategoryProvider<W> categoryProvider;
+    public AbstractAllParams<W> getAllParams() {
+        return this.all;
+    }
 
-	protected AbstractVCat(final AbstractAllParams<W> all, final CategoryProvider<W> categoryProvider) {
-		this.all = all;
-		this.categoryProvider = categoryProvider;
-	}
+    protected String getDefaultGraphLabel(Collection<Root> roots) {
+        final StringBuilder sb = new StringBuilder(this.all.getVCat().getWiki().getDisplayName());
+        for (Root root : roots) {
+            sb.append(' ').append(root.getFullTitle());
+        }
+        return sb.toString();
+    }
 
-	public AbstractAllParams<W> getAllParams() {
-		return this.all;
-	}
+    private Graph renderGraph() throws VCatException {
+        return this.renderGraphForDepth(this.all.getVCat().getDepth());
+    }
 
-	protected String getDefaultGraphLabel(Collection<Root> roots) {
-		final StringBuilder sb = new StringBuilder(this.all.getVCat().getWiki().getDisplayName());
-		for (Root root : roots) {
-			sb.append(' ').append(root.getFullTitle());
-		}
-		return sb.toString();
-	}
+    private Graph renderGraphForDepth(Integer maxDepth) throws VCatException {
 
-	private Graph renderGraph() throws VCatException {
-		return this.renderGraphForDepth(this.all.getVCat().getDepth());
-	}
+        final long startMillis = System.currentTimeMillis();
 
-	private Graph renderGraphForDepth(Integer maxDepth) throws VCatException {
+        final Graph graph = new Graph();
 
-		final long startMillis = System.currentTimeMillis();
+        final Metadata metadata = this.all.getMetadata();
+        final VCatParams<W> vCatParams = this.all.getVCat();
 
-		final Graph graph = new Graph();
+        final String categoryNamespacePrefix = metadata.getAuthoritativeName(Metadata.NS_CATEGORY) + ':';
+        final int categoryNamespacePrefixLength = categoryNamespacePrefix.length();
 
-		final Metadata metadata = this.all.getMetadata();
-		final VCatParams<W> vCatParams = this.all.getVCat();
+        String fullTitle;
 
-		final String categoryNamespacePrefix = metadata.getAuthoritativeName(Metadata.NS_CATEGORY) + ':';
-		final int categoryNamespacePrefixLength = categoryNamespacePrefix.length();
+        try {
+            HashSet<Node> allNodesFound = new HashSet<>();
 
-		String fullTitle;
+            Collection<TitleNamespaceParam> titleNamespaceList = vCatParams.getTitleNamespaceParams();
+            ArrayList<Root> roots = new ArrayList<>(titleNamespaceList.size());
 
-		try {
-			HashSet<Node> allNodesFound = new HashSet<>();
+            int n = 0;
+            for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
+                final String title = titleNamespace.getTitle();
+                final int namespace = titleNamespace.getNamespace();
 
-			Collection<TitleNamespaceParam> titleNamespaceList = vCatParams.getTitleNamespaceParams();
-			ArrayList<Root> roots = new ArrayList<>(titleNamespaceList.size());
+                fullTitle = this.all.getMetadata().fullTitle(title, namespace);
 
-			int n = 0;
-			for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
-				final String title = titleNamespace.getTitle();
-				final int namespace = titleNamespace.getNamespace();
+                Node rootNode;
+                if (namespace == Metadata.NS_CATEGORY) {
+                    // For categories, use the title without namespace as the name
+                    rootNode = graph.node(title);
+                } else {
+                    // Otherwise use "ROOT" with a number and set a label with the full title
+                    rootNode = graph.node(ROOT_NODE_PREFIX + n);
+                    n++;
+                    rootNode.setLabel(fullTitle);
+                }
+                all.getVCat().getLinkProvider().addLinkToNode(rootNode, fullTitle);
 
-				fullTitle = this.all.getMetadata().fullTitle(title, namespace);
+                roots.add(new Root(rootNode, title, namespace, fullTitle));
+                allNodesFound.add(rootNode);
+            }
 
-				Node rootNode;
-				if (namespace == Metadata.NS_CATEGORY) {
-					// For categories, use the title without namespace as the name
-					rootNode = graph.node(title);
-				} else {
-					// Otherwise use "ROOT" with a number and set a label with the full title
-					rootNode = graph.node(ROOT_NODE_PREFIX + n);
-					n++;
-					rootNode.setLabel(fullTitle);
-				}
-				all.getVCat().getLinkProvider().addLinkToNode(rootNode, fullTitle);
+            boolean showhidden = vCatParams.isShowhidden();
 
-				roots.add(new Root(rootNode, title, namespace, fullTitle));
-				allNodesFound.add(rootNode);
-			}
+            ArrayList<Node> newNodes = new ArrayList<>();
 
-			boolean showhidden = vCatParams.isShowhidden();
+            for (Root root : roots) {
+                this.renderGraphOuterFirstLoop(graph, newNodes, root.getNode(), allNodesFound, root.getFullTitle(),
+                        categoryNamespacePrefixLength, showhidden);
+            }
 
-			ArrayList<Node> newNodes = new ArrayList<>();
+            // Counting depth and storing various information to be used when it is exceeded
+            int curDepth = 0;
+            boolean exceedDepth = false;
+            Integer limit = vCatParams.getLimit();
 
-			for (Root root : roots) {
-				this.renderGraphOuterFirstLoop(graph, newNodes, root.getNode(), allNodesFound, root.getFullTitle(),
-						categoryNamespacePrefixLength, showhidden);
-			}
+            while (!newNodes.isEmpty() && !exceedDepth) {
+                curDepth++;
 
-			// Counting depth and storing various information to be used when it is exceeded
-			int curDepth = 0;
-			boolean exceedDepth = false;
-			Integer limit = vCatParams.getLimit();
+                if (maxDepth != null && curDepth >= maxDepth) {
+                    exceedDepth = true;
+                }
 
-			while (!newNodes.isEmpty() && !exceedDepth) {
-				curDepth++;
+                // The new nodes from the last loop iteration are now the current ones. Move them and prepare a new list
+                // of new nodes.
+                Collection<Node> curNodes = newNodes;
+                newNodes = new ArrayList<>();
 
-				if (maxDepth != null && curDepth >= maxDepth) {
-					exceedDepth = true;
-				}
+                this.renderGraphOuterLoop(graph, newNodes, curNodes, allNodesFound, categoryNamespacePrefix,
+                        categoryNamespacePrefixLength, showhidden, exceedDepth);
 
-				// The new nodes from the last loop iteration are now the current ones. Move them and prepare a new list
-				// of new nodes.
-				Collection<Node> curNodes = newNodes;
-				newNodes = new ArrayList<>();
+                if (limit != null && graph.getNodeCount() > limit && curDepth > 1) {
+                    // If curDepth and maxDepth end up the same, reduce curDepth by one
+                    if (maxDepth != null && curDepth == maxDepth) {
+                        curDepth--;
+                    }
+                    return renderGraphForDepth(curDepth);
+                }
+            }
 
-				this.renderGraphOuterLoop(graph, newNodes, curNodes, allNodesFound, categoryNamespacePrefix,
-						categoryNamespacePrefixLength, showhidden, exceedDepth);
+            final StringBuilder graphLabel = new StringBuilder(this.getDefaultGraphLabel(roots));
 
-				if (limit != null && graph.getNodeCount() > limit && curDepth > 1) {
-					// If curDepth and maxDepth end up the same, reduce curDepth by one
-					if (maxDepth != null && curDepth == maxDepth) {
-						curDepth--;
-					}
-					return renderGraphForDepth(curDepth);
-				}
-			}
+            Relation relation = this.all.getVCat().getRelation();
+            if (relation != Relation.Category) {
+                graphLabel.append(' ');
+                graphLabel.append(LABEL_REL_PREFIX);
+                graphLabel.append(relation.name());
+            }
 
-			final StringBuilder graphLabel = new StringBuilder(this.getDefaultGraphLabel(roots));
+            if (showhidden) {
+                graphLabel.append(' ');
+                graphLabel.append(LABEL_HIDDEN);
+            }
 
-			Relation relation = this.all.getVCat().getRelation();
-			if (relation != Relation.Category) {
-				graphLabel.append(' ');
-				graphLabel.append(LABEL_REL_PREFIX);
-				graphLabel.append(relation.name());
-			}
+            if (exceedDepth && !newNodes.isEmpty()) {
+                // We have gone below the depth. If there are actually any excess nodes, change graph title and group
+                // these nodes.
+                graphLabel.append(' ');
+                graphLabel.append(LABEL_DEPTH_PREFIX);
+                graphLabel.append(maxDepth);
 
-			if (showhidden) {
-				graphLabel.append(' ');
-				graphLabel.append(LABEL_HIDDEN);
-			}
+                Group exceedGroup = graph.group(GROUP_EXCEED);
+                for (Node node : newNodes) {
+                    node.setStyle(Graph.STYLE_DASHED);
+                    exceedGroup.addNode(node);
+                }
+                exceedGroup.setRank(this.renderGraphExceedRank());
+            }
 
-			if (exceedDepth && !newNodes.isEmpty()) {
-				// We have gone below the depth. If there are actually any excess nodes, change graph title and group
-				// these nodes.
-				graphLabel.append(' ');
-				graphLabel.append(LABEL_DEPTH_PREFIX);
-				graphLabel.append(maxDepth);
+            renderGraphDefaultFormatting(graphLabel.toString(), graph, roots);
 
-				Group exceedGroup = graph.group(GROUP_EXCEED);
-				for (Node node : newNodes) {
-					node.setStyle(Graph.STYLE_DASHED);
-					exceedGroup.addNode(node);
-				}
-				exceedGroup.setRank(this.renderGraphExceedRank());
-			}
+        } catch (ApiException e) {
+            throw new VCatException(Messages.getString("AbstractVCat.Exception.CreatingGraph"), e);
+        }
 
-			renderGraphDefaultFormatting(graphLabel.toString(), graph, roots);
+        long endMillis = System.currentTimeMillis();
 
-		} catch (ApiException e) {
-			throw new VCatException(Messages.getString("AbstractVCat.Exception.CreatingGraph"), e);
-		}
+        LOG.info(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(),
+                endMillis - startMillis);
 
-		long endMillis = System.currentTimeMillis();
+        return graph;
 
-		LOG.info(Messages.getString("AbstractVCat.Info.CreatedGraph"), graph.getNodeCount(),
-				endMillis - startMillis);
+    }
 
-		return graph;
+    protected void renderGraphDefaultFormatting(String graphLabel, Graph graph, Collection<Root> roots) {
+        graph.setFontname(GRAPH_FONT);
+        graph.setFontsize(12);
+        graph.setLabel(graphLabel);
+        graph.setSplines(true);
 
-	}
+        graph.getDefaultNode().setFontname(GRAPH_FONT);
+        graph.getDefaultNode().setFontsize(12);
+        graph.getDefaultNode().setShape(Graph.SHAPE_RECT);
 
-	protected void renderGraphDefaultFormatting(String graphLabel, Graph graph, Collection<Root> roots) {
-		graph.setFontname(GRAPH_FONT);
-		graph.setFontsize(12);
-		graph.setLabel(graphLabel);
-		graph.setSplines(true);
+        Group groupMin = graph.group(GROUP_ROOT);
+        groupMin.setRank(this.renderGraphRootRank());
+        for (Root root : roots) {
+            Node rootNode = root.getNode();
+            rootNode.setLabel(root.getTitle());
+            rootNode.setStyle(Graph.STYLE_BOLD);
+            groupMin.addNode(rootNode);
+        }
+    }
 
-		graph.getDefaultNode().setFontname(GRAPH_FONT);
-		graph.getDefaultNode().setFontsize(12);
-		graph.getDefaultNode().setShape(Graph.SHAPE_RECT);
+    protected abstract GroupRank renderGraphExceedRank();
 
-		Group groupMin = graph.group(GROUP_ROOT);
-		groupMin.setRank(this.renderGraphRootRank());
-		for (Root root : roots) {
-			Node rootNode = root.getNode();
-			rootNode.setLabel(root.getTitle());
-			rootNode.setStyle(Graph.STYLE_BOLD);
-			groupMin.addNode(rootNode);
-		}
-	}
+    protected abstract void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode,
+                                                      Set<Node> allNodesFound, String fullTitle, int categoryNamespacePrefixLength, boolean showhidden)
+            throws ApiException;
 
-	protected abstract GroupRank renderGraphExceedRank();
+    protected abstract void renderGraphOuterLoop(Graph graph, Collection<Node> newNodes, Collection<Node> curNodes,
+                                                 Set<Node> allNodesFound, String categoryNamespacePrefix, int categoryNamespacePrefixLength,
+                                                 boolean showhidden, boolean exceed) throws ApiException;
 
-	protected abstract void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode,
-			Set<Node> allNodesFound, String fullTitle, int categoryNamespacePrefixLength, boolean showhidden)
-			throws ApiException;
+    protected abstract GroupRank renderGraphRootRank();
 
-	protected abstract void renderGraphOuterLoop(Graph graph, Collection<Node> newNodes, Collection<Node> curNodes,
-			Set<Node> allNodesFound, String categoryNamespacePrefix, int categoryNamespacePrefixLength,
-			boolean showhidden, boolean exceed) throws ApiException;
-
-	protected abstract GroupRank renderGraphRootRank();
-
-	public void renderToFile(Path outputFile) throws VCatException, GraphvizException {
-		Graph graph = this.renderGraph();
-		try {
-			GraphWriter.writeGraphToFile(graph, outputFile);
-		} catch (GraphvizException e) {
-			try {
-				Files.delete(outputFile);
-			} catch (IOException ee) {
-				e.addSuppressed(ee);
-			}
-			throw e;
-		}
-	}
+    public void renderToFile(Path outputFile) throws VCatException, GraphvizException {
+        Graph graph = this.renderGraph();
+        try {
+            GraphWriter.writeGraphToFile(graph, outputFile);
+        } catch (GraphvizException e) {
+            try {
+                Files.delete(outputFile);
+            } catch (IOException ee) {
+                e.addSuppressed(ee);
+            }
+            throw e;
+        }
+    }
 
 }
