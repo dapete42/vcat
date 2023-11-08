@@ -1,11 +1,10 @@
 package vcat.renderer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import vcat.AbstractVCat;
 import vcat.VCatException;
-import vcat.graphviz.interfaces.Graphviz;
 import vcat.graphviz.GraphvizException;
+import vcat.graphviz.interfaces.Graphviz;
 import vcat.mediawiki.interfaces.CategoryProvider;
 import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
@@ -19,12 +18,11 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 
+@Slf4j
 public class VCatRenderer<W extends Wiki> extends AbstractVCatRenderer<W> {
 
     @Serial
     private static final long serialVersionUID = 7255644185587547207L;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(VCatRenderer.class);
 
     private final Graphviz graphviz;
 
@@ -114,7 +112,7 @@ public class VCatRenderer<W extends Wiki> extends AbstractVCatRenderer<W> {
             try {
                 Files.delete(outputFile);
             } catch (IOException ee) {
-                LOGGER.error("Failed to delete output file after error", ee);
+                LOG.error("Failed to delete output file after error", ee);
             }
             throw new VCatException("Failed to create output file", e);
         }

@@ -1,7 +1,6 @@
 package vcat.toolforge.webapp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import vcat.VCatException;
 
@@ -15,12 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+@Slf4j
 public class MyCnfConfig {
-
-    /**
-     * Log4j2 Logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(MyCnfConfig.class);
 
     private static final String MY_CNF = "replica.my.cnf";
 
@@ -44,13 +39,13 @@ public class MyCnfConfig {
         // Primary: from $HOME
         Path myCnfFile = Paths.get(userHome, MY_CNF);
         if (Files.exists(myCnfFile)) {
-            LOGGER.info("Using {} from {}", MY_CNF, myCnfFile);
+            LOG.info("Using {} from {}", MY_CNF, myCnfFile);
         } else {
             // Secondary: from $TOOL_DATA_DIR (within container built by Build Service)
             if (toolDataDir != null) {
                 myCnfFile = Paths.get(toolDataDir, MY_CNF);
                 if (Files.exists(myCnfFile)) {
-                    LOGGER.info("Using {} from {}", MY_CNF, myCnfFile);
+                    LOG.info("Using {} from {}", MY_CNF, myCnfFile);
                 } else {
                     throw new VCatException(
                             MessageFormatter.format("{} not found in home or $TOOL_DATA_DIR", MY_CNF).getMessage());
@@ -75,7 +70,7 @@ public class MyCnfConfig {
 
         user = properties.getProperty("user");
         if (user == null || user.isEmpty()) {
-            LOGGER.error("Property '{}' missing or empty", "user");
+            LOG.error("Property '{}' missing or empty", "user");
             errors++;
         }
         if (user != null && user.startsWith("'") && user.endsWith("'")) {
@@ -84,7 +79,7 @@ public class MyCnfConfig {
 
         password = properties.getProperty("password");
         if (password == null || password.isEmpty()) {
-            LOGGER.error("Property '{}' missing or empty", "password");
+            LOG.error("Property '{}' missing or empty", "password");
             errors++;
         }
         if (password != null && password.startsWith("'") && password.endsWith("'")) {

@@ -1,8 +1,7 @@
 package vcat.renderer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vcat.Messages;
 import vcat.VCatException;
 import vcat.mediawiki.interfaces.Wiki;
@@ -17,15 +16,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+@Slf4j
 public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
 
     @Serial
     private static final long serialVersionUID = 7817745519732907506L;
-
-    /**
-     * Log4j2 Logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueuedVCatRenderer.class);
 
     private final ExecutorService executorService;
 
@@ -96,7 +91,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
             if (this.jobs.containsKey(jobId)) {
                 // If the job is alread queued or running, we need to record that we are also waiting for it to finish.
                 this.jobs.put(jobId, this.jobs.get(jobId) + 1);
-                LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId);
+                LOG.info(Messages.getString("QueuedVCatRenderer.Info.AlreadyScheduled"), jobId);
                 // Get lock
                 lock = jobLocks.get(jobId);
             } else {
@@ -108,7 +103,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
 
                 this.executorService.execute(() -> runJob(jobId, all));
 
-                LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId);
+                LOG.info(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId);
             }
         }
 
@@ -160,7 +155,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
      */
     private void runJob(final String jobId, final AbstractAllParams<W> all) {
 
-        LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId);
+        LOG.info(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId);
 
         Object lock = jobLocks.get(jobId);
         synchronized (lock) {
@@ -171,7 +166,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
             } catch (Exception e) {
                 // Record exception as thrown for this job
                 this.jobExceptions.put(jobId, e);
-                LOGGER.error(Messages.getString("QueuedVCatRenderer.Exception.Job"), e);
+                LOG.error(Messages.getString("QueuedVCatRenderer.Exception.Job"), e);
             }
 
             // Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
@@ -183,7 +178,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
 
         }
 
-        LOGGER.info(Messages.getString("QueuedVCatRenderer.Info.ThreadFinished"));
+        LOG.info(Messages.getString("QueuedVCatRenderer.Info.ThreadFinished"));
 
     }
 

@@ -148,11 +148,11 @@ public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
                 Files.delete(path);
                 purgedFiles++;
             } catch (IOException e) {
-                log.warn(Messages.getString("CachedVCatRenderer.Warn.CouldNotDeletePurging"), path, e);
+                LOG.warn(Messages.getString("CachedVCatRenderer.Warn.CouldNotDeletePurging"), path, e);
             }
         }
         if (purgedFiles > 0) {
-            log.info(Messages.getString("CachedVCatRenderer.Info.Purged"), purgedFiles);
+            LOG.info(Messages.getString("CachedVCatRenderer.Info.Purged"), purgedFiles);
         }
     }
 

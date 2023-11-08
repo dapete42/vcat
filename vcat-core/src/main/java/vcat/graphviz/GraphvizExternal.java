@@ -1,7 +1,6 @@
 package vcat.graphviz;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import vcat.Messages;
 import vcat.graphviz.interfaces.Graphviz;
@@ -20,12 +19,8 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Peter Schlömer
  */
+@Slf4j
 public class GraphvizExternal implements Graphviz {
-
-    /**
-     * Log4j2 Logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(GraphvizExternal.class);
 
     private final Path programPath;
 
@@ -85,7 +80,7 @@ public class GraphvizExternal implements Graphviz {
             processOutput = new String(graphvizProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             // If this fails, just log an error
-            LOGGER.warn(Messages.getString("GraphvizExternal.Warn.Stdout"), command, e);
+            LOG.warn(Messages.getString("GraphvizExternal.Warn.Stdout"), command, e);
         }
         do {
             try {
@@ -104,17 +99,17 @@ public class GraphvizExternal implements Graphviz {
         long endMillis = System.currentTimeMillis();
 
         if (exitValue == 0) {
-            LOGGER.info(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.toAbsolutePath(),
+            LOG.info(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.toAbsolutePath(),
                     endMillis - startMillis);
         } else {
-            LOGGER.error(Messages.getString("GraphvizExternal.Error.ExitCode"), inputFile.toAbsolutePath(), exitValue);
+            LOG.error(Messages.getString("GraphvizExternal.Error.ExitCode"), inputFile.toAbsolutePath(), exitValue);
             try {
                 Files.delete(outputFile);
             } catch (IOException e) {
-                LOGGER.error(Messages.getString("GraphvizExternal.Error.CouldNotRemoveOutputFile"), outputFile, e);
+                LOG.error(Messages.getString("GraphvizExternal.Error.CouldNotRemoveOutputFile"), outputFile, e);
             }
             if (processOutput != null) {
-                LOGGER.error(Messages.getString("GraphvitExternal.Error.ProcessOutput"), processOutput);
+                LOG.error(Messages.getString("GraphvitExternal.Error.ProcessOutput"), processOutput);
             }
             throw new GraphvizException(MessageFormatter
                     .format(Messages.getString("GraphvizExternal.Exception.ExitCode"), exitValue).getMessage());

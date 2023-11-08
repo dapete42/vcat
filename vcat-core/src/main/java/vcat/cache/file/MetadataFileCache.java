@@ -1,9 +1,8 @@
 package vcat.cache.file;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.interfaces.MetadataCache;
@@ -12,12 +11,8 @@ import vcat.mediawiki.interfaces.Wiki;
 
 import java.nio.file.Path;
 
+@Slf4j
 public class MetadataFileCache extends AbstractFileCache<String> implements MetadataCache {
-
-    /**
-     * Log4j2 Logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataFileCache.class);
 
     private static final String PREFIX = "Metadata-";
 
@@ -41,7 +36,7 @@ public class MetadataFileCache extends AbstractFileCache<String> implements Meta
                     // Wrong type
                     this.remove(key);
                     String message = Messages.getString("MetadataFileCache.Error.Deserialize");
-                    LOGGER.error(message);
+                    LOG.error(message);
                     throw new CacheException(message);
                 }
             } catch (SerializationException e) {

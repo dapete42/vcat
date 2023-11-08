@@ -1,8 +1,7 @@
 package vcat.cache.file;
 
 import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import vcat.Messages;
 import vcat.cache.CacheException;
@@ -25,12 +24,8 @@ import java.util.stream.Stream;
  * @param <K> Class used for key.
  * @author Peter Schlömer
  */
+@Slf4j
 public abstract class AbstractFileCache<K extends Serializable> {
-
-    /**
-     * Log4j2 Logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFileCache.class);
 
     /**
      * The cache directory.
@@ -82,11 +77,11 @@ public abstract class AbstractFileCache<K extends Serializable> {
                 Files.delete(path);
                 clearedFiles++;
             } catch (IOException e) {
-                LOGGER.warn(Messages.getString("AbstractFileCache.Warn.CouldNotDeleteClearing"), path, e);
+                LOG.warn(Messages.getString("AbstractFileCache.Warn.CouldNotDeleteClearing"), path, e);
             }
         }
         if (clearedFiles > 0) {
-            LOGGER.info(Messages.getString("AbstractFileCache.Info.Cleared"), clearedFiles);
+            LOG.info(Messages.getString("AbstractFileCache.Info.Cleared"), clearedFiles);
         }
     }
 
@@ -166,12 +161,12 @@ public abstract class AbstractFileCache<K extends Serializable> {
                     Files.delete(path);
                     purgedFiles++;
                 } catch (IOException e) {
-                    LOGGER.warn(Messages.getString("AbstractFileCache.Warn.CouldNotDeletePurging"), path, e);
+                    LOG.warn(Messages.getString("AbstractFileCache.Warn.CouldNotDeletePurging"), path, e);
                 }
             }
         }
         if (purgedFiles > 0) {
-            LOGGER.info(Messages.getString("AbstractFileCache.Info.Purged"), purgedFiles);
+            LOG.info(Messages.getString("AbstractFileCache.Info.Purged"), purgedFiles);
         }
     }
 

@@ -1,7 +1,6 @@
 package vcat.mediawiki;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.interfaces.MetadataCache;
@@ -10,15 +9,11 @@ import vcat.mediawiki.interfaces.Wiki;
 
 import java.io.Serial;
 
+@Slf4j
 public class CachedMetadataProvider implements MetadataProvider {
 
     @Serial
     private static final long serialVersionUID = 5966985791741996909L;
-
-    /**
-     * Log4j2 Logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CachedMetadataProvider.class);
 
     private final MetadataCache metadataCache;
 
@@ -36,7 +31,7 @@ public class CachedMetadataProvider implements MetadataProvider {
             this.metadataCache.purge();
             metadata = this.metadataCache.getMetadata(wiki);
         } catch (CacheException e) {
-            LOGGER.warn(Messages.getString("CachedMetadataProvider.Warn.Retrieve"), e);
+            LOG.warn(Messages.getString("CachedMetadataProvider.Warn.Retrieve"), e);
         }
 
         if (metadata == null) {

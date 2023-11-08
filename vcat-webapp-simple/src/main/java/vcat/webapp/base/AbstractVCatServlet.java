@@ -5,8 +5,7 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import vcat.renderer.RenderedFileInfo;
 
 import java.io.InputStream;
@@ -18,13 +17,9 @@ import java.nio.file.Path;
  *
  * @author Peter Schlömer
  */
+@Slf4j
 @SuppressWarnings("serial")
 public abstract class AbstractVCatServlet extends HttpServlet {
-
-    /**
-     * Log4j2 Logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractVCatServlet.class);
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
@@ -63,7 +58,7 @@ public abstract class AbstractVCatServlet extends HttpServlet {
                 renderedInput.transferTo(output);
             }
 
-            LOGGER.info("File sent: '{}' sent as '{}', {} bytes", resultFile.toAbsolutePath(), contentType, length);
+            LOG.info("File sent: '{}' sent as '{}', {} bytes", resultFile.toAbsolutePath(), contentType, length);
         } catch (Exception e) {
             throw new ServletException(e);
         }
