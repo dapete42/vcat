@@ -1,40 +1,40 @@
 package vcat.params;
 
-import java.io.Serializable;
+import vcat.mediawiki.interfaces.Wiki;
 
-import vcat.mediawiki.IWiki;
+import java.io.Serializable;
 
 /**
  * Combined parameters for the graph generation ({@link VCatParams}) and parameters for the invocation of the Graphviz
  * command line tool ({@link GraphvizParams}). Together these are a unique definition for each image rendered by
  * Graphviz.
- * 
+ *
  * @author schloeme
  */
-public class CombinedParams<W extends IWiki> implements Serializable {
+public class CombinedParams<W extends Wiki> implements Serializable {
 
-	private static final long serialVersionUID = -6156218131952150941L;
+    private static final long serialVersionUID = -6156218131952150941L;
 
-	private VCatParams<W> vCatParams;
+    private VCatParams<W> vCatParams;
 
-	private GraphvizParams graphvizParams;
+    private GraphvizParams graphvizParams;
 
-	protected CombinedParams() {
-		this.vCatParams = new VCatParams<>();
-		this.graphvizParams = new GraphvizParams();
-	}
+    protected CombinedParams() {
+        this.vCatParams = new VCatParams<>();
+        this.graphvizParams = new GraphvizParams();
+    }
 
-	public CombinedParams(VCatParams<W> vCatParams, GraphvizParams graphvizParams) {
-		this.vCatParams = vCatParams;
-		this.graphvizParams = graphvizParams;
-	}
+    public CombinedParams(VCatParams<W> vCatParams, GraphvizParams graphvizParams) {
+        this.vCatParams = vCatParams;
+        this.graphvizParams = graphvizParams;
+    }
 
-	public VCatParams<W> getVCat() {
-		return this.vCatParams;
-	}
+    public VCatParams<W> getVCat() {
+        return this.vCatParams;
+    }
 
-	public GraphvizParams getGraphviz() {
-		return this.graphvizParams;
-	}
+    public GraphvizParams getGraphviz() {
+        return this.graphvizParams;
+    }
 
 }

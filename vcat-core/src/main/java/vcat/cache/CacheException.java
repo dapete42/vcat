@@ -1,24 +1,18 @@
 package vcat.cache;
 
+import lombok.experimental.StandardException;
+
+import java.io.Serial;
+
 /**
  * Exception to be used by classes in the {@code vcat.cache} package.
- * 
+ *
  * @author Peter Schlömer
  */
+@StandardException
 public class CacheException extends Exception {
 
-	private static final long serialVersionUID = -4820106025233905079L;
-
-	public CacheException(Throwable cause) {
-		super(cause);
-	}
-
-	public CacheException(String message) {
-		super(message);
-	}
-
-	public CacheException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    @Serial
+    private static final long serialVersionUID = -6480864966068661264L;
 
 }

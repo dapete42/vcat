@@ -1,8 +1,8 @@
 package vcat.toolforge.webapp;
 
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.Wiki;
 
-public class ToolforgeWiki implements IWiki {
+public class ToolforgeWiki implements Wiki {
 
 	private static final long serialVersionUID = -8039078925472549881L;
 

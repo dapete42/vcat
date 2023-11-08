@@ -1,28 +1,30 @@
 package vcat.mediawiki;
 
-public class SimpleWikimediaWiki implements IWiki {
+import vcat.mediawiki.interfaces.Wiki;
 
-	private static final long serialVersionUID = -7792081905551487036L;
+public class SimpleWikimediaWiki implements Wiki {
 
-	private final String host;
+    private static final long serialVersionUID = -7792081905551487036L;
 
-	public SimpleWikimediaWiki(String host) {
-		this.host = host;
-	}
+    private final String host;
 
-	@Override
-	public String getApiUrl() {
-		return "https://" + this.host + "/w/api.php";
-	}
+    public SimpleWikimediaWiki(String host) {
+        this.host = host;
+    }
 
-	@Override
-	public String getDisplayName() {
-		return this.host;
-	}
+    @Override
+    public String getApiUrl() {
+        return "https://" + this.host + "/w/api.php";
+    }
 
-	@Override
-	public String getName() {
-		return this.host;
-	}
+    @Override
+    public String getDisplayName() {
+        return this.host;
+    }
+
+    @Override
+    public String getName() {
+        return this.host;
+    }
 
 }

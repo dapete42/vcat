@@ -3,12 +3,13 @@ package vcat.renderer;
 import java.nio.file.Path;
 
 import vcat.VCatException;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.Links;
 import vcat.params.OutputFormat;
+import vcat.renderer.interfaces.VCatRenderer;
 
-public abstract class AbstractVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
+public abstract class AbstractVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
 
 	private static final long serialVersionUID = 6181737937496899531L;
 

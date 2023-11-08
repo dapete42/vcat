@@ -9,13 +9,13 @@ import vcat.graph.Graph;
 import vcat.graph.GroupRank;
 import vcat.graph.Node;
 import vcat.mediawiki.ApiException;
-import vcat.mediawiki.ICategoryProvider;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.CategoryProvider;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 
-public class VCatForSubcategories<W extends IWiki> extends AbstractVCat<W> {
+public class VCatForSubcategories<W extends Wiki> extends AbstractVCat<W> {
 
-	public VCatForSubcategories(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider)
+	public VCatForSubcategories(final AbstractAllParams<W> all, final CategoryProvider<W> categoryProvider)
 			throws VCatException {
 		super(all, categoryProvider);
 	}

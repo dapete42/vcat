@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vcat.AbstractVCat;
 import vcat.VCatException;
-import vcat.graphviz.Graphviz;
+import vcat.graphviz.interfaces.Graphviz;
 import vcat.graphviz.GraphvizException;
-import vcat.mediawiki.ICategoryProvider;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.CategoryProvider;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.OutputFormat;
 import vcat.params.VCatFactory;
@@ -19,7 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 
-public class VCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
+public class VCatRenderer<W extends Wiki> extends AbstractVCatRenderer<W> {
 
     @Serial
     private static final long serialVersionUID = 7255644185587547207L;
@@ -32,7 +32,7 @@ public class VCatRenderer<W extends IWiki> extends AbstractVCatRenderer<W> {
 
     private final VCatFactory<W> vCatFactory;
 
-    public VCatRenderer(final Graphviz graphviz, final Path tempDir, final ICategoryProvider<W> categoryProvider) {
+    public VCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider<W> categoryProvider) {
         this.graphviz = graphviz;
         this.outputDir = tempDir;
         this.vCatFactory = new VCatFactory<>(categoryProvider);

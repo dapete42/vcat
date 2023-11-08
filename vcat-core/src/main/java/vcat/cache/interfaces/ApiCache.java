@@ -1,8 +1,9 @@
-package vcat.cache;
+package vcat.cache.interfaces;
 
 import jakarta.json.JsonObject;
+import vcat.cache.CacheException;
 
-public interface IApiCache {
+public interface ApiCache {
 
     boolean containsKey(String key);
 

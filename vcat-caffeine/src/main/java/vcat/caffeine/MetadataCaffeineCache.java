@@ -2,15 +2,15 @@ package vcat.caffeine;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import vcat.cache.IMetadataCache;
-import vcat.mediawiki.IWiki;
+import vcat.cache.interfaces.MetadataCache;
 import vcat.mediawiki.Metadata;
+import vcat.mediawiki.interfaces.Wiki;
 
 import java.time.Duration;
 
-public class MetadataCaffeineCache implements IMetadataCache {
+public class MetadataCaffeineCache implements MetadataCache {
 
-    private final Cache<IWiki, Metadata> cache;
+    private final Cache<Wiki, Metadata> cache;
 
     public MetadataCaffeineCache(int size, int timeout) {
         cache = Caffeine.newBuilder()
@@ -21,7 +21,7 @@ public class MetadataCaffeineCache implements IMetadataCache {
 
 
     @Override
-    public Metadata getMetadata(IWiki wiki) {
+    public Metadata getMetadata(Wiki wiki) {
         return cache.getIfPresent(wiki);
     }
 
@@ -31,7 +31,7 @@ public class MetadataCaffeineCache implements IMetadataCache {
     }
 
     @Override
-    public void put(IWiki wiki, Metadata metadata) {
+    public void put(Wiki wiki, Metadata metadata) {
         cache.put(wiki, metadata);
     }
 

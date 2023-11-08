@@ -7,18 +7,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import vcat.VCatException;
-import vcat.cache.IMetadataCache;
+import vcat.cache.interfaces.MetadataCache;
 import vcat.caffeine.ApiCaffeineCache;
 import vcat.caffeine.MetadataCaffeineCache;
 import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
-import vcat.mediawiki.IMetadataProvider;
 import vcat.mediawiki.SimpleWikimediaWiki;
+import vcat.mediawiki.interfaces.MetadataProvider;
 import vcat.params.AllParams;
 import vcat.renderer.CachedVCatRenderer;
-import vcat.renderer.IVCatRenderer;
+import vcat.renderer.interfaces.VCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
 import vcat.webapp.base.AbstractVCatServlet;
@@ -65,9 +65,9 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
     @ConfigProperty(name = "vcat.threads", defaultValue = "0")
     Integer vcatThreads;
 
-    private static IMetadataProvider metadataProvider;
+    private static MetadataProvider metadataProvider;
 
-    private static IVCatRenderer<SimpleWikimediaWiki> vCatRenderer;
+    private static VCatRenderer<SimpleWikimediaWiki> vCatRenderer;
 
     @Override
     public String getServletInfo() {
@@ -82,7 +82,7 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
             final var graphviz = new QueuedGraphviz(new GraphvizExternal(Paths.get(graphvizDir)), 1);
             final var apiCache = new ApiCaffeineCache(10000, cachePurge);
             final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<>(apiCache);
-            final IMetadataCache metadataCache = new MetadataCaffeineCache(10000, cachePurgeMetadata);
+            final MetadataCache metadataCache = new MetadataCaffeineCache(10000, cachePurgeMetadata);
             metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
             vCatRenderer = new QueuedVCatRenderer<>(
                     new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cachePath, cachePurge), vcatThreads);

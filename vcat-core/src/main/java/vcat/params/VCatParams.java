@@ -3,7 +3,7 @@ package vcat.params;
 import java.io.Serializable;
 import java.util.Collection;
 
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.util.AbstractLinkProvider;
 
 /**
@@ -11,7 +11,7 @@ import vcat.util.AbstractLinkProvider;
  * 
  * @author Peter Schlömer
  */
-public class VCatParams<W extends IWiki> implements Serializable {
+public class VCatParams<W extends Wiki> implements Serializable {
 
 	private static final long serialVersionUID = -7181473469976962467L;
 

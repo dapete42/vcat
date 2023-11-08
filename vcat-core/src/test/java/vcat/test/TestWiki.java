@@ -1,8 +1,8 @@
 package vcat.test;
 
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.Wiki;
 
-public class TestWiki implements IWiki {
+public class TestWiki implements Wiki {
 
 	private static final long serialVersionUID = 6023746140482931907L;
 

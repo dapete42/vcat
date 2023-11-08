@@ -3,10 +3,10 @@ package vcat.cache.file;
 import java.nio.file.Path;
 
 import vcat.cache.CacheException;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.CombinedParams;
 
-public class RenderedFileCache<W extends IWiki> extends AbstractFileCache<CombinedParams<W>> {
+public class RenderedFileCache<W extends Wiki> extends AbstractFileCache<CombinedParams<W>> {
 
 	private static final long serialVersionUID = 6473652038986724784L;
 

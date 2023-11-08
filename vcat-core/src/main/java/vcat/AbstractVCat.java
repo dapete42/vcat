@@ -19,15 +19,15 @@ import vcat.graph.Node;
 import vcat.graphviz.GraphWriter;
 import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ApiException;
-import vcat.mediawiki.ICategoryProvider;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.CategoryProvider;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.mediawiki.Metadata;
 import vcat.params.AbstractAllParams;
 import vcat.params.Relation;
 import vcat.params.TitleNamespaceParam;
 import vcat.params.VCatParams;
 
-public abstract class AbstractVCat<W extends IWiki> {
+public abstract class AbstractVCat<W extends Wiki> {
 
 	static class Root extends TitleNamespaceParam {
 
@@ -77,9 +77,9 @@ public abstract class AbstractVCat<W extends IWiki> {
 
 	protected final AbstractAllParams<W> all;
 
-	protected final ICategoryProvider<W> categoryProvider;
+	protected final CategoryProvider<W> categoryProvider;
 
-	protected AbstractVCat(final AbstractAllParams<W> all, final ICategoryProvider<W> categoryProvider) {
+	protected AbstractVCat(final AbstractAllParams<W> all, final CategoryProvider<W> categoryProvider) {
 		this.all = all;
 		this.categoryProvider = categoryProvider;
 	}

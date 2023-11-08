@@ -6,9 +6,9 @@ import vcat.VCatException;
 import vcat.cache.CacheException;
 import vcat.cache.file.GraphFileCache;
 import vcat.cache.file.RenderedFileCache;
-import vcat.graphviz.Graphviz;
-import vcat.mediawiki.ICategoryProvider;
-import vcat.mediawiki.IWiki;
+import vcat.graphviz.interfaces.Graphviz;
+import vcat.mediawiki.interfaces.CategoryProvider;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.CombinedParams;
 import vcat.params.OutputFormat;
@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 @Slf4j
-public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
+public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
 
     @Serial
     private static final long serialVersionUID = -7813270634239995061L;
@@ -32,12 +32,12 @@ public class CachedVCatRenderer<W extends IWiki> extends VCatRenderer<W> {
 
     private final RenderedFileCache<W> renderedCache;
 
-    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final ICategoryProvider<W> categoryProvider,
+    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider<W> categoryProvider,
                               final Path cacheDir) throws VCatException {
         this(graphviz, tempDir, categoryProvider, cacheDir, 600);
     }
 
-    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final ICategoryProvider<W> categoryProvider,
+    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider<W> categoryProvider,
                               final Path cacheDir, final int purge) throws VCatException {
         super(graphviz, tempDir, categoryProvider);
         this.purge = purge;

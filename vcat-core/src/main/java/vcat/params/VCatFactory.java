@@ -9,16 +9,16 @@ import vcat.Messages;
 import vcat.VCatException;
 import vcat.VCatForCategories;
 import vcat.VCatForSubcategories;
-import vcat.mediawiki.ICategoryProvider;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.CategoryProvider;
+import vcat.mediawiki.interfaces.Wiki;
 
-public class VCatFactory<W extends IWiki> implements Serializable {
+public class VCatFactory<W extends Wiki> implements Serializable {
 
 	private static final long serialVersionUID = 5190043989637851420L;
 
-	private final ICategoryProvider<W> categoryProvider;
+	private final CategoryProvider<W> categoryProvider;
 
-	public VCatFactory(final ICategoryProvider<W> categoryProvider) {
+	public VCatFactory(final CategoryProvider<W> categoryProvider) {
 		this.categoryProvider = categoryProvider;
 	}
 

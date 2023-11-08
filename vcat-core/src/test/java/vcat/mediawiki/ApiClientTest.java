@@ -4,13 +4,15 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import vcat.mediawiki.interfaces.Wiki;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Disabled("api tests fail")
 public class ApiClientTest {
@@ -25,9 +27,9 @@ public class ApiClientTest {
 
     private final static String WIKI = "de.wikipedia.org";
 
-    private IWiki wiki;
+    private Wiki wiki;
 
-    private ApiClient<IWiki> client;
+    private ApiClient<Wiki> client;
 
     @BeforeEach
     public void before() {

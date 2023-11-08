@@ -6,8 +6,8 @@ import org.slf4j.helpers.MessageFormatter;
 import vcat.Messages;
 import vcat.VCatException;
 import vcat.mediawiki.ApiException;
-import vcat.mediawiki.IMetadataProvider;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.MetadataProvider;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.mediawiki.Metadata;
 import vcat.util.AbstractLinkProvider;
 
@@ -20,7 +20,7 @@ import java.util.*;
  *
  * @author Peter Schlömer
  */
-public abstract class AbstractAllParams<W extends IWiki> {
+public abstract class AbstractAllParams<W extends Wiki> {
 
     private static final int MAX_LIMIT = 250;
 
@@ -57,7 +57,7 @@ public abstract class AbstractAllParams<W extends IWiki> {
     protected final Map<String, String[]> requestParams = new HashMap<>();
 
     protected void init(final Map<String, String[]> requestParams, final String renderUrl,
-                        final IMetadataProvider metadataProvider) throws VCatException {
+                        final MetadataProvider metadataProvider) throws VCatException {
 
         // Remember the URL used to render a graph
         this.renderUrl = renderUrl;

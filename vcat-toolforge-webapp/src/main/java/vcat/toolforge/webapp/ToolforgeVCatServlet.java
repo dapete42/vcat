@@ -13,7 +13,7 @@ import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
-import vcat.mediawiki.IMetadataProvider;
+import vcat.mediawiki.interfaces.MetadataProvider;
 import vcat.renderer.CachedVCatRenderer;
 import vcat.renderer.QueuedVCatRenderer;
 import vcat.renderer.RenderedFileInfo;
@@ -84,7 +84,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
     private static QueuedVCatRenderer<ToolforgeWiki> vCatRenderer;
 
-    private static IMetadataProvider metadataProvider;
+    private static MetadataProvider metadataProvider;
 
     private static ToolforgeWikiProvider toolforgeWikiProvider;
 

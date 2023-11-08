@@ -5,8 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vcat.Messages;
 import vcat.VCatException;
-import vcat.mediawiki.IWiki;
+import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
+import vcat.renderer.interfaces.VCatRenderer;
 import vcat.util.HashHelper;
 
 import java.io.Serial;
@@ -16,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
-public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
+public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
 
     @Serial
     private static final long serialVersionUID = 7817745519732907506L;
@@ -54,7 +55,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
     /**
      * Graphviz renderer used for actual rendering
      */
-    private final IVCatRenderer<W> otherRenderer;
+    private final VCatRenderer<W> otherRenderer;
 
     /**
      * Return an instance of QueuedGraphviz, which uses the supplied Graphviz for rendering.
@@ -62,7 +63,7 @@ public class QueuedVCatRenderer<W extends IWiki> implements IVCatRenderer<W> {
      * @param otherRenderer   vCat renderer to use.
      * @param numberOfThreads Maximum number of threads to use (zero or less means an unlimited number).
      */
-    public QueuedVCatRenderer(final IVCatRenderer<W> otherRenderer, final int numberOfThreads) {
+    public QueuedVCatRenderer(final VCatRenderer<W> otherRenderer, final int numberOfThreads) {
 
         this.otherRenderer = otherRenderer;
 

@@ -12,6 +12,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.helpers.MessageFormatter;
 import vcat.Messages;
+import vcat.mediawiki.interfaces.CategoryProvider;
+import vcat.mediawiki.interfaces.MetadataProvider;
+import vcat.mediawiki.interfaces.Wiki;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetadataProvider {
+public class ApiClient<W extends Wiki> implements CategoryProvider<W>, MetadataProvider {
 
     @Serial
     private static final long serialVersionUID = 2558987660016530790L;
@@ -266,7 +269,7 @@ public class ApiClient<W extends IWiki> implements ICategoryProvider<W>, IMetada
     }
 
     @Override
-    public Metadata requestMetadata(final IWiki wiki) throws ApiException {
+    public Metadata requestMetadata(final Wiki wiki) throws ApiException {
         // Set query properties
         Map<String, String> params = new HashMap<>();
         params.put("meta", "siteinfo");

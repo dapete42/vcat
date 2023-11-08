@@ -3,11 +3,11 @@ package vcat.caffeine;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.json.JsonObject;
-import vcat.cache.IApiCache;
+import vcat.cache.interfaces.ApiCache;
 
 import java.time.Duration;
 
-public class ApiCaffeineCache implements IApiCache {
+public class ApiCaffeineCache implements ApiCache {
 
     private final Cache<String, JsonObject> cache;
 
