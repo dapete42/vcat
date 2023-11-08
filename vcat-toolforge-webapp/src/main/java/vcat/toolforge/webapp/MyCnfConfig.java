@@ -1,5 +1,6 @@
 package vcat.toolforge.webapp;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.helpers.MessageFormatter;
 import vcat.VCatException;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+@Getter
 @Slf4j
 public class MyCnfConfig {
 
@@ -22,14 +24,6 @@ public class MyCnfConfig {
     private String user;
 
     private String password;
-
-    public String getUser() {
-        return user;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 
     public boolean readFromMyCnf() throws VCatException {
 
