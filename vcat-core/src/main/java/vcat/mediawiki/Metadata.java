@@ -3,6 +3,7 @@ package vcat.mediawiki;
 import org.slf4j.helpers.MessageFormatter;
 import vcat.Messages;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.Set;
 
 public class Metadata implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -2562390668664997668L;
 
     /**
@@ -84,10 +86,6 @@ public class Metadata implements Serializable {
 
     public String getAuthoritativeName(int namespace) {
         return this.authoritativeNamespaces.get(namespace);
-    }
-
-    public int getId(String namespaceName) {
-        return this.allNamespacesInverse.get(namespaceName);
     }
 
     public String getServer() {

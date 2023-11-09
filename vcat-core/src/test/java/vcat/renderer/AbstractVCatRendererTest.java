@@ -15,7 +15,7 @@ public class AbstractVCatRendererTest {
     private TestVCatRenderer underTest;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         underTest = new TestVCatRenderer();
     }
 

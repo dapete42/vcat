@@ -16,8 +16,7 @@ public class DefaultNode extends AbstractDefaultEdgeNode {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof DefaultNode) {
-            final DefaultNode n = (DefaultNode) o;
+        if (o instanceof DefaultNode n) {
             return new EqualsBuilder().appendSuper(super.equals(o)).append(shape, n.shape).build();
         }
         return false;

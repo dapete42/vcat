@@ -3,6 +3,7 @@ package vcat.util;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
@@ -12,6 +13,7 @@ public class HashHelperTest {
 
     private static class TestClass implements Serializable {
 
+        @Serial
         private static final long serialVersionUID = 4591638198169811763L;
 
     }

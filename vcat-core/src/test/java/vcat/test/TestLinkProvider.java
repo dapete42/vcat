@@ -2,8 +2,11 @@ package vcat.test;
 
 import vcat.util.AbstractLinkProvider;
 
+import java.io.Serial;
+
 public class TestLinkProvider extends AbstractLinkProvider {
 
+    @Serial
     private static final long serialVersionUID = 4438603179157010925L;
 
     @Override

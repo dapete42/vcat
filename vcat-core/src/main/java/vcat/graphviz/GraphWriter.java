@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -39,7 +38,7 @@ public class GraphWriter {
     }
 
     public static void writeGraphToFile(Graph graph, Path outputFile) throws GraphvizException {
-        Writer writer = null;
+        final Writer writer;
         try {
             writer = new BufferedWriter(new OutputStreamWriter(
                     Files.newOutputStream(outputFile, StandardOpenOption.CREATE), StandardCharsets.UTF_8));
@@ -48,7 +47,7 @@ public class GraphWriter {
                     .format(Messages.getString("GraphWriter.Exception.OpenFileForOutput"), outputFile).getMessage(), e);
         }
 
-        GraphWriter graphWriter = new GraphWriter(writer);
+        final var graphWriter = new GraphWriter(writer);
         try {
             graphWriter.writeGraph(graph);
         } catch (IOException e) {
@@ -139,15 +138,6 @@ public class GraphWriter {
 
         // Charset
         this.writer.write("charset=\"UTF-8\";\n");
-
-        // Create a Set of nodes that have no edges; they have to be included even if they do not have any properties
-        Set<Node> nodesWithoutEdges = new HashSet<>();
-        // Assume no node as edges; then remove those that have from the list
-        nodesWithoutEdges.addAll(graph.getNodes());
-        for (Edge edge : graph.getEdges()) {
-            nodesWithoutEdges.remove(edge.getNodeFrom());
-            nodesWithoutEdges.remove(edge.getNodeTo());
-        }
 
         this.writeLineProperties(graph.properties());
 

@@ -2,6 +2,7 @@ package vcat.params;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -12,6 +13,7 @@ import java.io.Serializable;
  */
 public class GraphvizParams implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -3887996473000446247L;
 
     private Algorithm algorithm = Algorithm.DOT;
@@ -22,8 +24,7 @@ public class GraphvizParams implements Serializable {
     public boolean equals(Object o) {
         if (o == null) {
             return false;
-        } else if (o instanceof GraphvizParams) {
-            GraphvizParams gp = (GraphvizParams) o;
+        } else if (o instanceof GraphvizParams gp) {
             return gp.algorithm == this.algorithm && gp.outputFormat == this.outputFormat;
         } else {
             return false;
@@ -52,7 +53,6 @@ public class GraphvizParams implements Serializable {
 
     public void setOutputFormat(OutputFormat outputFormat) {
         this.outputFormat = outputFormat;
-        super.equals(null);
     }
 
 }

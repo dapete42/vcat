@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+@Getter
 @Named("status")
 @RequestScoped
 public class StatusBean implements Serializable {
@@ -17,19 +18,14 @@ public class StatusBean implements Serializable {
     @Serial
     private static final long serialVersionUID = -3546694105983195743L;
 
-    @Getter
     private List<Thread> threads;
 
-    @Getter
     private int numberOfThreads;
 
-    @Getter
     private long freeMemory;
 
-    @Getter
     private long maxMemory;
 
-    @Getter
     private long totalMemory;
 
     @PostConstruct
@@ -41,10 +37,10 @@ public class StatusBean implements Serializable {
             numberOfThreads = Thread.enumerate(threads);
         }
         this.threads = Arrays.asList(threads);
-        final long mb = 1024 * 1024;
-        freeMemory = Runtime.getRuntime().freeMemory() / (1024L * 1024L);
-        maxMemory = Runtime.getRuntime().maxMemory() / (1024L * 1024L);
-        totalMemory = Runtime.getRuntime().totalMemory() / (1024L * 1024L);
+        final long mb = 1024L * 1024L;
+        freeMemory = Runtime.getRuntime().freeMemory() / mb;
+        maxMemory = Runtime.getRuntime().maxMemory() / mb;
+        totalMemory = Runtime.getRuntime().totalMemory() / mb;
     }
 
     public String getSystemProperty(String key) {

@@ -30,7 +30,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
     private final Map<String, Exception> jobExceptions = new HashMap<>();
 
     /**
-     * Map of all jobs. The value is an object we use to track the number number of invocations waiting for each job.
+     * Map of all jobs. The value is an object we use to track the number of invocations waiting for each job.
      * <p>
      * This is also used to synchronize all operations on this Map or any of these other Collections to make the code
      * thread-safe.

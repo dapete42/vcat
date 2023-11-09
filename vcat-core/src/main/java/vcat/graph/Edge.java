@@ -18,8 +18,7 @@ public class Edge extends DefaultEdge {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Edge) {
-            Edge e = (Edge) o;
+        if (o instanceof Edge e) {
             // two nodes are equal if they go between the same nodes
             return this.nodeFrom.equals(e.nodeFrom) && this.nodeTo.equals(e.nodeTo);
         } else {

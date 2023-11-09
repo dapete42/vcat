@@ -17,7 +17,7 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
     private String fontname;
 
     /**
-     * Label size
+     * Label font size
      */
     private int fontsize;
 
@@ -30,8 +30,7 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof AbstractDefaultEdgeNode) {
-            final AbstractDefaultEdgeNode n = (AbstractDefaultEdgeNode) o;
+        if (o instanceof AbstractDefaultEdgeNode n) {
             return new EqualsBuilder().append(fontname, n.fontname).append(fontsize, n.fontsize).append(href, n.href)
                     .append(style, n.style).build();
         }

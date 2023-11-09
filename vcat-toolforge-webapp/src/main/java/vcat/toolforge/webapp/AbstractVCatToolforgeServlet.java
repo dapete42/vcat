@@ -41,7 +41,7 @@ public abstract class AbstractVCatToolforgeServlet extends HttpServlet {
         this.doRequest(req, resp);
     }
 
-    private void doRequestInternal(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void doRequestInternal(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
         try {
             RenderedFileInfo renderedFileInfo = this.renderedFileFromRequest(req);
 
@@ -81,7 +81,7 @@ public abstract class AbstractVCatToolforgeServlet extends HttpServlet {
         // Add a wrapper around doRequest which displays a nice error page instead of the default error message.
         try {
             doRequestInternal(req, resp);
-        } catch (IOException | ServletException e) {
+        } catch (ServletException e) {
             if (!(e.getCause() instanceof VCatException)) {
                 LOG.error(e.getMessage(), e);
             }

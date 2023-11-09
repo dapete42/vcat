@@ -3,7 +3,6 @@ package vcat.graph;
 import vcat.graph.internal.AbstractGraphPropertyUser;
 import vcat.graph.internal.GraphProperty;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,10 +24,6 @@ public class Group extends AbstractGraphPropertyUser {
 
     public void addNode(Node node) {
         this.nodes.add(node);
-    }
-
-    public void addNodes(Collection<Node> node) {
-        this.nodes.addAll(node);
     }
 
     public DefaultEdge getDefaultEdge() {

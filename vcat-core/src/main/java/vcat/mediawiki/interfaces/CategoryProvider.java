@@ -14,7 +14,7 @@ public interface CategoryProvider<W extends Wiki> extends Serializable {
      *
      * @param wiki       Wiki to get categories from.
      * @param fullTitles Full titles (including namespace) of pages.
-     * @param showhidden Whether categories marked as hidden in the wiki (using <code>__HIDDENCAT__</code> should be included.
+     * @param showhidden Whether categories marked as hidden in the wiki (using <code>__HIDDENCAT__</code>) should be included.
      * @return Map of strings with the full titles (with namespace) of categories the page with the supplied full title
      * is in.
      * @throws ApiException If there are any errors.

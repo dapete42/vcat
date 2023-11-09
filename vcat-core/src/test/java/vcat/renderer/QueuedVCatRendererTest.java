@@ -16,7 +16,7 @@ public class QueuedVCatRendererTest {
     private QueuedVCatRenderer<TestWiki> underTest;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         testRenderer = new TestVCatRenderer();
         underTest = new QueuedVCatRenderer<>(testRenderer, 2);
     }

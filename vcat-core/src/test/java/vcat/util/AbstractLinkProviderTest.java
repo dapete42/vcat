@@ -10,8 +10,7 @@ import vcat.test.TestLinkProvider;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AbstractLinkProviderTest {
 
@@ -30,7 +29,7 @@ public class AbstractLinkProviderTest {
 
     @Test
     public void testEscapeForUrlNull() {
-        assertEquals(null, AbstractLinkProvider.escapeForUrl(null));
+        assertNull(AbstractLinkProvider.escapeForUrl(null));
     }
 
     @Test
@@ -41,7 +40,7 @@ public class AbstractLinkProviderTest {
 
     @Test
     public void testEscapeMediawikiTitleForUrlNull() {
-        assertEquals(null, AbstractLinkProvider.escapeMediawikiTitleForUrl(null));
+        assertNull(AbstractLinkProvider.escapeMediawikiTitleForUrl(null));
     }
 
     @Test
@@ -64,14 +63,6 @@ public class AbstractLinkProviderTest {
         underTest.addLinkToNode(node, "linktitle");
 
         assertEquals("link:linktitle", node.getHref());
-
-    }
-
-    public void testAddLinkToNodeEmpty() {
-
-    }
-
-    public void testAddLinkToNodeNull() {
 
     }
 

@@ -60,7 +60,7 @@ public class CatgraphConverter {
             parameters.remove("lang");
         }
 
-        // Set defaults for ns if if is not supplied
+        // Set defaults for ns if it is not supplied
         if (!parameters.containsKey("ns")) {
             if ("article".equalsIgnoreCase(parameters.get("sub"))) {
                 // For sub=article, default is 0

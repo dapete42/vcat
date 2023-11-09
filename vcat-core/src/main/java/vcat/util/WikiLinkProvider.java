@@ -3,6 +3,8 @@ package vcat.util;
 import vcat.mediawiki.Metadata;
 import vcat.params.AbstractAllParams;
 
+import java.io.Serial;
+
 /**
  * Link provider which creates links to the corresponding wiki page.
  *
@@ -10,6 +12,7 @@ import vcat.params.AbstractAllParams;
  */
 public class WikiLinkProvider extends AbstractLinkProvider {
 
+    @Serial
     private static final long serialVersionUID = 3854287898146040511L;
 
     /**

@@ -1,15 +1,13 @@
 package vcat.graph;
 
+import lombok.experimental.StandardException;
+
+import java.io.Serial;
+
+@StandardException
 public class GraphException extends Exception {
 
-    private static final long serialVersionUID = 381013055055800767L;
-
-    public GraphException(String message) {
-        super(message);
-    }
-
-    public GraphException(String message, Throwable cause) {
-        super(message, cause);
-    }
+    @Serial
+    private static final long serialVersionUID = -6658041092065033415L;
 
 }

@@ -26,7 +26,7 @@ public enum Algorithm {
         return null;
     }
 
-    private String program;
+    private final String program;
 
     Algorithm(String program) {
         this.program = program;

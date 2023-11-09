@@ -31,7 +31,7 @@ public class QueuedGraphviz implements Graphviz {
     private final Map<Job, Exception> jobExceptions = new HashMap<>();
 
     /**
-     * Map of all jobs. The value is an object we use to lockthe number number of calls to
+     * Map of all jobs. The value is an object we use to lock the number of calls to
      * {@link #render(Path, Path, GraphvizParams)} currently waiting for each Job. Each Job will be in this Map while
      * being processed.
      * <p>

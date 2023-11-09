@@ -1,13 +1,12 @@
 package vcat.test;
 
-import vcat.VCatException;
 import vcat.mediawiki.Metadata;
 import vcat.params.AbstractAllParams;
 
 public class TestAllParams extends AbstractAllParams<TestWiki> {
 
     @Override
-    public TestWiki initWiki(String wikiString) throws VCatException {
+    public TestWiki initWiki(String wikiString) {
         return new TestWiki();
     }
 

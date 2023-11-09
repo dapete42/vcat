@@ -240,19 +240,21 @@ public abstract class AbstractAllParams<W extends Wiki> {
         Relation relation = Relation.Category;
         if (relationString != null) {
             relation = Relation.valueOfIgnoreCase(relationString);
-            if (relation == Relation.Category) {
-                // all ok
-            } else if (relation == Relation.Subcategory) {
-                for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
-                    if (titleNamespace.getNamespace() != Metadata.NS_CATEGORY) {
-                        throw new VCatException(MessageFormatter
-                                .format(Messages.getString("AbstractAllParams.Exception.RelOnlyForCategories"),
-                                        relationString)
-                                .getMessage());
+            switch (relation) {
+                case Category -> {
+                    // all OK
+                }
+                case Subcategory -> {
+                    for (TitleNamespaceParam titleNamespace : titleNamespaceList) {
+                        if (titleNamespace.getNamespace() != Metadata.NS_CATEGORY) {
+                            throw new VCatException(MessageFormatter
+                                    .format(Messages.getString("AbstractAllParams.Exception.RelOnlyForCategories"),
+                                            relationString)
+                                    .getMessage());
+                        }
                     }
                 }
-            } else {
-                throw new VCatException(
+                case null, default -> throw new VCatException(
                         MessageFormatter.format(Messages.getString("AbstractAllParams.Exception.UnknownValue"),
                                 PARAM_RELATION, relationString).getMessage());
             }

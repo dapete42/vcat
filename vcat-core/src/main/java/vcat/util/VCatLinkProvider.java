@@ -1,7 +1,9 @@
 package vcat.util;
 
+import lombok.Getter;
 import vcat.params.AbstractAllParams;
 
+import java.io.Serial;
 import java.util.Map.Entry;
 
 /**
@@ -11,8 +13,10 @@ import java.util.Map.Entry;
  */
 public class VCatLinkProvider extends AbstractLinkProvider {
 
+    @Serial
     private static final long serialVersionUID = -6540033060770454452L;
 
+    @Getter
     private final String renderUrl;
 
     private final String renderParams;
@@ -39,10 +43,6 @@ public class VCatLinkProvider extends AbstractLinkProvider {
 
     public VCatLinkProvider(final AbstractAllParams<?> all) {
         this(all, all.getRenderUrl());
-    }
-
-    public String getRenderUrl() {
-        return this.renderUrl;
     }
 
     @Override

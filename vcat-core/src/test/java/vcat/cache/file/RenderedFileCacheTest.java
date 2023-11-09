@@ -37,7 +37,7 @@ class RenderedFileCacheTest {
     }
 
     @Test
-    void testgetCacheFilename() throws CacheException {
+    void testgetCacheFilename() {
 
         VCatParams<TestWiki> vCatParams = new VCatParams<>();
         GraphvizParams graphvizParams = new GraphvizParams();

@@ -1,9 +1,14 @@
 package vcat.params;
 
+import lombok.Getter;
+
+import java.io.Serial;
 import java.io.Serializable;
 
+@Getter
 public class TitleNamespaceParam implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = -8613491816971451993L;
 
     private final int namespace;
@@ -17,14 +22,6 @@ public class TitleNamespaceParam implements Serializable {
     public TitleNamespaceParam(String title, int namespace) {
         this.title = title;
         this.namespace = namespace;
-    }
-
-    public int getNamespace() {
-        return namespace;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
 }

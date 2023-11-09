@@ -79,10 +79,6 @@ public abstract class AbstractVCat<W extends Wiki> {
         this.categoryProvider = categoryProvider;
     }
 
-    public AbstractAllParams<W> getAllParams() {
-        return this.all;
-    }
-
     protected String getDefaultGraphLabel(Collection<Root> roots) {
         final StringBuilder sb = new StringBuilder(this.all.getVCat().getWiki().getDisplayName());
         for (Root root : roots) {

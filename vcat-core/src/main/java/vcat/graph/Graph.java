@@ -8,11 +8,6 @@ import java.util.regex.Pattern;
 
 public class Graph extends AbstractGraphPropertyUser {
 
-    /**
-     * Pattern do determine if a string can be used as an identifier in a graphviz file without quoting.
-     */
-    public final static Pattern PATTERN_IDENTIFIER = Pattern.compile("[A-Za-z][A-Za-z0-9_]+");
-
     public final static String EDGE = "edge";
 
     public final static String NODE = "node";
@@ -40,13 +35,6 @@ public class Graph extends AbstractGraphPropertyUser {
     public final static String STYLE_DASHED = "dashed";
 
     public final static String TRUE = "true";
-
-    public static Graph createSubGraph(Graph fullGraph, Node rootNode, int depth) {
-        Graph subGraph = new Graph();
-        Set<Node> rootNodeSet = Collections.singleton(rootNode);
-        createSubgraphRecursive(subGraph, fullGraph, rootNodeSet, depth);
-        return subGraph;
-    }
 
     public static void createSubgraphRecursive(Graph subGraph, Graph fullGraph, Set<Node> nodes, int depth) {
         if (depth > 0) {
