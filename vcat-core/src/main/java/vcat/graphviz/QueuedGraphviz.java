@@ -1,7 +1,6 @@
 package vcat.graphviz;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import vcat.Messages;
 import vcat.graphviz.interfaces.Graphviz;
 import vcat.params.GraphvizParams;
@@ -66,16 +65,16 @@ public class QueuedGraphviz implements Graphviz {
 
         this.otherGraphviz = otherGraphviz;
 
-        final ThreadFactory tf = new BasicThreadFactory.Builder()
-                .namingPattern(this.getClass().getSimpleName() + '-' + this.hashCode() + "-pool-%d")
-                .build();
+        final ThreadFactory tf = Thread.ofVirtual()
+                .name(getClass().getSimpleName() + '-' + hashCode())
+                .factory();
 
         if (numberOfThreads < 1) {
-            this.executorService = Executors.newCachedThreadPool(tf);
+            executorService = Executors.newCachedThreadPool(tf);
         } else if (numberOfThreads == 1) {
-            this.executorService = Executors.newSingleThreadExecutor(tf);
+            executorService = Executors.newSingleThreadExecutor(tf);
         } else {
-            this.executorService = Executors.newFixedThreadPool(numberOfThreads, tf);
+            executorService = Executors.newFixedThreadPool(numberOfThreads, tf);
         }
     }
 
