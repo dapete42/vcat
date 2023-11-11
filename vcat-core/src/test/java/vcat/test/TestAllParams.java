@@ -3,7 +3,7 @@ package vcat.test;
 import vcat.mediawiki.Metadata;
 import vcat.params.AbstractAllParams;
 
-public class TestAllParams extends AbstractAllParams<TestWiki> {
+public class TestAllParams extends AbstractAllParams {
 
     @Override
     public TestWiki initWiki(String wikiString) {

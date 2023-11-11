@@ -1,23 +1,20 @@
 package vcat;
 
-import vcat.graph.Edge;
 import vcat.graph.Graph;
 import vcat.graph.GroupRank;
 import vcat.graph.Node;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.interfaces.CategoryProvider;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 
-public class VCatForCategories<W extends Wiki> extends AbstractVCat<W> {
+public class VCatForCategories extends AbstractVCat {
 
-    public VCatForCategories(final AbstractAllParams<W> all, final CategoryProvider<W> categoryProvider) {
+    public VCatForCategories(final AbstractAllParams all, final CategoryProvider categoryProvider) {
         super(all, categoryProvider);
     }
 

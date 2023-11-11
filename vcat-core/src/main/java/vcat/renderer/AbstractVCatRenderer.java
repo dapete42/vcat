@@ -1,7 +1,6 @@
 package vcat.renderer;
 
 import vcat.VCatException;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.Links;
 import vcat.params.OutputFormat;
@@ -10,26 +9,26 @@ import vcat.renderer.interfaces.VCatRenderer;
 import java.io.Serial;
 import java.nio.file.Path;
 
-public abstract class AbstractVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
+public abstract class AbstractVCatRenderer implements VCatRenderer {
 
     @Serial
     private static final long serialVersionUID = 6181737937496899531L;
 
-    protected abstract Path createGraphFile(final AbstractAllParams<W> all) throws VCatException;
+    protected abstract Path createGraphFile(final AbstractAllParams all) throws VCatException;
 
-    protected abstract Path createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
+    protected abstract Path createImagemapHtmlFile(final AbstractAllParams all, final OutputFormat imageFormat)
             throws VCatException;
 
-    protected Path createRenderedFile(final AbstractAllParams<W> all) throws VCatException {
+    protected Path createRenderedFile(final AbstractAllParams all) throws VCatException {
         final Path graphFile = this.createGraphFile(all);
         return this.createRenderedFileFromGraphFile(all, graphFile);
     }
 
-    protected abstract Path createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final Path graphFile)
+    protected abstract Path createRenderedFileFromGraphFile(final AbstractAllParams all, final Path graphFile)
             throws VCatException;
 
     @Override
-    public RenderedFileInfo render(final AbstractAllParams<W> all) throws VCatException {
+    public RenderedFileInfo render(final AbstractAllParams all) throws VCatException {
         // Get and, if necessary, create result file
         final Path resultFile;
         OutputFormat outputFormat = all.getGraphviz().getOutputFormat();

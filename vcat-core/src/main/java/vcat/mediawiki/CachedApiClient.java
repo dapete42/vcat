@@ -5,7 +5,6 @@ import lombok.Getter;
 import vcat.Messages;
 import vcat.cache.CacheException;
 import vcat.cache.interfaces.ApiCache;
-import vcat.mediawiki.interfaces.Wiki;
 
 import java.io.Serial;
 import java.net.URLEncoder;
@@ -14,7 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 @Getter
-public class CachedApiClient<W extends Wiki> extends ApiClient<W> {
+public class CachedApiClient extends ApiClient {
 
     @Serial
     private static final long serialVersionUID = -4286304620124061421L;

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
+public class TestVCatRenderer extends AbstractVCatRenderer {
 
     @Serial
     private static final long serialVersionUID = -7348028299089897262L;
@@ -29,7 +29,7 @@ public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
     }
 
     @Getter
-    private final List<AbstractAllParams<TestWiki>> createdGraphFiles = new ArrayList<>();
+    private final List<AbstractAllParams> createdGraphFiles = new ArrayList<>();
 
     @Getter
     private final List<ImagemapHtmlFileEntry> createdImagemapHtmlFiles = new ArrayList<>();
@@ -40,14 +40,14 @@ public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
     private long delay = 0L;
 
     @Override
-    protected Path createGraphFile(AbstractAllParams<TestWiki> all) {
+    protected Path createGraphFile(AbstractAllParams all) {
         delay();
         createdGraphFiles.add(all);
         return null;
     }
 
     @Override
-    protected Path createImagemapHtmlFile(AbstractAllParams<TestWiki> all, OutputFormat imageFormat) {
+    protected Path createImagemapHtmlFile(AbstractAllParams all, OutputFormat imageFormat) {
         delay();
         ImagemapHtmlFileEntry entry = new ImagemapHtmlFileEntry();
         entry.imageFormat = imageFormat;
@@ -56,7 +56,7 @@ public class TestVCatRenderer extends AbstractVCatRenderer<TestWiki> {
     }
 
     @Override
-    protected Path createRenderedFileFromGraphFile(AbstractAllParams<TestWiki> all, Path graphFile) {
+    protected Path createRenderedFileFromGraphFile(AbstractAllParams all, Path graphFile) {
         delay();
         RenderedFileFromGraphFileEntry entry = new RenderedFileFromGraphFileEntry();
         entry.graphFile = graphFile;

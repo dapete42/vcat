@@ -21,7 +21,7 @@ public class VCatLinkProvider extends AbstractLinkProvider {
 
     private final String renderParams;
 
-    protected VCatLinkProvider(final AbstractAllParams<?> all, final String renderUrl) {
+    protected VCatLinkProvider(final AbstractAllParams all, final String renderUrl) {
         this.renderUrl = renderUrl;
         // Use request map to build the URL string to use
         final StringBuilder renderParamsBuilder = new StringBuilder();
@@ -41,7 +41,7 @@ public class VCatLinkProvider extends AbstractLinkProvider {
         this.renderParams = renderParamsBuilder.toString();
     }
 
-    public VCatLinkProvider(final AbstractAllParams<?> all) {
+    public VCatLinkProvider(final AbstractAllParams all) {
         this(all, all.getRenderUrl());
     }
 

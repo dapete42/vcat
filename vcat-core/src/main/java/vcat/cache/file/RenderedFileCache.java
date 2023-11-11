@@ -1,12 +1,11 @@
 package vcat.cache.file;
 
 import vcat.cache.CacheException;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.CombinedParams;
 
 import java.nio.file.Path;
 
-public class RenderedFileCache<W extends Wiki> extends AbstractFileCache<CombinedParams<W>> {
+public class RenderedFileCache extends AbstractFileCache<CombinedParams> {
 
     private static final String PREFIX = "RenderedFile-";
 
@@ -17,7 +16,7 @@ public class RenderedFileCache<W extends Wiki> extends AbstractFileCache<Combine
     }
 
     @Override
-    protected String getCacheFilename(CombinedParams<W> key) {
+    protected String getCacheFilename(CombinedParams key) {
         // Append file extension to generated file names to make it easier to recognize to humans
         return super.getCacheFilename(key) + '.' + key.getGraphviz().getOutputFormat().getFileExtension();
     }

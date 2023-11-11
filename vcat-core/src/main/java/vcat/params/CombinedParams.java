@@ -1,7 +1,6 @@
 package vcat.params;
 
 import lombok.Getter;
-import vcat.mediawiki.interfaces.Wiki;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,21 +13,21 @@ import java.io.Serializable;
  * @author schloeme
  */
 @Getter
-public class CombinedParams<W extends Wiki> implements Serializable {
+public class CombinedParams implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -6156218131952150941L;
 
-    private final VCatParams<W> vCat;
+    private final VCatParams vCat;
 
     private final GraphvizParams graphviz;
 
     protected CombinedParams() {
-        vCat = new VCatParams<>();
+        vCat = new VCatParams();
         graphviz = new GraphvizParams();
     }
 
-    public CombinedParams(VCatParams<W> vCatParams, GraphvizParams graphvizParams) {
+    public CombinedParams(VCatParams vCatParams, GraphvizParams graphvizParams) {
         vCat = vCatParams;
         graphviz = graphvizParams;
     }

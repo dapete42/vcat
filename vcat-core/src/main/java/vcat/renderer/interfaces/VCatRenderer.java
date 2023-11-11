@@ -1,14 +1,13 @@
 package vcat.renderer.interfaces;
 
 import vcat.VCatException;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.renderer.RenderedFileInfo;
 
 import java.io.Serializable;
 
-public interface VCatRenderer<W extends Wiki> extends Serializable {
+public interface VCatRenderer extends Serializable {
 
-    RenderedFileInfo render(AbstractAllParams<W> all) throws VCatException;
+    RenderedFileInfo render(AbstractAllParams all) throws VCatException;
 
 }

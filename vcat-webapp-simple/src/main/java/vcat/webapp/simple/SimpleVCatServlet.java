@@ -14,7 +14,6 @@ import vcat.graphviz.GraphvizExternal;
 import vcat.graphviz.QueuedGraphviz;
 import vcat.mediawiki.CachedApiClient;
 import vcat.mediawiki.CachedMetadataProvider;
-import vcat.mediawiki.SimpleWikimediaWiki;
 import vcat.mediawiki.interfaces.MetadataProvider;
 import vcat.params.AllParams;
 import vcat.renderer.CachedVCatRenderer;
@@ -67,7 +66,7 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
 
     private static MetadataProvider metadataProvider;
 
-    private static VCatRenderer<SimpleWikimediaWiki> vCatRenderer;
+    private static VCatRenderer vCatRenderer;
 
     @Override
     public String getServletInfo() {
@@ -81,11 +80,11 @@ public class SimpleVCatServlet extends AbstractVCatServlet {
         try {
             final var graphviz = new QueuedGraphviz(new GraphvizExternal(Paths.get(graphvizDir)), 1);
             final var apiCache = new ApiCaffeineCache(10000, cachePurge);
-            final CachedApiClient<SimpleWikimediaWiki> apiClient = new CachedApiClient<>(apiCache);
+            final CachedApiClient apiClient = new CachedApiClient(apiCache);
             final MetadataCache metadataCache = new MetadataCaffeineCache(10000, cachePurgeMetadata);
             metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
-            vCatRenderer = new QueuedVCatRenderer<>(
-                    new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cachePath, cachePurge), vcatThreads);
+            vCatRenderer = new QueuedVCatRenderer(
+                    new CachedVCatRenderer(graphviz, tempDir, apiClient, cachePath, cachePurge), vcatThreads);
         } catch (VCatException e) {
             throw new ServletException(e);
         }

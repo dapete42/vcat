@@ -20,7 +20,7 @@ import java.util.*;
  *
  * @author Peter Schlömer
  */
-public abstract class AbstractAllParams<W extends Wiki> {
+public abstract class AbstractAllParams {
 
     private static final int MAX_LIMIT = 250;
 
@@ -46,7 +46,7 @@ public abstract class AbstractAllParams<W extends Wiki> {
 
     public static final String PARAM_WIKI = "wiki";
 
-    private final CombinedParams<W> combinedParams = new CombinedParams<>();
+    private final CombinedParams combinedParams = new CombinedParams();
 
     @Getter
     protected Metadata metadata;
@@ -73,7 +73,7 @@ public abstract class AbstractAllParams<W extends Wiki> {
         if (wikiString == null || wikiString.isEmpty()) {
             throw new VCatException(Messages.getString("AbstractAllParams.Exception.WikiMissing"));
         }
-        W wiki = initWiki(wikiString);
+        Wiki wiki = initWiki(wikiString);
         this.getVCat().setWiki(wiki);
 
         try {
@@ -327,7 +327,7 @@ public abstract class AbstractAllParams<W extends Wiki> {
      * @return Wiki corresponding to wikiString.
      * @throws VCatException If the wiki object could not be created.
      */
-    protected abstract W initWiki(final String wikiString) throws VCatException;
+    protected abstract Wiki initWiki(final String wikiString) throws VCatException;
 
     private static String unescapeMediawikiTitle(String title) {
         if (title == null) {
@@ -337,7 +337,7 @@ public abstract class AbstractAllParams<W extends Wiki> {
         }
     }
 
-    public CombinedParams<W> getCombined() {
+    public CombinedParams getCombined() {
         return this.combinedParams;
     }
 
@@ -349,11 +349,11 @@ public abstract class AbstractAllParams<W extends Wiki> {
         return Collections.unmodifiableMap(this.requestParams);
     }
 
-    public VCatParams<W> getVCat() {
+    public VCatParams getVCat() {
         return this.combinedParams.getVCat();
     }
 
-    public W getWiki() {
+    public Wiki getWiki() {
         return this.combinedParams.getVCat().getWiki();
     }
 

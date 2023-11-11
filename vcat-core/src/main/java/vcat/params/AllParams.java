@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author Peter Schlömer
  */
-public class AllParams extends AbstractAllParams<SimpleWikimediaWiki> {
+public class AllParams extends AbstractAllParams {
 
     public AllParams(final Map<String, String[]> requestParams, final String renderUrl,
                      final MetadataProvider metadataProvider) throws VCatException {
