@@ -30,7 +30,8 @@ public class TestUtils {
     }
 
     static String removeCreditLine(final String graphvizSourceCode) {
-        return graphvizSourceCode.replaceAll("// Created by GraphWriter at (.*?)\n", "");
+        return graphvizSourceCode.replaceAll("// Created by GraphWriter at (.*?)\n", "")
+                .replace("\r\n", "\n");
     }
 
     static void generateExpected(Supplier<CanGenerateExpected>... constructors) throws Exception {
