@@ -65,7 +65,8 @@ public class VCatForCategoriesTest implements CanGenerateExpected {
                 "wiki", "de.wikipedia.org",
                 "category", "Deutschland",
                 "format", "gv",
-                "links", "wiki"
+                "links", "wiki",
+                "depth", "4"
         )), "", testApiClient);
 
         final var underTest = new VCatFactory(testApiClient).createInstance(params);

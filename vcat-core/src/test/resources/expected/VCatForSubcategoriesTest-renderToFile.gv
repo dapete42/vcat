@@ -1,8 +1,8 @@
-// Created by GraphWriter at 2023-11-11 18:52:35 CET
+// Created by GraphWriter at 2023-11-11 19:29:47 CET
 digraph cluster_vcat{
 charset="UTF-8";
 fontsize="12";
-label="de.wikipedia.org Kategorie:Overath rel=Subcategory";
+label="de.wikipedia.org Kategorie:Overath rel=Subcategory d:2";
 fontname="DejaVu Sans";
 splines="true";
 node [shape="rect",fontsize="12",fontname="DejaVu Sans"];
@@ -10,13 +10,15 @@ node [shape="rect",fontsize="12",fontname="DejaVu Sans"];
 rank="min";
 "Overath" 
 }
+{
+rank="max";
+"Ortsteil von Overath_more" "Sakralbau in Overath_more" 
+}
 "Bauwerk in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Bauwerk_in_Overath"];
 "Bauwerk in Overath" -> "Wassermühle in Overath";
 "Bauwerk in Overath" -> "Sakralbau in Overath";
 "Naturschutzgebiet in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Naturschutzgebiet_in_Overath"];
-"Kirchengebäude in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Kirchengeb%C3%A4ude_in_Overath"];
-"Ortsteil von Steinenbrück" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Steinenbr%C3%BCck"];
-"Ortsteil von Brombach" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Brombach"];
+"Sakralbau in Overath_more" [style="dashed",label="…"];
 "Overath" [style="bold",href="http://de.wikipedia.org/wiki/Kategorie:Overath"];
 "Overath" -> "Bauwerk in Overath";
 "Overath" -> "Person (Overath)";
@@ -24,32 +26,22 @@ rank="min";
 "Overath" -> "Baudenkmal in Overath";
 "Overath" -> "Geographie (Overath)";
 "Wüstung in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:W%C3%BCstung_in_Overath"];
-"Ortsteil von Immekeppel" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Immekeppel"];
-"Ortsteil von Marialinden" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Marialinden"];
-"Ortsteil von Vilkerath" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Vilkerath"];
 "Stadtteil von Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Stadtteil_von_Overath"];
+"Ortsteil von Overath_more" [style="dashed",label="…"];
 "Wirtschaft (Overath)" [href="http://de.wikipedia.org/wiki/Kategorie:Wirtschaft_%28Overath%29"];
 "Wirtschaft (Overath)" -> "Bergwerk in Overath";
 "Sakralbau in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Sakralbau_in_Overath"];
-"Sakralbau in Overath" -> "Kirchengebäude in Overath";
+"Sakralbau in Overath" -> "Sakralbau in Overath_more";
 "Geographie (Overath)" [href="http://de.wikipedia.org/wiki/Kategorie:Geographie_%28Overath%29"];
 "Geographie (Overath)" -> "Bergwerk in Overath";
 "Geographie (Overath)" -> "Wüstung in Overath";
 "Geographie (Overath)" -> "Naturschutzgebiet in Overath";
 "Geographie (Overath)" -> "Ortsteil von Overath";
 "Geographie (Overath)" -> "Stadtteil von Overath";
-"Ortsteil von Heiligenhaus" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Heiligenhaus"];
-"Ortsteil von Untereschbach" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Untereschbach"];
 "Baudenkmal in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Baudenkmal_in_Overath"];
 "Wassermühle in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Wasserm%C3%BChle_in_Overath"];
 "Ortsteil von Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Overath"];
-"Ortsteil von Overath" -> "Ortsteil von Brombach";
-"Ortsteil von Overath" -> "Ortsteil von Untereschbach";
-"Ortsteil von Overath" -> "Ortsteil von Vilkerath";
-"Ortsteil von Overath" -> "Ortsteil von Immekeppel";
-"Ortsteil von Overath" -> "Ortsteil von Steinenbrück";
-"Ortsteil von Overath" -> "Ortsteil von Marialinden";
-"Ortsteil von Overath" -> "Ortsteil von Heiligenhaus";
+"Ortsteil von Overath" -> "Ortsteil von Overath_more";
 "Person (Overath)" [href="http://de.wikipedia.org/wiki/Kategorie:Person_%28Overath%29"];
 "Bergwerk in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Bergwerk_in_Overath"];
 }

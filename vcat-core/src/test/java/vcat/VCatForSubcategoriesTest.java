@@ -67,6 +67,7 @@ public class VCatForSubcategoriesTest implements CanGenerateExpected {
                 "category", "Overath",
                 "format", "gv",
                 "links", "wiki",
+                "depth", "2",
                 "rel", "subcategory"
         )), "", testApiClient);
 
