@@ -1,25 +1,24 @@
-// Created by GraphWriter at 2023-11-11 19:29:47 CET
 digraph cluster_vcat{
 charset="UTF-8";
+fontname="DejaVu Sans";
 fontsize="12";
 label="de.wikipedia.org Kategorie:Overath rel=Subcategory d:2";
-fontname="DejaVu Sans";
 splines="true";
-node [shape="rect",fontsize="12",fontname="DejaVu Sans"];
+node [fontname="DejaVu Sans",fontsize="12",shape="rect"];
 {
 rank="min";
-"Overath" 
+"Overath"
 }
 {
 rank="max";
-"Ortsteil von Overath_more" "Sakralbau in Overath_more" 
+"Ortsteil von Overath_more" "Sakralbau in Overath_more"
 }
 "Bauwerk in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Bauwerk_in_Overath"];
 "Bauwerk in Overath" -> "Wassermühle in Overath";
 "Bauwerk in Overath" -> "Sakralbau in Overath";
 "Naturschutzgebiet in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Naturschutzgebiet_in_Overath"];
-"Sakralbau in Overath_more" [style="dashed",label="…"];
-"Overath" [style="bold",href="http://de.wikipedia.org/wiki/Kategorie:Overath"];
+"Sakralbau in Overath_more" [label="…",style="dashed"];
+"Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Overath",style="bold"];
 "Overath" -> "Bauwerk in Overath";
 "Overath" -> "Person (Overath)";
 "Overath" -> "Wirtschaft (Overath)";
@@ -27,7 +26,7 @@ rank="max";
 "Overath" -> "Geographie (Overath)";
 "Wüstung in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:W%C3%BCstung_in_Overath"];
 "Stadtteil von Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Stadtteil_von_Overath"];
-"Ortsteil von Overath_more" [style="dashed",label="…"];
+"Ortsteil von Overath_more" [label="…",style="dashed"];
 "Wirtschaft (Overath)" [href="http://de.wikipedia.org/wiki/Kategorie:Wirtschaft_%28Overath%29"];
 "Wirtschaft (Overath)" -> "Bergwerk in Overath";
 "Sakralbau in Overath" [href="http://de.wikipedia.org/wiki/Kategorie:Sakralbau_in_Overath"];

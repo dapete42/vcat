@@ -17,6 +17,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.stream.Collectors;
 
 /**
  * Write the contents of a {@link Graph} to a {@link Writer} as a Graphviz file (<code>.gv</code>, formerly
@@ -168,16 +170,17 @@ public class GraphWriter {
         this.writeLineProperties(group.properties());
         writeDefaultNode(group.getDefaultNode());
         writeDefaultEdge(group.getDefaultEdge());
-        for (Node node : group.getNodes()) {
-            this.writer.write(escape(node.getName()));
-            this.writer.write(' ');
-        }
+        this.writer.write(group.getNodes().stream()
+                .map(Node::getName)
+                .map(GraphWriter::escape)
+                .collect(Collectors.joining(" "))
+        );
         this.writer.write('\n');
         this.writer.write('}');
         this.writer.write('\n');
     }
 
-    private void writeLineProperties(Map<String, String> properties) throws IOException {
+    private void writeLineProperties(SortedMap<String, String> properties) throws IOException {
         if (!properties.isEmpty()) {
             for (Entry<String, String> property : properties.entrySet()) {
                 writeLineProperty(property.getKey(), property.getValue());
