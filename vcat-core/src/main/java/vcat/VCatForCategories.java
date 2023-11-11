@@ -37,9 +37,9 @@ public class VCatForCategories<W extends Wiki> extends AbstractVCat<W> {
         }
     }
 
-    private void renderGraphInnerFirstLoop(Graph graph, Node rootNode, Set<Node> allNodesFound,
-                                           Collection<Node> newNodes, Collection<String> categoryFullTitles,
-                                           String categoryNamespacePrefix) {
+    private void renderGraphInnerFirstLoop(
+            Graph graph, Node rootNode, Set<Node> allNodesFound, Collection<Node> newNodes,
+            Collection<String> categoryFullTitles, String categoryNamespacePrefix) {
         for (String categoryFullTitle : categoryFullTitles) {
             final String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefix.length());
             final var categoryNode = graph.node(categoryTitle);
@@ -53,24 +53,23 @@ public class VCatForCategories<W extends Wiki> extends AbstractVCat<W> {
     }
 
     @Override
-    protected void renderGraphOuterLoop(Graph graph, Collection<Node> newNodes, Collection<Node> curNodes,
-                                        Set<Node> allNodesFound, String categoryNamespacePrefix,
-                                        boolean showHidden, boolean exceedDepth) throws ApiException {
+    protected void renderGraphOuterLoop(
+            Graph graph, Collection<Node> newNodes, Collection<Node> curNodes, Set<Node> allNodesFound,
+            String categoryNamespacePrefix, boolean showHidden, boolean exceedDepth) throws ApiException {
 
-        // Create a list of the full titles (including namespace) of the categories in the current loop iteration
+        // Create a list of the full titles (including namespace) needed for API call
         var curFullTitles = curNodes.stream()
                 .map(Node::getName)
                 .map(name -> categoryNamespacePrefix + name)
                 .toList();
 
-        final BiFunction<Node, Node, Edge> createEdgeFunction = graph::edge;
+        final CreateEdgeFunction createEdgeFunction = graph::edge;
 
         // Look at categories from API
         for (var categoryFullEntry : categoryProvider.requestCategories(all.getWiki(), curFullTitles, showHidden)
                 .entrySet()) {
-            final var categoryFullTitles = categoryFullEntry.getValue();
-            // For each API result, first get the node it contains categories for
             final String baseTitle = categoryFullEntry.getKey().substring(categoryNamespacePrefix.length());
+            final var categoryFullTitles = categoryFullEntry.getValue();
             renderGraphInnerLoop(graph, newNodes, allNodesFound, categoryNamespacePrefix, exceedDepth, baseTitle,
                     categoryFullTitles, createEdgeFunction);
         }
