@@ -1,0 +1,77 @@
+// Created by GraphWriter at 2023-11-11 18:52:32 CET
+digraph cluster_vcat{
+charset="UTF-8";
+fontsize="12";
+label="de.wikipedia.org Kategorie:Deutschland";
+fontname="DejaVu Sans";
+splines="true";
+node [shape="rect",fontsize="12",fontname="DejaVu Sans"];
+{
+rank="max";
+"Deutschland" 
+}
+"Staaten" [href="http://de.wikipedia.org/wiki/Kategorie:Staaten"];
+"Staaten" -> "Staat als Thema";
+"Eurasien" [href="http://de.wikipedia.org/wiki/Kategorie:Eurasien"];
+"Eurasien" -> "Europa";
+"Thema nach Kontinent" [href="http://de.wikipedia.org/wiki/Kategorie:Thema_nach_Kontinent"];
+"Thema nach Kontinent" -> "Kultur nach Kontinent";
+"Räumliche Sachsystematik" [href="http://de.wikipedia.org/wiki/Kategorie:R%C3%A4umliche_Sachsystematik"];
+"Räumliche Sachsystematik" -> "Thema nach Kontinent";
+"Räumliche Sachsystematik" -> "Kunst und Kultur nach räumlicher Zuordnung";
+"Regionen" [href="http://de.wikipedia.org/wiki/Kategorie:Regionen"];
+"Regionen" -> "Region als Thema";
+"Kunst und Kultur nach räumlicher Zuordnung" [href="http://de.wikipedia.org/wiki/Kategorie:Kunst_und_Kultur_nach_r%C3%A4umlicher_Zuordnung"];
+"Kunst und Kultur nach räumlicher Zuordnung" -> "Kultur nach räumlicher Zuordnung";
+"Kontinent als Thema" [href="http://de.wikipedia.org/wiki/Kategorie:Kontinent_als_Thema"];
+"Kontinent als Thema" -> "Europa";
+"Kontinent als Thema" -> "Eurasien";
+"Europa nach Kulturraum" [href="http://de.wikipedia.org/wiki/Kategorie:Europa_nach_Kulturraum"];
+"Europa nach Kulturraum" -> "Mitteleuropa";
+"Deutschland" [style="bold",href="http://de.wikipedia.org/wiki/Kategorie:Deutschland"];
+"Europa nach Region" [href="http://de.wikipedia.org/wiki/Kategorie:Europa_nach_Region"];
+"Europa nach Region" -> "Mitteleuropa";
+"Sachsystematik" [href="http://de.wikipedia.org/wiki/Kategorie:Sachsystematik"];
+"Sachsystematik" -> "Erde";
+"Sachsystematik" -> "Kunst und Kultur";
+"Sachsystematik" -> "Räumliche Sachsystematik";
+"Kulturraum als Thema" [href="http://de.wikipedia.org/wiki/Kategorie:Kulturraum_als_Thema"];
+"Kulturraum als Thema" -> "Kulturraum als Thema nach Kontinent";
+"Kulturraum als Thema" -> "Mitteleuropa";
+"Europa" [href="http://de.wikipedia.org/wiki/Kategorie:Europa"];
+"Europa" -> "Europa nach Region";
+"Europa" -> "Europa nach Kulturraum";
+"Region als Thema" [href="http://de.wikipedia.org/wiki/Kategorie:Region_als_Thema"];
+"Region als Thema" -> "Region als Thema nach Kontinent";
+"Region als Thema" -> "Mitteleuropa";
+"Kultur nach räumlicher Zuordnung" [href="http://de.wikipedia.org/wiki/Kategorie:Kultur_nach_r%C3%A4umlicher_Zuordnung"];
+"Kultur nach räumlicher Zuordnung" -> "Kultur nach Kontinent";
+"Kulturräume" [href="http://de.wikipedia.org/wiki/Kategorie:Kulturr%C3%A4ume"];
+"Kulturräume" -> "Kulturraum als Thema";
+"Kulturraum als Thema nach Kontinent" [href="http://de.wikipedia.org/wiki/Kategorie:Kulturraum_als_Thema_nach_Kontinent"];
+"Kulturraum als Thema nach Kontinent" -> "Europa nach Kulturraum";
+"Kontinente" [href="http://de.wikipedia.org/wiki/Kategorie:Kontinente"];
+"Kontinente" -> "Thema nach Kontinent";
+"Kontinente" -> "Kontinent als Thema";
+"Kultur nach Kontinent" [href="http://de.wikipedia.org/wiki/Kategorie:Kultur_nach_Kontinent"];
+"Kultur nach Kontinent" -> "Kulturraum als Thema nach Kontinent";
+"Kunst und Kultur" [href="http://de.wikipedia.org/wiki/Kategorie:Kunst_und_Kultur"];
+"Kunst und Kultur" -> "Kunst und Kultur nach räumlicher Zuordnung";
+"Staat als Thema" [href="http://de.wikipedia.org/wiki/Kategorie:Staat_als_Thema"];
+"Staat als Thema" -> "Deutschland";
+"!Hauptkategorie" [href="http://de.wikipedia.org/wiki/Kategorie:%21Hauptkategorie"];
+"!Hauptkategorie" -> "Sachsystematik";
+"!Hauptkategorie" -> "Räumliche Systematik";
+"Erde" [href="http://de.wikipedia.org/wiki/Kategorie:Erde"];
+"Erde" -> "Kulturräume";
+"Erde" -> "Staaten";
+"Erde" -> "Kontinente";
+"Erde" -> "Regionen";
+"Region als Thema nach Kontinent" [href="http://de.wikipedia.org/wiki/Kategorie:Region_als_Thema_nach_Kontinent"];
+"Region als Thema nach Kontinent" -> "Europa nach Region";
+"Räumliche Systematik" [href="http://de.wikipedia.org/wiki/Kategorie:R%C3%A4umliche_Systematik"];
+"Räumliche Systematik" -> "Erde";
+"Räumliche Systematik" -> "Räumliche Sachsystematik";
+"Mitteleuropa" [href="http://de.wikipedia.org/wiki/Kategorie:Mitteleuropa"];
+"Mitteleuropa" -> "Deutschland";
+}

@@ -153,6 +153,9 @@ public abstract class AbstractFileCache<K extends Serializable> {
     }
 
     public synchronized void purge() throws CacheException {
+        if (maxAgeInSeconds < 0) {
+            return;
+        }
         long lastModifiedThreshold = System.currentTimeMillis() - (1000L * this.maxAgeInSeconds);
         int purgedFiles = 0;
         for (Path path : this.getAllFiles()) {
