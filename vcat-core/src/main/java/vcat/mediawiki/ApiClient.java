@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class ApiClient<W extends Wiki> implements CategoryProvider<W>, MetadataProvider {
+public class ApiClient implements CategoryProvider, MetadataProvider {
 
     @Serial
     private static final long serialVersionUID = 2558987660016530790L;
@@ -100,7 +100,7 @@ public class ApiClient<W extends Wiki> implements CategoryProvider<W>, MetadataP
     }
 
     @Override
-    public Map<String, Collection<String>> requestCategories(W wiki, List<String> fullTitles, boolean showhidden)
+    public Map<String, Collection<String>> requestCategories(Wiki wiki, List<String> fullTitles, boolean showhidden)
             throws ApiException {
         Map<String, Collection<String>> categoryMap = new HashMap<>();
         String clshow = showhidden ? null : "!hidden";
@@ -167,7 +167,7 @@ public class ApiClient<W extends Wiki> implements CategoryProvider<W>, MetadataP
     }
 
     @Override
-    public List<String> requestCategorymembers(final W wiki, final String fullTitle) throws ApiException {
+    public List<String> requestCategorymembers(final Wiki wiki, final String fullTitle) throws ApiException {
         List<String> categories = new ArrayList<>();
         this.requestCategorymembersRecursive(wiki.getApiUrl(), fullTitle, categories, null);
         return categories;
@@ -210,7 +210,7 @@ public class ApiClient<W extends Wiki> implements CategoryProvider<W>, MetadataP
 
     }
 
-    public Collection<Pair<String, String>> requestLinksBetween(W wiki, List<String> fullTitles) throws ApiException {
+    public Collection<Pair<String, String>> requestLinksBetween(Wiki wiki, List<String> fullTitles) throws ApiException {
         ArrayList<Pair<String, String>> links = new ArrayList<>();
         this.requestLinksBetweenRecursive(wiki.getApiUrl(), fullTitles, links, null);
         return links;

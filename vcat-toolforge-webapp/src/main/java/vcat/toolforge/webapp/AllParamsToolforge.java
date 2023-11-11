@@ -6,7 +6,7 @@ import vcat.params.AbstractAllParams;
 
 import java.util.Map;
 
-public class AllParamsToolforge extends AbstractAllParams<ToolforgeWiki> {
+public class AllParamsToolforge extends AbstractAllParams {
 
     private final ToolforgeWikiProvider toolforgeMetainfo;
 

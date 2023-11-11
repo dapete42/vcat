@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import vcat.VCatException;
 import vcat.test.TestAllParams;
 import vcat.test.TestVCatRenderer;
-import vcat.test.TestWiki;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -13,12 +12,12 @@ public class QueuedVCatRendererTest {
 
     private TestVCatRenderer testRenderer;
 
-    private QueuedVCatRenderer<TestWiki> underTest;
+    private QueuedVCatRenderer underTest;
 
     @BeforeEach
     public void setUp() {
         testRenderer = new TestVCatRenderer();
-        underTest = new QueuedVCatRenderer<>(testRenderer, 2);
+        underTest = new QueuedVCatRenderer(testRenderer, 2);
     }
 
     @Test

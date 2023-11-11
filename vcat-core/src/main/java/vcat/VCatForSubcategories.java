@@ -5,15 +5,14 @@ import vcat.graph.GroupRank;
 import vcat.graph.Node;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.interfaces.CategoryProvider;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 
 import java.util.Collection;
 import java.util.Set;
 
-public class VCatForSubcategories<W extends Wiki> extends AbstractVCat<W> {
+public class VCatForSubcategories extends AbstractVCat {
 
-    public VCatForSubcategories(final AbstractAllParams<W> all, final CategoryProvider<W> categoryProvider) {
+    public VCatForSubcategories(final AbstractAllParams all, final CategoryProvider categoryProvider) {
         super(all, categoryProvider);
     }
 

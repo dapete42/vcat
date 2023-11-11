@@ -33,7 +33,7 @@ public abstract class AbstractLinkProvider implements Serializable {
      * @param all Parameters.
      * @return Link provider fitting for the requested parameters.
      */
-    public static AbstractLinkProvider fromParams(final AbstractAllParams<?> all) {
+    public static AbstractLinkProvider fromParams(final AbstractAllParams all) {
         return switch (all.getVCat().getLinks()) {
             case Graph -> new VCatLinkProvider(all);
             case Wiki -> new WikiLinkProvider(all);

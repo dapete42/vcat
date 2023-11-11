@@ -1,12 +1,11 @@
 package vcat.cache.file;
 
 import vcat.cache.CacheException;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.VCatParams;
 
 import java.nio.file.Path;
 
-public class GraphFileCache<W extends Wiki> extends AbstractFileCache<VCatParams<W>> {
+public class GraphFileCache extends AbstractFileCache<VCatParams> {
 
     private static final String PREFIX = "Graph-";
 

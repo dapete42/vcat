@@ -7,13 +7,12 @@ import vcat.cache.CacheException;
 import vcat.cache.file.ApiFileCache;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.CachedApiClient;
-import vcat.mediawiki.interfaces.Wiki;
 
 import java.io.Serial;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class TestApiClient extends CachedApiClient<Wiki> {
+public class TestApiClient extends CachedApiClient {
 
     @Serial
     private static final long serialVersionUID = 4814974369474303893L;

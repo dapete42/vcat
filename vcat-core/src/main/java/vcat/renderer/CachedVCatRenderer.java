@@ -8,7 +8,6 @@ import vcat.cache.file.GraphFileCache;
 import vcat.cache.file.RenderedFileCache;
 import vcat.graphviz.interfaces.Graphviz;
 import vcat.mediawiki.interfaces.CategoryProvider;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.CombinedParams;
 import vcat.params.OutputFormat;
@@ -21,23 +20,23 @@ import java.nio.file.Path;
 import java.util.List;
 
 @Slf4j
-public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
+public class CachedVCatRenderer extends VCatRenderer {
 
     @Serial
     private static final long serialVersionUID = -7813270634239995061L;
 
-    private final GraphFileCache<W> graphCache;
+    private final GraphFileCache graphCache;
 
     private final int purge;
 
-    private final RenderedFileCache<W> renderedCache;
+    private final RenderedFileCache renderedCache;
 
-    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider<W> categoryProvider,
+    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider categoryProvider,
                               final Path cacheDir) throws VCatException {
         this(graphviz, tempDir, categoryProvider, cacheDir, 600);
     }
 
-    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider<W> categoryProvider,
+    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider categoryProvider,
                               final Path cacheDir, final int purge) throws VCatException {
         super(graphviz, tempDir, categoryProvider);
         this.purge = purge;
@@ -47,9 +46,9 @@ public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
 
         try {
             Files.createDirectories(graphCacheDir);
-            this.graphCache = new GraphFileCache<>(graphCacheDir, this.purge);
+            this.graphCache = new GraphFileCache(graphCacheDir, this.purge);
             Files.createDirectories(renderedFileCacheDir);
-            this.renderedCache = new RenderedFileCache<>(renderedFileCacheDir, this.purge);
+            this.renderedCache = new RenderedFileCache(renderedFileCacheDir, this.purge);
         } catch (CacheException | IOException e) {
             throw new VCatException("Error while setting up caches", e);
         }
@@ -58,8 +57,8 @@ public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
     }
 
     @Override
-    protected Path createGraphFile(final AbstractAllParams<W> all) throws VCatException {
-        final VCatParams<W> vCatParams = all.getVCat();
+    protected Path createGraphFile(final AbstractAllParams all) throws VCatException {
+        final VCatParams vCatParams = all.getVCat();
         if (!this.graphCache.containsKey(vCatParams)) {
             final Path otherFile = super.createGraphFile(all);
             try {
@@ -72,9 +71,9 @@ public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
     }
 
     @Override
-    protected Path createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
+    protected Path createImagemapHtmlFile(final AbstractAllParams all, final OutputFormat imageFormat)
             throws VCatException {
-        final CombinedParams<W> combinedParams = all.getCombined();
+        final CombinedParams combinedParams = all.getCombined();
         if (!this.renderedCache.containsKey(combinedParams)) {
             final Path otherFile = super.createImagemapHtmlFile(all, imageFormat);
             try {
@@ -87,9 +86,9 @@ public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
     }
 
     @Override
-    protected Path createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final Path graphFile)
+    protected Path createRenderedFileFromGraphFile(final AbstractAllParams all, final Path graphFile)
             throws VCatException {
-        final CombinedParams<W> combinedParams = all.getCombined();
+        final CombinedParams combinedParams = all.getCombined();
         if (!this.renderedCache.containsKey(combinedParams)) {
             final Path otherFile = super.createRenderedFileFromGraphFile(all, graphFile);
             try {
@@ -157,7 +156,7 @@ public class CachedVCatRenderer<W extends Wiki> extends VCatRenderer<W> {
     }
 
     @Override
-    public RenderedFileInfo render(AbstractAllParams<W> all) throws VCatException {
+    public RenderedFileInfo render(AbstractAllParams all) throws VCatException {
         // Purge caches
         this.purge();
         return super.render(all);

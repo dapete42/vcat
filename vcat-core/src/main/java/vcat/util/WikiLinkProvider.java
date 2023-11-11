@@ -20,7 +20,7 @@ public class WikiLinkProvider extends AbstractLinkProvider {
      */
     private final String pattern;
 
-    public WikiLinkProvider(final AbstractAllParams<?> all) {
+    public WikiLinkProvider(final AbstractAllParams all) {
         // The pattern can be constructed from metadata information
         final Metadata metadata = all.getMetadata();
         String tempPattern = metadata.getServer() + metadata.getArticlepath();

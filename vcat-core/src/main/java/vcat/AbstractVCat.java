@@ -9,7 +9,6 @@ import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ApiException;
 import vcat.mediawiki.Metadata;
 import vcat.mediawiki.interfaces.CategoryProvider;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.Relation;
 import vcat.params.TitleNamespaceParam;
@@ -24,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-public abstract class AbstractVCat<W extends Wiki> {
+public abstract class AbstractVCat {
 
     @FunctionalInterface
     protected interface CreateEdgeFunction extends BiFunction<Node, Node, Edge> {
@@ -71,11 +70,11 @@ public abstract class AbstractVCat<W extends Wiki> {
 
     private static final String ROOT_NODE_PREFIX = "ROOT";
 
-    protected final AbstractAllParams<W> all;
+    protected final AbstractAllParams all;
 
-    protected final CategoryProvider<W> categoryProvider;
+    protected final CategoryProvider categoryProvider;
 
-    protected AbstractVCat(final AbstractAllParams<W> all, final CategoryProvider<W> categoryProvider) {
+    protected AbstractVCat(final AbstractAllParams all, final CategoryProvider categoryProvider) {
         this.all = all;
         this.categoryProvider = categoryProvider;
     }

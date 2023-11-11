@@ -16,7 +16,7 @@ import java.util.Collection;
  */
 @Getter
 @Setter
-public class VCatParams<W extends Wiki> implements Serializable {
+public class VCatParams implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -7181473469976962467L;
@@ -38,6 +38,6 @@ public class VCatParams<W extends Wiki> implements Serializable {
 
     private Collection<TitleNamespaceParam> titleNamespaceParams;
 
-    private W wiki;
+    private Wiki wiki;
 
 }

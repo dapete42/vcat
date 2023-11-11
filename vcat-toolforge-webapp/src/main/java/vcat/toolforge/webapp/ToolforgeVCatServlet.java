@@ -82,7 +82,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
     @Inject
     DataSource dataSource;
 
-    private static QueuedVCatRenderer<ToolforgeWiki> vCatRenderer;
+    private static QueuedVCatRenderer vCatRenderer;
 
     private static MetadataProvider metadataProvider;
 
@@ -108,7 +108,7 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             final var apiCache = new ApiCaffeineCache(10000, cachePurge);
             final var metadataCache = new MetadataCaffeineCache(10000, cachePurgeMetadata);
 
-            final CachedApiClient<ToolforgeWiki> apiClient = new CachedApiClient<>(apiCache);
+            final CachedApiClient apiClient = new CachedApiClient(apiCache);
 
             // Metadata provider
             metadataProvider = new CachedMetadataProvider(apiClient, metadataCache);
@@ -126,8 +126,8 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
             final var graphviz = new QueuedGraphviz(baseGraphviz, graphvizThreads);
 
             // Create renderer
-            vCatRenderer = new QueuedVCatRenderer<>(
-                    new CachedVCatRenderer<>(graphviz, tempDir, apiClient, cacheDir, cachePurge),
+            vCatRenderer = new QueuedVCatRenderer(
+                    new CachedVCatRenderer(graphviz, tempDir, apiClient, cacheDir, cachePurge),
                     vcatThreads);
 
         } catch (IOException | VCatException e) {

@@ -6,7 +6,6 @@ import vcat.VCatException;
 import vcat.graphviz.GraphvizException;
 import vcat.graphviz.interfaces.Graphviz;
 import vcat.mediawiki.interfaces.CategoryProvider;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.params.OutputFormat;
 import vcat.params.VCatFactory;
@@ -19,7 +18,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 
 @Slf4j
-public class VCatRenderer<W extends Wiki> extends AbstractVCatRenderer<W> {
+public class VCatRenderer extends AbstractVCatRenderer {
 
     @Serial
     private static final long serialVersionUID = 7255644185587547207L;
@@ -28,17 +27,17 @@ public class VCatRenderer<W extends Wiki> extends AbstractVCatRenderer<W> {
 
     protected final Path outputDir;
 
-    private final VCatFactory<W> vCatFactory;
+    private final VCatFactory vCatFactory;
 
-    public VCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider<W> categoryProvider) {
+    public VCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider categoryProvider) {
         this.graphviz = graphviz;
         this.outputDir = tempDir;
-        this.vCatFactory = new VCatFactory<>(categoryProvider);
+        this.vCatFactory = new VCatFactory(categoryProvider);
     }
 
     @Override
-    protected Path createGraphFile(final AbstractAllParams<W> all) throws VCatException {
-        final AbstractVCat<W> vCat = this.vCatFactory.createInstance(all);
+    protected Path createGraphFile(final AbstractAllParams all) throws VCatException {
+        final AbstractVCat vCat = this.vCatFactory.createInstance(all);
         try {
             final Path outputFile = Files.createTempFile(this.outputDir, "temp-Graph-", ".gv");
             vCat.renderToFile(outputFile);
@@ -49,7 +48,7 @@ public class VCatRenderer<W extends Wiki> extends AbstractVCatRenderer<W> {
     }
 
     @Override
-    protected Path createImagemapHtmlFile(final AbstractAllParams<W> all, final OutputFormat imageFormat)
+    protected Path createImagemapHtmlFile(final AbstractAllParams all, final OutputFormat imageFormat)
             throws VCatException {
 
         final OutputFormat outputFormat = all.getGraphviz().getOutputFormat();
@@ -119,7 +118,7 @@ public class VCatRenderer<W extends Wiki> extends AbstractVCatRenderer<W> {
     }
 
     @Override
-    protected Path createRenderedFileFromGraphFile(final AbstractAllParams<W> all, final Path graphFile)
+    protected Path createRenderedFileFromGraphFile(final AbstractAllParams all, final Path graphFile)
             throws VCatException {
         try {
             final Path outputFile = Files.createTempFile(this.outputDir, "temp-RenderedFile-",

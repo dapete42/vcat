@@ -3,7 +3,6 @@ package vcat.renderer;
 import lombok.extern.slf4j.Slf4j;
 import vcat.Messages;
 import vcat.VCatException;
-import vcat.mediawiki.interfaces.Wiki;
 import vcat.params.AbstractAllParams;
 import vcat.renderer.interfaces.VCatRenderer;
 import vcat.util.HashHelper;
@@ -16,7 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 @Slf4j
-public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
+public class QueuedVCatRenderer implements VCatRenderer {
 
     @Serial
     private static final long serialVersionUID = 7817745519732907506L;
@@ -49,7 +48,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
     /**
      * Graphviz renderer used for actual rendering
      */
-    private final VCatRenderer<W> otherRenderer;
+    private final VCatRenderer otherRenderer;
 
     /**
      * Return an instance of QueuedGraphviz, which uses the supplied Graphviz for rendering.
@@ -57,7 +56,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
      * @param otherRenderer   vCat renderer to use.
      * @param numberOfThreads Maximum number of threads to use (zero or less means an unlimited number).
      */
-    public QueuedVCatRenderer(final VCatRenderer<W> otherRenderer, final int numberOfThreads) {
+    public QueuedVCatRenderer(final VCatRenderer otherRenderer, final int numberOfThreads) {
 
         this.otherRenderer = otherRenderer;
 
@@ -79,7 +78,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
     }
 
     @Override
-    public RenderedFileInfo render(final AbstractAllParams<W> all) throws VCatException {
+    public RenderedFileInfo render(final AbstractAllParams all) throws VCatException {
 
         // Build a Job instance for the parameters.
         final String jobId = HashHelper.sha256Hex(all.getCombined());
@@ -152,7 +151,7 @@ public class QueuedVCatRenderer<W extends Wiki> implements VCatRenderer<W> {
     /**
      * Called from the {@link Runnable#run()} implementation for the Job rendering thread.
      */
-    private void runJob(final String jobId, final AbstractAllParams<W> all) {
+    private void runJob(final String jobId, final AbstractAllParams all) {
 
         LOG.info(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId);
 

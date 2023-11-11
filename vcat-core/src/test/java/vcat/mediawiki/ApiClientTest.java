@@ -29,12 +29,12 @@ public class ApiClientTest {
 
     private Wiki wiki;
 
-    private ApiClient<Wiki> client;
+    private ApiClient client;
 
     @BeforeEach
     public void before() {
         this.wiki = new SimpleWikimediaWiki(WIKI);
-        this.client = new ApiClient<>();
+        this.client = new ApiClient();
     }
 
     @Test

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface CategoryProvider<W extends Wiki> extends Serializable {
+public interface CategoryProvider extends Serializable {
 
     /**
      * Get categories for the supplied collection of pages.
@@ -19,7 +19,7 @@ public interface CategoryProvider<W extends Wiki> extends Serializable {
      * is in.
      * @throws ApiException If there are any errors.
      */
-    Map<String, Collection<String>> requestCategories(W wiki, List<String> fullTitles,
+    Map<String, Collection<String>> requestCategories(Wiki wiki, List<String> fullTitles,
                                                       boolean showhidden) throws ApiException;
 
     /**
@@ -30,6 +30,6 @@ public interface CategoryProvider<W extends Wiki> extends Serializable {
      * @return List of titles of the pages belonging to the category.
      * @throws ApiException If there are any errors.
      */
-    List<String> requestCategorymembers(W wiki, String fullTitle) throws ApiException;
+    List<String> requestCategorymembers(Wiki wiki, String fullTitle) throws ApiException;
 
 }

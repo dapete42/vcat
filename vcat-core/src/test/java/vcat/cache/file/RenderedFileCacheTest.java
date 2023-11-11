@@ -8,7 +8,6 @@ import vcat.params.CombinedParams;
 import vcat.params.GraphvizParams;
 import vcat.params.OutputFormat;
 import vcat.params.VCatParams;
-import vcat.test.TestWiki;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,12 +19,12 @@ class RenderedFileCacheTest {
 
     private Path tempDirectory;
 
-    private RenderedFileCache<TestWiki> underTest;
+    private RenderedFileCache underTest;
 
     @BeforeEach
     void setUp() throws IOException, CacheException {
         tempDirectory = Files.createTempDirectory("ApiFileCacheTest");
-        underTest = new RenderedFileCache<>(tempDirectory, 10);
+        underTest = new RenderedFileCache(tempDirectory, 10);
     }
 
     @AfterEach
@@ -39,10 +38,10 @@ class RenderedFileCacheTest {
     @Test
     void testgetCacheFilename() {
 
-        VCatParams<TestWiki> vCatParams = new VCatParams<>();
+        VCatParams vCatParams = new VCatParams();
         GraphvizParams graphvizParams = new GraphvizParams();
         graphvizParams.setOutputFormat(OutputFormat.PNG);
-        CombinedParams<TestWiki> key = new CombinedParams<>(vCatParams, graphvizParams);
+        CombinedParams key = new CombinedParams(vCatParams, graphvizParams);
 
         final String result = underTest.getCacheFilename(key);
 
