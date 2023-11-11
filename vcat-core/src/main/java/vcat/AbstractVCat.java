@@ -3,10 +3,7 @@ package vcat;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vcat.graph.Graph;
-import vcat.graph.Group;
-import vcat.graph.GroupRank;
-import vcat.graph.Node;
+import vcat.graph.*;
 import vcat.graphviz.GraphWriter;
 import vcat.graphviz.GraphvizException;
 import vcat.mediawiki.ApiException;
@@ -26,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public abstract class AbstractVCat<W extends Wiki> {
 
@@ -140,7 +138,7 @@ public abstract class AbstractVCat<W extends Wiki> {
 
             for (Root root : roots) {
                 this.renderGraphOuterFirstLoop(graph, newNodes, root.getNode(), allNodesFound, root.getFullTitle(),
-                        categoryNamespacePrefixLength, showhidden);
+                        categoryNamespacePrefix, showhidden);
             }
 
             // Counting depth and storing various information to be used when it is exceeded
@@ -161,7 +159,7 @@ public abstract class AbstractVCat<W extends Wiki> {
                 newNodes = new ArrayList<>();
 
                 this.renderGraphOuterLoop(graph, newNodes, curNodes, allNodesFound, categoryNamespacePrefix,
-                        categoryNamespacePrefixLength, showhidden, exceedDepth);
+                        showhidden, exceedDepth);
 
                 if (limit != null && graph.getNodeCount() > limit && curDepth > 1) {
                     // If curDepth and maxDepth end up the same, reduce curDepth by one
@@ -239,12 +237,65 @@ public abstract class AbstractVCat<W extends Wiki> {
     protected abstract GroupRank renderGraphExceedRank();
 
     protected abstract void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode,
-                                                      Set<Node> allNodesFound, String fullTitle, int categoryNamespacePrefixLength, boolean showhidden)
+                                                      Set<Node> allNodesFound, String fullTitle,
+                                                      String categoryNamespacePrefix, boolean showHidden)
             throws ApiException;
 
     protected abstract void renderGraphOuterLoop(Graph graph, Collection<Node> newNodes, Collection<Node> curNodes,
-                                                 Set<Node> allNodesFound, String categoryNamespacePrefix, int categoryNamespacePrefixLength,
-                                                 boolean showhidden, boolean exceed) throws ApiException;
+                                                 Set<Node> allNodesFound, String categoryNamespacePrefix,
+                                                 boolean showHidden, boolean exceedDepth) throws ApiException;
+
+    protected final void renderGraphInnerLoop(Graph graph, Collection<Node> newNodes, Set<Node> allNodesFound,
+                                              String categoryNamespacePrefix, boolean exceedDepth, String baseTitle,
+                                              Collection<String> categoryFullTitles,
+                                              BiFunction<Node, Node, Edge> createEdgeFunction) {
+        final var baseNode = graph.node(baseTitle);
+        if (exceedDepth) {
+            // If the depth limit has been reached, normal processing is replaced by this
+            if (!categoryFullTitles.isEmpty()) {
+                int unlinkedEdgesRemaining = categoryFullTitles.size();
+                // Now, just one special case remains - it is possible we already have nodes in the graph that
+                // should have edges with the baseNode. So we look for these and only connect those.
+                for (String categoryFullTitle : categoryFullTitles) {
+                    // Remove "Category:" prefix
+                    final String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefix.length());
+                    // Add edge to graph if the graph already contains a node
+                    if (graph.containsNode(categoryTitle)) {
+                        final var categoryNode = graph.node(categoryTitle);
+                        all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
+                        createEdgeFunction.apply(categoryNode, baseNode);
+                        unlinkedEdgesRemaining--;
+                    }
+                }
+                // If we have not covered all edges with this, there is an unknown subtree hidden.
+                // The node needs a "..." node to show the graph is incomplete.
+                if (unlinkedEdgesRemaining > 0) {
+                    final var exceedNode = graph.node(baseNode.getName() + NODE_EXCEED_SUFFIX);
+                    exceedNode.setLabel(NODE_EXCEED_LABEL);
+                    createEdgeFunction.apply(exceedNode, baseNode);
+                    // Keep these excess nodes in the list of new nodes. This is OK because this is the last loop
+                    // iteration.
+                    newNodes.add(exceedNode);
+                }
+            }
+        } else {
+            // Normal processing - loop through all categories
+            for (String categoryFullTitle : categoryFullTitles) {
+                // Remove "Category:" prefix
+                final String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefix.length());
+                // Add node to graph
+                final var categoryNode = graph.node(categoryTitle);
+                all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
+                createEdgeFunction.apply(categoryNode, baseNode);
+                // If we had not encountered node before (will happen with loops!) we record it as a new node and
+                // remember we have already seen it
+                if (!allNodesFound.contains(categoryNode)) {
+                    newNodes.add(categoryNode);
+                    allNodesFound.add(categoryNode);
+                }
+            }
+        }
+    }
 
     protected abstract GroupRank renderGraphRootRank();
 

@@ -4,7 +4,6 @@ import vcat.graph.internal.AbstractGraphPropertyUser;
 import vcat.graph.internal.GraphProperty;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class Graph extends AbstractGraphPropertyUser {
 
@@ -91,6 +90,10 @@ public class Graph extends AbstractGraphPropertyUser {
         Edge edge = new Edge(nodeFrom, nodeTo);
         this.edgeSet.add(edge);
         return edge;
+    }
+
+    public Edge edgeReverse(Node nodeTo, Node nodeFrom) {
+        return edge(nodeFrom, nodeTo);
     }
 
     public DefaultEdge getDefaultEdge() {

@@ -1,5 +1,6 @@
 package vcat;
 
+import vcat.graph.Edge;
 import vcat.graph.Graph;
 import vcat.graph.GroupRank;
 import vcat.graph.Node;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public class VCatForSubcategories<W extends Wiki> extends AbstractVCat<W> {
 
@@ -20,9 +22,9 @@ public class VCatForSubcategories<W extends Wiki> extends AbstractVCat<W> {
     }
 
     protected void renderGraphInnerLoop(Graph graph, Node rootNode, Set<Node> allNodesFound, Collection<Node> newNodes,
-                                        Collection<String> categoryFullTitles, int categoryNamespacePrefixLength) {
+                                        Collection<String> categoryFullTitles, String categoryNamespacePrefix) {
         for (String categoryFullTitle : categoryFullTitles) {
-            String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefixLength);
+            String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefix.length());
             Node categoryNode = graph.node(categoryTitle);
             all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
             graph.edge(rootNode, categoryNode);
@@ -35,81 +37,34 @@ public class VCatForSubcategories<W extends Wiki> extends AbstractVCat<W> {
 
     @Override
     protected void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode,
-                                             Set<Node> allNodesFound, String fullTitle, int categoryNamespacePrefixLength, boolean showhidden)
+                                             Set<Node> allNodesFound, String fullTitle, String categoryNamespacePrefix,
+                                             boolean showHidden)
             throws ApiException {
-        Collection<String> categoryFullTitles = this.categoryProvider.requestCategorymembers(this.all.getWiki(),
-                fullTitle);
+        Collection<String> categoryFullTitles = categoryProvider.requestCategorymembers(all.getWiki(), fullTitle);
         if (categoryFullTitles != null) {
-            renderGraphInnerLoop(graph, rootNode, allNodesFound, newNodes, categoryFullTitles,
-                    categoryNamespacePrefixLength);
+            renderGraphInnerLoop(graph, rootNode, allNodesFound, newNodes, categoryFullTitles, categoryNamespacePrefix);
         }
     }
 
     @Override
     protected void renderGraphOuterLoop(Graph graph, Collection<Node> newNodes, Collection<Node> curNodes,
-                                        Set<Node> allNodesFound, String categoryNamespacePrefix, int categoryNamespacePrefixLength,
-                                        boolean showhidden, boolean exceed) throws ApiException {
+                                        Set<Node> allNodesFound, String categoryNamespacePrefix,
+                                        boolean showhidden, boolean exceedDepth) throws ApiException {
 
         // Create a list of the full titles (including namespace) of the categories in the current loop iteration
-        ArrayList<String> curFullTitles = new ArrayList<>(curNodes.size());
-        for (Node curNode : curNodes) {
-            curFullTitles.add(categoryNamespacePrefix + curNode.getName());
-        }
+        var curFullTitles = curNodes.stream()
+                .map(Node::getName)
+                .map(name -> categoryNamespacePrefix + name)
+                .toList();
+
+        final BiFunction<Node, Node, Edge> createEdgeFunction = graph::edgeReverse;
 
         for (String fullTitle : curFullTitles) {
-            // Request subcategories using API
-            List<String> categoryFullTitles = this.categoryProvider.requestCategorymembers(this.all.getWiki(),
-                    fullTitle);
+            final var categoryFullTitles = categoryProvider.requestCategorymembers(all.getWiki(), fullTitle);
             // For each API result, first get the node it contains categories for
-            String baseTitle = fullTitle.substring(categoryNamespacePrefixLength);
-            Node baseNode = graph.node(baseTitle);
-            // Then get the list of these categories
-            if (exceed) {
-                // If the depth limit has been reached, normal processing is replaced by this
-                if (!categoryFullTitles.isEmpty()) {
-                    int unlinkedEdgesRemaining = categoryFullTitles.size();
-                    // Now, just one special case remains - it is possible we already have nodes in the graph that
-                    // should have edges with the baseNode. So we look for these and only connect those.
-                    for (String categoryFullTitle : categoryFullTitles) {
-                        // Remove "Category:" prefix
-                        String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefixLength);
-                        // Add edge to graph if the graph already contains a node
-                        if (graph.containsNode(categoryTitle)) {
-                            Node categoryNode = graph.node(categoryTitle);
-                            all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
-                            graph.edge(baseNode, categoryNode);
-                            unlinkedEdgesRemaining--;
-                        }
-                    }
-                    // If we have not covered all edges with this, there is an unknown subtree hidden.
-                    // The node needs a "..." node to show the graph is incomplete.
-                    if (unlinkedEdgesRemaining > 0) {
-                        Node exceedNode = graph.node(baseNode.getName() + NODE_EXCEED_SUFFIX);
-                        exceedNode.setLabel(NODE_EXCEED_LABEL);
-                        // graph.edge(exceedNode, baseNode);
-                        graph.edge(baseNode, exceedNode);
-                        // Keep these excess nodes in the list of new nodes. This is OK because this is the last loop
-                        // iteration.
-                        newNodes.add(exceedNode);
-                    }
-                }
-            } else {
-                // Normal processing - loop through all categories
-                for (String categoryFullTitle : categoryFullTitles) {
-                    // Remove "Category:" prefix
-                    String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefixLength);
-                    // Add node to graph
-                    Node categoryNode = graph.node(categoryTitle);
-                    all.getVCat().getLinkProvider().addLinkToNode(categoryNode, categoryFullTitle);
-                    graph.edge(baseNode, categoryNode);
-                    // If we had not encountered node before (will happen with loops!) we record it as a new node and
-                    // remember we have already seen it
-                    if (!allNodesFound.contains(categoryNode)) {
-                        newNodes.add(categoryNode);
-                        allNodesFound.add(categoryNode);
-                    }
-                }
-            }
+            final String baseTitle = fullTitle.substring(categoryNamespacePrefix.length());
+            renderGraphInnerLoop(graph, newNodes, allNodesFound, categoryNamespacePrefix, exceedDepth, baseTitle,
+                    categoryFullTitles, createEdgeFunction);
         }
     }
 
