@@ -1,8 +1,15 @@
 package vcat.graph;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import vcat.graph.internal.GraphProperty;
 
+import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+@Getter
+@Setter
 public class Edge extends DefaultEdge {
 
     private String label;
@@ -17,35 +24,25 @@ public class Edge extends DefaultEdge {
     }
 
     @Override
+    protected SortedMap<String, String> propertiesInternal() {
+        final SortedMap<String, String> properties = new TreeMap<>(super.propertiesInternal());
+        properties.put(Graph.PROPERTY_LABEL, label);
+        return properties;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o instanceof Edge e) {
             // two nodes are equal if they go between the same nodes
-            return this.nodeFrom.equals(e.nodeFrom) && this.nodeTo.equals(e.nodeTo);
+            return Objects.equals(nodeFrom, e.nodeFrom) && Objects.equals(nodeTo, e.nodeTo);
         } else {
             return false;
         }
     }
 
-    @GraphProperty(Graph.PROPERTY_LABEL)
-    public String getLabel() {
-        return this.label;
-    }
-
-    public Node getNodeFrom() {
-        return this.nodeFrom;
-    }
-
-    public Node getNodeTo() {
-        return this.nodeTo;
-    }
-
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(113, 237).append(this.nodeFrom).append(this.nodeTo).toHashCode();
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
+        return new HashCodeBuilder(113, 237).append(nodeFrom).append(nodeTo).toHashCode();
     }
 
 }

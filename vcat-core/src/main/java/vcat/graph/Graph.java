@@ -1,11 +1,12 @@
 package vcat.graph;
 
-import vcat.graph.internal.AbstractGraphPropertyUser;
-import vcat.graph.internal.GraphProperty;
+import lombok.Getter;
+import lombok.Setter;
+import vcat.graph.internal.AbstractHasGraphProperties;
 
 import java.util.*;
 
-public class Graph extends AbstractGraphPropertyUser {
+public class Graph extends AbstractHasGraphProperties {
 
     public final static String EDGE = "edge";
 
@@ -35,48 +36,36 @@ public class Graph extends AbstractGraphPropertyUser {
 
     public final static String TRUE = "true";
 
-    public static void createSubgraphRecursive(Graph subGraph, Graph fullGraph, Set<Node> nodes, int depth) {
-        if (depth > 0) {
-            HashSet<Node> nextNodes = new HashSet<>();
-            for (Node node : nodes) {
-                subGraph.nodeMap.put(node.getName(), node);
-                for (Edge edge : fullGraph.getEdgesFrom(node)) {
-                    Node nodeTo = edge.getNodeTo();
-                    subGraph.nodeMap.put(nodeTo.getName(), nodeTo);
-                    subGraph.edgeSet.add(edge);
-                    nextNodes.add(nodeTo);
-                }
-                for (Edge edge : fullGraph.getEdgesTo(node)) {
-                    Node nodeFrom = edge.getNodeTo();
-                    subGraph.nodeMap.put(nodeFrom.getName(), nodeFrom);
-                    subGraph.edgeSet.add(edge);
-                    nextNodes.add(nodeFrom);
-                }
-            }
-            createSubgraphRecursive(subGraph, fullGraph, nextNodes, depth - 1);
-        }
-    }
-
+    @Getter
     private final DefaultEdge defaultEdge = new DefaultEdge();
 
+    @Getter
     private final DefaultNode defaultNode = new DefaultNode();
 
     private final Set<Edge> edgeSet = new HashSet<>();
 
+    @Getter
+    @Setter
     private String fontname;
 
+    @Getter
+    @Setter
     private int fontsize;
 
     private final Map<String, Group> groupMap = new HashMap<>();
 
     private final Map<String, Node> nodeMap = new HashMap<>();
 
+    @Getter
+    @Setter
     private boolean splines = false;
 
+    @Getter
+    @Setter
     private String label;
 
     public boolean containsNode(String name) {
-        return this.nodeMap.containsKey(name);
+        return nodeMap.containsKey(name);
     }
 
     /**
@@ -87,8 +76,8 @@ public class Graph extends AbstractGraphPropertyUser {
      * @return Edge between
      */
     public Edge edge(Node nodeFrom, Node nodeTo) {
-        Edge edge = new Edge(nodeFrom, nodeTo);
-        this.edgeSet.add(edge);
+        final var edge = new Edge(nodeFrom, nodeTo);
+        edgeSet.add(edge);
         return edge;
     }
 
@@ -96,21 +85,13 @@ public class Graph extends AbstractGraphPropertyUser {
         return edge(nodeFrom, nodeTo);
     }
 
-    public DefaultEdge getDefaultEdge() {
-        return defaultEdge;
-    }
-
-    public DefaultNode getDefaultNode() {
-        return defaultNode;
-    }
-
     public Set<Edge> getEdges() {
-        return Collections.unmodifiableSet(this.edgeSet);
+        return Collections.unmodifiableSet(edgeSet);
     }
 
     public Set<Edge> getEdgesFrom(Node node) {
-        Set<Edge> edges = new HashSet<>();
-        for (Edge edge : this.edgeSet) {
+        final Set<Edge> edges = new HashSet<>();
+        for (Edge edge : edgeSet) {
             if (edge.getNodeFrom().equals(node)) {
                 edges.add(edge);
             }
@@ -119,8 +100,8 @@ public class Graph extends AbstractGraphPropertyUser {
     }
 
     public Set<Edge> getEdgesTo(Node node) {
-        Set<Edge> edges = new HashSet<>();
-        for (Edge edge : this.edgeSet) {
+        final Set<Edge> edges = new HashSet<>();
+        for (Edge edge : edgeSet) {
             if (edge.getNodeTo().equals(node)) {
                 edges.add(edge);
             }
@@ -128,86 +109,44 @@ public class Graph extends AbstractGraphPropertyUser {
         return edges;
     }
 
-    @GraphProperty(PROPERTY_FONTNAME)
-    public String getFontname() {
-        return this.fontname;
-    }
-
-    public int getFontsize() {
-        return this.fontsize;
-    }
-
-    @GraphProperty(PROPERTY_FONTSIZE)
-    public String getFontsizeString() {
-        if (this.fontsize == 0) {
-            return null;
-        } else {
-            return Integer.toString(this.fontsize);
-        }
+    @Override
+    protected SortedMap<String, String> propertiesInternal() {
+        final SortedMap<String, String> properties = new TreeMap<>();
+        properties.put(PROPERTY_FONTNAME, fontname);
+        properties.put(PROPERTY_FONTSIZE, fontsize == 0 ? null : Integer.toString(fontsize));
+        properties.put(PROPERTY_LABEL, label);
+        properties.put(PROPERTY_SPLINES, splines ? TRUE : null);
+        return properties;
     }
 
     public Collection<Group> getGroups() {
-        return Collections.unmodifiableCollection(this.groupMap.values());
-    }
-
-    @GraphProperty(PROPERTY_LABEL)
-    public String getLabel() {
-        return this.label;
+        return Collections.unmodifiableCollection(groupMap.values());
     }
 
     public int getNodeCount() {
-        return this.nodeMap.size();
+        return nodeMap.size();
     }
 
     public Collection<Node> getNodes() {
-        return Collections.unmodifiableCollection(this.nodeMap.values());
-    }
-
-    @GraphProperty(PROPERTY_SPLINES)
-    public String getSplinesString() {
-        if (this.splines) {
-            return TRUE;
-        } else {
-            return null;
-        }
+        return Collections.unmodifiableCollection(nodeMap.values());
     }
 
     public Group group(String name) {
-        Group group = this.groupMap.get(name);
+        var group = groupMap.get(name);
         if (group == null) {
             group = new Group(name);
-            this.groupMap.put(name, group);
+            groupMap.put(name, group);
         }
         return group;
     }
 
-    public boolean isSplines() {
-        return this.splines;
-    }
-
     public Node node(String name) {
-        Node node = this.nodeMap.get(name);
+        var node = nodeMap.get(name);
         if (node == null) {
             node = new Node(name);
-            this.nodeMap.put(name, node);
+            nodeMap.put(name, node);
         }
         return node;
-    }
-
-    public void setFontname(String fontname) {
-        this.fontname = fontname;
-    }
-
-    public void setFontsize(int fontsize) {
-        this.fontsize = fontsize;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public void setSplines(boolean splines) {
-        this.splines = splines;
     }
 
 }

@@ -1,12 +1,17 @@
 package vcat.graph;
 
-import vcat.graph.internal.AbstractGraphPropertyUser;
-import vcat.graph.internal.GraphProperty;
+import lombok.Getter;
+import lombok.Setter;
+import vcat.graph.internal.AbstractHasGraphProperties;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
-public class Group extends AbstractGraphPropertyUser {
+@Getter
+@Setter
+public class Group extends AbstractHasGraphProperties {
 
     private final DefaultEdge defaultEdge = new DefaultEdge();
 
@@ -23,32 +28,13 @@ public class Group extends AbstractGraphPropertyUser {
     }
 
     public void addNode(Node node) {
-        this.nodes.add(node);
+        nodes.add(node);
     }
 
-    public DefaultEdge getDefaultEdge() {
-        return defaultEdge;
-    }
-
-    public DefaultNode getDefaultNode() {
-        return defaultNode;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Set<Node> getNodes() {
-        return this.nodes;
-    }
-
-    @GraphProperty(Graph.PROPERTY_RANK)
-    public GroupRank getRank() {
-        return this.rank;
-    }
-
-    public void setRank(GroupRank rank) {
-        this.rank = rank;
+    protected SortedMap<String, String> propertiesInternal() {
+        final SortedMap<String, String> properties = new TreeMap<>();
+        properties.put(Graph.PROPERTY_RANK, rank.name());
+        return properties;
     }
 
 }

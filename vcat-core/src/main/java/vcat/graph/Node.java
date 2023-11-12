@@ -1,9 +1,16 @@
 package vcat.graph;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import vcat.Messages;
-import vcat.graph.internal.GraphProperty;
 
+import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+@Getter
+@Setter
 public class Node extends DefaultNode {
 
     private String label;
@@ -23,31 +30,25 @@ public class Node extends DefaultNode {
     }
 
     @Override
+    protected SortedMap<String, String> propertiesInternal() {
+        final SortedMap<String, String> properties = new TreeMap<>(super.propertiesInternal());
+        properties.put(Graph.PROPERTY_LABEL, label);
+        return properties;
+    }
+
+    @Override
     public boolean equals(Object o) {
-        if (o instanceof Node) {
+        if (o instanceof Node n) {
             // two nodes are equal if they have the same name
-            return this.name.equals(((Node) o).name);
+            return Objects.equals(name, n.name);
         } else {
             return false;
         }
     }
 
-    @GraphProperty(Graph.PROPERTY_LABEL)
-    public String getLabel() {
-        return this.label;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(197, 1117).append(this.name).toHashCode();
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
+        return new HashCodeBuilder(197, 1117).append(name).toHashCode();
     }
 
 }

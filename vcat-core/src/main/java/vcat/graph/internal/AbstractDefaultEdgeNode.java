@@ -1,15 +1,22 @@
 package vcat.graph.internal;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import vcat.graph.Graph;
+
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Base class for all edges and nodes in a {@link Graph}.
  *
  * @author Peter Schlömer
  */
-public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser {
+@Getter
+@Setter
+public abstract class AbstractDefaultEdgeNode extends AbstractHasGraphProperties {
 
     /**
      * Label font family name.
@@ -29,80 +36,22 @@ public abstract class AbstractDefaultEdgeNode extends AbstractGraphPropertyUser 
     private String style;
 
     @Override
+    protected SortedMap<String, String> propertiesInternal() {
+        final SortedMap<String, String> properties = new TreeMap<>();
+        properties.put(Graph.PROPERTY_FONTNAME, fontname);
+        properties.put(Graph.PROPERTY_FONTSIZE, fontsize == 0 ? null : Integer.toString(fontsize));
+        properties.put(Graph.PROPERTY_HREF, href);
+        properties.put(Graph.PROPERTY_STYLE, style);
+        return properties;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o instanceof AbstractDefaultEdgeNode n) {
             return new EqualsBuilder().append(fontname, n.fontname).append(fontsize, n.fontsize).append(href, n.href)
                     .append(style, n.style).build();
         }
         return false;
-    }
-
-    /**
-     * @return Label font family name.
-     */
-    @GraphProperty("fontname")
-    public String getFontname() {
-        return this.fontname;
-    }
-
-    /**
-     * @return Label size.
-     */
-    public int getFontsize() {
-        return this.fontsize;
-    }
-
-    @GraphProperty(Graph.PROPERTY_FONTSIZE)
-    public String getFontsizeString() {
-        if (this.fontsize == 0) {
-            return null;
-        } else {
-            return Integer.toString(this.fontsize);
-        }
-    }
-
-    /**
-     * @return Label href attribute.
-     */
-    @GraphProperty(Graph.PROPERTY_HREF)
-    public String getHref() {
-        return this.href;
-    }
-
-    /**
-     * @return Label style attribute.
-     */
-    @GraphProperty(Graph.PROPERTY_STYLE)
-    public String getStyle() {
-        return this.style;
-    }
-
-    /**
-     * @param fontname Label font family name.
-     */
-    public void setFontname(String fontname) {
-        this.fontname = fontname;
-    }
-
-    /**
-     * @param fontsize Label size.
-     */
-    public void setFontsize(int fontsize) {
-        this.fontsize = fontsize;
-    }
-
-    /**
-     * @param href Label href attribute.
-     */
-    public void setHref(String href) {
-        this.href = href;
-    }
-
-    /**
-     * @param style Label style attribute.
-     */
-    public void setStyle(String style) {
-        this.style = style;
     }
 
     @Override

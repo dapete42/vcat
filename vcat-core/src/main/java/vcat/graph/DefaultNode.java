@@ -1,17 +1,25 @@
 package vcat.graph;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import vcat.graph.internal.AbstractDefaultEdgeNode;
-import vcat.graph.internal.GraphProperty;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+@Getter
+@Setter
 public class DefaultNode extends AbstractDefaultEdgeNode {
 
     private String shape;
 
-    @GraphProperty(Graph.PROPERTY_SHAPE)
-    public String getShape() {
-        return this.shape;
+    @Override
+    protected SortedMap<String, String> propertiesInternal() {
+        final SortedMap<String, String> properties = new TreeMap<>(super.propertiesInternal());
+        properties.put(Graph.PROPERTY_SHAPE, shape);
+        return properties;
     }
 
     @Override
@@ -25,10 +33,6 @@ public class DefaultNode extends AbstractDefaultEdgeNode {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(197, 1117).append(shape).toHashCode();
-    }
-
-    public void setShape(String shape) {
-        this.shape = shape;
     }
 
 }
