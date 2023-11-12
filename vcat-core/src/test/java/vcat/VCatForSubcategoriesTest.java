@@ -4,33 +4,21 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import vcat.cache.CacheException;
-import vcat.graphviz.GraphvizException;
 import vcat.junit.CanGenerateExpected;
-import vcat.junit.TestApiClient;
 import vcat.junit.TestMode;
 import vcat.junit.TestUtils;
-import vcat.mediawiki.interfaces.CategoryProvider;
-import vcat.mediawiki.interfaces.Wiki;
-import vcat.params.AllParams;
-import vcat.params.VCatFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class VCatForSubcategoriesTest implements CanGenerateExpected {
-
-    private TestApiClient testApiClient;
 
     private Path tempDirectory;
 
     @BeforeEach
-    void beforeEach() throws CacheException, IOException {
-        testApiClient = new TestApiClient();
+    void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
     }
 
@@ -43,46 +31,59 @@ public class VCatForSubcategoriesTest implements CanGenerateExpected {
     public void generateExpected() throws Exception {
         beforeEach();
         renderToFile(TestMode.GenerateExpected);
+        renderToFileDepth(TestMode.GenerateExpected);
+        renderToFileMultipleCategories(TestMode.GenerateExpected);
         afterEach();
     }
 
+    private void genericRenderToFileTest(TestMode mode, String testName, Map<String, String[]> requestParams) throws Exception {
+        TestUtils.genericRenderToFileTest(mode, getClass(), testName, requestParams, tempDirectory);
+    }
+
     @Test
-    void renderToFile() throws GraphvizException, IOException, VCatException {
+    void renderToFile() throws Exception {
         renderToFile(TestMode.Test);
     }
 
-    private void renderToFile(TestMode mode) throws GraphvizException, IOException, VCatException {
+    private void renderToFile(TestMode mode) throws Exception {
+        genericRenderToFileTest(mode, "renderToFile", Map.of(
+                "wiki", new String[]{"de.wikipedia.org"},
+                "category", new String[]{"Overath"},
+                "format", new String[]{"gv"},
+                "links", new String[]{"wiki"},
+                "rel", new String[]{"subcategory"}
+        ));
+    }
 
-        final String fileName = getClass().getSimpleName() + "-renderToFile.gv";
+    @Test
+    void renderToFileDepth() throws Exception {
+        renderToFileDepth(TestMode.Test);
+    }
 
-        final Path actualFile = tempDirectory.resolve(fileName);
-        final Path expectedFile = TestUtils.expectedDirectory.resolve(fileName);
+    private void renderToFileDepth(TestMode mode) throws Exception {
+        genericRenderToFileTest(mode, "renderToFileDepth", Map.of(
+                "wiki", new String[]{"de.wikipedia.org"},
+                "category", new String[]{"Overath"},
+                "format", new String[]{"gv"},
+                "links", new String[]{"wiki"},
+                "depth", new String[]{"2"},
+                "rel", new String[]{"subcategory"}
+        ));
+    }
 
-        if (mode == TestMode.GenerateExpected) {
-            testApiClient.setCallRealApi(true);
-        }
+    @Test
+    void renderToFileMultipleCategories() throws Exception {
+        renderToFileMultipleCategories(TestMode.Test);
+    }
 
-        AllParams params = new AllParams(TestUtils.paramMap(Map.of(
-                "wiki", "de.wikipedia.org",
-                "category", "Overath",
-                "format", "gv",
-                "links", "wiki",
-                "depth", "2",
-                "rel", "subcategory"
-        )), "", testApiClient);
-
-        final var underTest = new VCatFactory(testApiClient).createInstance(params);
-        assertEquals(VCatForSubcategories.class, underTest.getClass());
-
-        underTest.renderToFile(actualFile);
-
-        if (mode == TestMode.GenerateExpected) {
-            testApiClient.setCallRealApi(false);
-            underTest.renderToFile(expectedFile);
-        }
-
-        TestUtils.assertGraphvizFilesEquals(expectedFile, actualFile);
-
+    private void renderToFileMultipleCategories(TestMode mode) throws Exception {
+        genericRenderToFileTest(mode, "renderToFileMultipleCategories", Map.of(
+                "wiki", new String[]{"de.wikipedia.org"},
+                "category", new String[]{"Overath", "Rösrath"},
+                "format", new String[]{"gv"},
+                "links", new String[]{"wiki"},
+                "rel", new String[]{"subcategory"}
+        ));
     }
 
 }
