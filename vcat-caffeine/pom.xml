@@ -13,20 +13,6 @@
     <name>vCat Caffeine cache</name>
     <description>Use Caffeine for caching in vCat.</description>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>Peter Schlömer</name>
-            <email>dev@dapete.net</email>
-        </developer>
-    </developers>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
