@@ -4,7 +4,7 @@
                              http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>vcat</groupId>
+    <groupId>org.toolforge.vcat</groupId>
     <artifactId>vcat</artifactId>
     <version>4-SNAPSHOT</version>
 

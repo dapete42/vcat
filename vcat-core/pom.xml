@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>vcat</groupId>
+        <groupId>org.toolforge.vcat</groupId>
         <artifactId>vcat</artifactId>
         <version>4-SNAPSHOT</version>
     </parent>
