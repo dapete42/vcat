@@ -43,7 +43,7 @@
 
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.6.0</quarkus.platform.version>
+        <quarkus.platform.version>3.6.1</quarkus.platform.version>
         <myfaces.version>4.0.1</myfaces.version>
     </properties>
 
