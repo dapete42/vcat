@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Maven package
-        run: mvn -B package
+        run: ./mvnw -B package
       - uses: codecov/codecov-action@v3
       - uses: actions/upload-artifact@v3
         with:
