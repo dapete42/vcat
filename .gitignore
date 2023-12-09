@@ -3,14 +3,6 @@
 /target/
 /*/target/
 /site/
-# Eclipse
-/.classpath
-/.metadata/
-/.project
-/.settings/
-/*/.classpath
-/*/.metadata/
-/*/.project
-/*/.settings/
 # IntelliJ IDEA
 /.idea/
+*.iml
