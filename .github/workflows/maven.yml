@@ -24,6 +24,10 @@ jobs:
           cache: maven
       - name: Maven package
         run: ./mvnw -B package
+      - uses: mikepenz/action-junit-report@v4
+        if: success() || failure()
+        with:
+          report_paths: '**/surefire-reports/TEST-*.xml'
       - uses: codecov/codecov-action@v3
       - uses: actions/upload-artifact@v3
         with:
