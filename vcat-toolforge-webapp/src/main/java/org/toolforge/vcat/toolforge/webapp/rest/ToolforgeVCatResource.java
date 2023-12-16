@@ -1,10 +1,12 @@
-package org.toolforge.vcat.toolforge.webapp;
+package org.toolforge.vcat.toolforge.webapp.rest;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.*;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.toolforge.vcat.VCatException;
 import org.toolforge.vcat.caffeine.ApiCaffeineCache;
@@ -16,23 +18,23 @@ import org.toolforge.vcat.mediawiki.CachedMetadataProvider;
 import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
 import org.toolforge.vcat.renderer.CachedVCatRenderer;
 import org.toolforge.vcat.renderer.QueuedVCatRenderer;
-import org.toolforge.vcat.renderer.RenderedFileInfo;
+import org.toolforge.vcat.toolforge.webapp.AllParamsToolforge;
+import org.toolforge.vcat.toolforge.webapp.Messages;
+import org.toolforge.vcat.toolforge.webapp.MyCnfConfig;
+import org.toolforge.vcat.toolforge.webapp.ToolforgeWikiProvider;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.Serial;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@ApplicationScoped
-@WebServlet(urlPatterns = {"/render", ToolforgeVCatServlet.CATGRAPH_REDIRECT_URL_PATTERN})
-public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
-
-    @Serial
-    private static final long serialVersionUID = -5655389767357096359L;
-
-    protected static final String CATGRAPH_REDIRECT_URL_PATTERN = "/catgraphRedirect";
+@Slf4j
+@Path("/render")
+public class ToolforgeVCatResource {
 
     /**
      * Directory with Graphviz binaries (dot, fdp).
@@ -88,12 +90,36 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
     private static ToolforgeWikiProvider toolforgeWikiProvider;
 
-    @Override
-    public String getServletInfo() {
-        return Messages.getString("ToolforgeVCatServlet.ServletInfo");
+    private static Map<String, String[]> convertRestParameters(
+            MultivaluedMap<String, String> parameters) {
+        return parameters.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().toArray(String[]::new)
+                ));
     }
 
-    @Override
+    private static Response errorResponse(Response.Status status, String message) {
+        return Response.status(status)
+                .entity(status.getReasonPhrase() + '\n' + message)
+                .type(MediaType.TEXT_PLAIN_TYPE)
+                .build();
+    }
+
+    private static String exceptionStringWithStacktrace(Exception e) {
+        final var joiner = new StringJoiner("\n");
+        joiner.add(e.getMessage());
+        joiner.add("");
+        Stream.of(e.getStackTrace())
+                .forEach(stackTraceElement -> joiner.add(stackTraceElement.toString()));
+        return joiner.toString();
+    }
+
+    private static String uriStringWithoutQuery(UriInfo uriInfo) {
+        return uriInfo.getRequestUriBuilder().replaceQuery(null).build().toString();
+    }
+
+    @PostConstruct
     public void init() throws ServletException {
 
         try {
@@ -136,28 +162,34 @@ public class ToolforgeVCatServlet extends AbstractVCatToolforgeServlet {
 
     }
 
-    @Override
-    protected RenderedFileInfo renderedFileFromRequest(final HttpServletRequest req) throws ServletException {
-
-        if (vCatRenderer.getNumberOfQueuedJobs() > vcatQueue) {
-            throw new ServletException(Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
-        }
-
-        final Map<String, String[]> parameterMap;
-        if (req.getRequestURI().endsWith(CATGRAPH_REDIRECT_URL_PATTERN)) {
-            // If called as catgraphRedirect, convert from Catgraph parameters to vCat parameters
-            parameterMap = CatgraphConverter.convertParameters(req.getParameterMap());
-        } else {
-            parameterMap = req.getParameterMap();
-        }
-
+    @GET
+    public Response render(@Context UriInfo uriInfo) {
         try {
-            return vCatRenderer.render(new AllParamsToolforge(parameterMap, this.getHttpRequestURI(req),
-                    metadataProvider, toolforgeWikiProvider));
-        } catch (VCatException e) {
-            throw new ServletException(e);
-        }
+            if (vCatRenderer.getNumberOfQueuedJobs() > vcatQueue) {
+                return errorResponse(Response.Status.TOO_MANY_REQUESTS,
+                        Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
+            }
 
+            final var pathParameters = convertRestParameters(uriInfo.getQueryParameters());
+            final var renderedFileInfo = vCatRenderer.render(
+                    new AllParamsToolforge(pathParameters, uriStringWithoutQuery(uriInfo), metadataProvider,
+                            toolforgeWikiProvider));
+
+            final var resultFile = renderedFileInfo.getFile();
+            final var mimeType = renderedFileInfo.getMimeType();
+
+            LOG.info("Sending file '{}' as '{}'", resultFile.toAbsolutePath(), mimeType);
+            return Response.ok(Files.newInputStream(resultFile))
+                    // Content-disposition (for file name)
+                    .header("Content-disposition", "filename=\"" + resultFile.getFileName().toString() + '"')
+                    .type(mimeType)
+                    .build();
+        } catch (VCatException e) {
+            return errorResponse(Response.Status.BAD_REQUEST, exceptionStringWithStacktrace(e));
+        } catch (Exception e) {
+            LOG.error("Error rendering response", e);
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
 }
