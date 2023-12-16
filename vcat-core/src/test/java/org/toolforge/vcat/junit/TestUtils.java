@@ -1,5 +1,7 @@
 package org.toolforge.vcat.junit;
 
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.FileUtils;
 import org.toolforge.vcat.params.AllParams;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -48,7 +51,7 @@ public class TestUtils {
     }
 
     public static void genericRenderToFileTest(
-            TestMode mode, Class<?> testClass, String testName, Map<String, String[]> requestParams,
+            TestMode mode, Class<?> testClass, String testName, MultivaluedMap<String, String> requestParams,
             Path tempDirectory) throws Exception {
 
         final var testApiClient = new TestApiClient();
@@ -79,6 +82,12 @@ public class TestUtils {
         final String actualString = readGraphvizFileForTesting(actualFile);
         final String expectedString = readGraphvizFileForTesting(expectedFile);
         assertEquals(expectedString, actualString);
+    }
+
+    public MultivaluedMap<String, String> requestParamMap(Map<String, List<String>> map) {
+        MultivaluedMap<String, String> requestParamMap = new MultivaluedHashMap<>();
+        map.forEach(requestParamMap::addAll);
+        return requestParamMap;
     }
 
 }

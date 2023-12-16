@@ -4,7 +4,10 @@ import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.toolforge.vcat.VCatException;
@@ -24,9 +27,7 @@ import org.toolforge.vcat.renderer.interfaces.VCatRenderer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -69,15 +70,6 @@ public class SimpleVCatResource {
 
     private VCatRenderer vCatRenderer;
 
-    private static Map<String, String[]> convertRestParameters(
-            MultivaluedMap<String, String> parameters) {
-        return parameters.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().toArray(String[]::new)
-                ));
-    }
-
     private static Response errorResponse(Response.Status status, String message) {
         return Response.status(status)
                 .entity(status.getReasonPhrase() + '\n' + message)
@@ -116,9 +108,8 @@ public class SimpleVCatResource {
     @GET
     public Response render(@Context UriInfo uriInfo) {
         try {
-            final var pathParameters = convertRestParameters(uriInfo.getQueryParameters());
             final var renderedFileInfo = vCatRenderer.render(
-                    new AllParams(pathParameters, uriStringWithoutQuery(uriInfo), metadataProvider));
+                    new AllParams(uriInfo.getQueryParameters(), uriStringWithoutQuery(uriInfo), metadataProvider));
 
             final var resultFile = renderedFileInfo.getFile();
             final var mimeType = renderedFileInfo.getMimeType();
