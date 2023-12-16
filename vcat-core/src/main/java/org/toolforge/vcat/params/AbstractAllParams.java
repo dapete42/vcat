@@ -1,5 +1,7 @@
 package org.toolforge.vcat.params;
 
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.helpers.MessageFormatter;
@@ -54,9 +56,9 @@ public abstract class AbstractAllParams {
     @Getter
     private String renderUrl;
 
-    protected final Map<String, String[]> requestParams = new HashMap<>();
+    protected final MultivaluedMap<String, String> requestParams = new MultivaluedHashMap<>();
 
-    protected void init(final Map<String, String[]> requestParams, final String renderUrl,
+    protected void init(final MultivaluedMap<String, String> requestParams, final String renderUrl,
                         final MetadataProvider metadataProvider) throws VCatException {
 
         // Remember the URL used to render a graph
@@ -67,7 +69,7 @@ public abstract class AbstractAllParams {
         this.requestParams.putAll(requestParams);
 
         // Get a copy of the parameters we can modify
-        final HashMap<String, String[]> params = new HashMap<>(requestParams);
+        final MultivaluedMap<String, String> params = new MultivaluedHashMap<>(requestParams);
 
         String wikiString = getAndRemove(params, PARAM_WIKI);
         if (wikiString == null || wikiString.isEmpty()) {
@@ -116,14 +118,14 @@ public abstract class AbstractAllParams {
         // Parameter for vCat creation
         //
 
-        String[] categoryStrings = getAndRemoveMulti(params, PARAM_CATEGORY);
-        String[] titleStrings = getAndRemoveMulti(params, PARAM_TITLE);
-        String namespaceString = getAndRemove(params, PARAM_NAMESPACE);
-        String depthString = getAndRemove(params, PARAM_DEPTH);
-        String limitString = getAndRemove(params, PARAM_LIMIT);
-        String showhiddenString = getAndRemove(params, PARAM_SHOWHIDDEN);
-        String relationString = getAndRemove(params, PARAM_RELATION);
-        String linksString = getAndRemove(params, PARAM_LINKS);
+        var categoryStrings = getAndRemoveMulti(params, PARAM_CATEGORY);
+        var titleStrings = getAndRemoveMulti(params, PARAM_TITLE);
+        var namespaceString = getAndRemove(params, PARAM_NAMESPACE);
+        var depthString = getAndRemove(params, PARAM_DEPTH);
+        var limitString = getAndRemove(params, PARAM_LIMIT);
+        var showhiddenString = getAndRemove(params, PARAM_SHOWHIDDEN);
+        var relationString = getAndRemove(params, PARAM_RELATION);
+        var linksString = getAndRemove(params, PARAM_LINKS);
 
         // 'category'
         if (categoryStrings != null) {
@@ -294,24 +296,24 @@ public abstract class AbstractAllParams {
 
     }
 
-    protected static String getAndRemove(Map<String, String[]> params, String key) throws VCatException {
-        String[] values = params.get(key);
+    protected static String getAndRemove(MultivaluedMap<String, String> params, String key) throws VCatException {
+        var values = params.get(key);
         if (values == null) {
             return null;
-        } else if (values.length == 0) {
+        } else if (values.isEmpty()) {
             params.remove(key);
             return "";
-        } else if (values.length == 1) {
+        } else if (values.size() == 1) {
             params.remove(key);
-            return values[0];
+            return values.getFirst();
         } else {
             throw new VCatException(MessageFormatter
                     .format(Messages.getString("AbstractAllParams.Exception.ParameterRepeated"), key).getMessage());
         }
     }
 
-    protected static String[] getAndRemoveMulti(Map<String, String[]> params, String key) {
-        String[] values = params.get(key);
+    protected static List<String> getAndRemoveMulti(MultivaluedMap<String, String> params, String key) {
+        var values = params.get(key);
         if (values == null) {
             return null;
         } else {
@@ -345,7 +347,7 @@ public abstract class AbstractAllParams {
         return this.combinedParams.getGraphviz();
     }
 
-    public Map<String, String[]> getRequestParams() {
+    public Map<String, List<String>> getRequestParams() {
         return Collections.unmodifiableMap(this.requestParams);
     }
 

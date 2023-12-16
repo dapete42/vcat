@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.toolforge.vcat.params.AbstractAllParams;
 
 import java.io.Serial;
-import java.util.Map.Entry;
 
 /**
  * Link provider which creates links back to another vCat graph.
@@ -25,7 +24,7 @@ public class VCatLinkProvider extends AbstractLinkProvider {
         this.renderUrl = renderUrl;
         // Use request map to build the URL string to use
         final StringBuilder renderParamsBuilder = new StringBuilder();
-        for (Entry<String, String[]> entry : all.getRequestParams().entrySet()) {
+        for (var entry : all.getRequestParams().entrySet()) {
             final String key = entry.getKey();
             if ("category".equalsIgnoreCase(key) || "ns".equalsIgnoreCase(key) || "title".equalsIgnoreCase(key)) {
                 // category, title and ns may must be removed, ignore them here

@@ -1,5 +1,6 @@
 package org.toolforge.vcat;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.toolforge.vcat.junit.TestUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 public class VCatForCategoriesTest implements CanGenerateExpected {
@@ -36,7 +38,7 @@ public class VCatForCategoriesTest implements CanGenerateExpected {
         afterEach();
     }
 
-    private void genericRenderToFileTest(TestMode mode, String testName, Map<String, String[]> requestParams) throws Exception {
+    private void genericRenderToFileTest(TestMode mode, String testName, MultivaluedMap<String, String> requestParams) throws Exception {
         TestUtils.genericRenderToFileTest(mode, getClass(), testName, requestParams, tempDirectory);
     }
 
@@ -46,12 +48,12 @@ public class VCatForCategoriesTest implements CanGenerateExpected {
     }
 
     private void renderToFile(TestMode mode) throws Exception {
-        genericRenderToFileTest(mode, "renderToFile", Map.of(
-                "wiki", new String[]{"de.wikipedia.org"},
-                "category", new String[]{"Deutschland"},
-                "format", new String[]{"gv"},
-                "links", new String[]{"wiki"}
-        ));
+        genericRenderToFileTest(mode, "renderToFile", TestUtils.requestParamMap(Map.of(
+                "wiki", List.of("de.wikipedia.org"),
+                "category", List.of("Deutschland"),
+                "format", List.of("gv"),
+                "links", List.of("wiki")
+        )));
     }
 
     @Test
@@ -60,13 +62,13 @@ public class VCatForCategoriesTest implements CanGenerateExpected {
     }
 
     private void renderToFileDepth(TestMode mode) throws Exception {
-        genericRenderToFileTest(mode, "renderToFileDepth", Map.of(
-                "wiki", new String[]{"de.wikipedia.org"},
-                "category", new String[]{"Deutschland"},
-                "format", new String[]{"gv"},
-                "links", new String[]{"wiki"},
-                "depth", new String[]{"4"}
-        ));
+        genericRenderToFileTest(mode, "renderToFileDepth", TestUtils.requestParamMap(Map.of(
+                "wiki", List.of("de.wikipedia.org"),
+                "category", List.of("Deutschland"),
+                "format", List.of("gv"),
+                "links", List.of("wiki"),
+                "depth", List.of("4")
+        )));
     }
 
     @Test
@@ -75,13 +77,13 @@ public class VCatForCategoriesTest implements CanGenerateExpected {
     }
 
     private void renderToFileMultipleCategories(TestMode mode) throws Exception {
-        genericRenderToFileTest(mode, "renderToFileMultipleCategories", Map.of(
-                "wiki", new String[]{"de.wikipedia.org"},
-                "category", new String[]{"Deutschland", "Belgien"},
-                "format", new String[]{"gv"},
-                "links", new String[]{"wiki"},
-                "depth", new String[]{"4"}
-        ));
+        genericRenderToFileTest(mode, "renderToFileMultipleCategories", TestUtils.requestParamMap(Map.of(
+                "wiki", List.of("de.wikipedia.org"),
+                "category", List.of("Deutschland", "Belgien"),
+                "format", List.of("gv"),
+                "links", List.of("wiki"),
+                "depth", List.of("4")
+        )));
     }
 
 }

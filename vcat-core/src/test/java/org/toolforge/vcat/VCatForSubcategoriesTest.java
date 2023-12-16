@@ -1,5 +1,6 @@
 package org.toolforge.vcat;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,7 @@ import org.toolforge.vcat.junit.TestUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 public class VCatForSubcategoriesTest implements CanGenerateExpected {
@@ -36,7 +38,7 @@ public class VCatForSubcategoriesTest implements CanGenerateExpected {
         afterEach();
     }
 
-    private void genericRenderToFileTest(TestMode mode, String testName, Map<String, String[]> requestParams) throws Exception {
+    private void genericRenderToFileTest(TestMode mode, String testName, MultivaluedMap<String, String> requestParams) throws Exception {
         TestUtils.genericRenderToFileTest(mode, getClass(), testName, requestParams, tempDirectory);
     }
 
@@ -46,13 +48,13 @@ public class VCatForSubcategoriesTest implements CanGenerateExpected {
     }
 
     private void renderToFile(TestMode mode) throws Exception {
-        genericRenderToFileTest(mode, "renderToFile", Map.of(
-                "wiki", new String[]{"de.wikipedia.org"},
-                "category", new String[]{"Overath"},
-                "format", new String[]{"gv"},
-                "links", new String[]{"wiki"},
-                "rel", new String[]{"subcategory"}
-        ));
+        genericRenderToFileTest(mode, "renderToFile", TestUtils.requestParamMap(Map.of(
+                "wiki", List.of("de.wikipedia.org"),
+                "category", List.of("Overath"),
+                "format", List.of("gv"),
+                "links", List.of("wiki"),
+                "rel", List.of("subcategory")
+        )));
     }
 
     @Test
@@ -61,14 +63,14 @@ public class VCatForSubcategoriesTest implements CanGenerateExpected {
     }
 
     private void renderToFileDepth(TestMode mode) throws Exception {
-        genericRenderToFileTest(mode, "renderToFileDepth", Map.of(
-                "wiki", new String[]{"de.wikipedia.org"},
-                "category", new String[]{"Overath"},
-                "format", new String[]{"gv"},
-                "links", new String[]{"wiki"},
-                "depth", new String[]{"2"},
-                "rel", new String[]{"subcategory"}
-        ));
+        genericRenderToFileTest(mode, "renderToFileDepth", TestUtils.requestParamMap(Map.of(
+                "wiki", List.of("de.wikipedia.org"),
+                "category", List.of("Overath"),
+                "format", List.of("gv"),
+                "links", List.of("wiki"),
+                "depth", List.of("2"),
+                "rel", List.of("subcategory")
+        )));
     }
 
     @Test
@@ -77,13 +79,13 @@ public class VCatForSubcategoriesTest implements CanGenerateExpected {
     }
 
     private void renderToFileMultipleCategories(TestMode mode) throws Exception {
-        genericRenderToFileTest(mode, "renderToFileMultipleCategories", Map.of(
-                "wiki", new String[]{"de.wikipedia.org"},
-                "category", new String[]{"Overath", "Rösrath"},
-                "format", new String[]{"gv"},
-                "links", new String[]{"wiki"},
-                "rel", new String[]{"subcategory"}
-        ));
+        genericRenderToFileTest(mode, "renderToFileMultipleCategories", TestUtils.requestParamMap(Map.of(
+                "wiki", List.of("de.wikipedia.org"),
+                "category", List.of("Overath", "Rösrath"),
+                "format", List.of("gv"),
+                "links", List.of("wiki"),
+                "rel", List.of("subcategory")
+        )));
     }
 
 }

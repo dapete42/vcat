@@ -1,10 +1,9 @@
 package org.toolforge.vcat.params;
 
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.toolforge.vcat.VCatException;
 import org.toolforge.vcat.mediawiki.SimpleWikimediaWiki;
 import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
-
-import java.util.Map;
 
 /**
  * A bundle of {@link CombinedParams} plus temporary objects needed to build the category graph. Can only be constructed
@@ -15,7 +14,7 @@ import java.util.Map;
  */
 public class AllParams extends AbstractAllParams {
 
-    public AllParams(final Map<String, String[]> requestParams, final String renderUrl,
+    public AllParams(final MultivaluedMap<String, String> requestParams, final String renderUrl,
                      final MetadataProvider metadataProvider) throws VCatException {
         this.init(requestParams, renderUrl, metadataProvider);
     }
