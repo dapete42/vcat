@@ -1,5 +1,6 @@
 package org.toolforge.vcat.toolforge.webapp.rest;
 
+import io.quarkus.qute.Template;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
@@ -28,9 +29,10 @@ import org.toolforge.vcat.toolforge.webapp.ToolforgeWikiProvider;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -85,26 +87,41 @@ public class ToolforgeVCatResource {
     @Inject
     DataSource dataSource;
 
+    /**
+     * Cute error template
+     */
+    @Inject
+    Template error;
+
     private static QueuedVCatRenderer vCatRenderer;
 
     private static MetadataProvider metadataProvider;
 
     private static ToolforgeWikiProvider toolforgeWikiProvider;
 
-    private static Response errorResponse(Response.Status status, String message) {
-        return Response.status(status)
-                .entity(status.getReasonPhrase() + '\n' + message)
-                .type(MediaType.TEXT_PLAIN_TYPE)
-                .build();
+    private Response errorResponse(Response.Status status, String message) {
+        return errorResponse(status, message, "");
     }
 
-    private static String exceptionStringWithStacktrace(Exception e) {
-        final var joiner = new StringJoiner("\n");
-        joiner.add(e.getMessage());
-        joiner.add("");
-        Stream.of(e.getStackTrace())
-                .forEach(stackTraceElement -> joiner.add(stackTraceElement.toString()));
-        return joiner.toString();
+    private Response errorResponse(Response.Status status, Exception e) {
+        var stacktrace = Stream.of(e.getStackTrace())
+                .map(StackTraceElement::toString)
+                .collect(Collectors.joining("\n"));
+        return errorResponse(status, e.getMessage(), stacktrace);
+    }
+
+    private Response errorResponse(Response.Status status, String errorMessage, String stacktrace) {
+        return Response.ok()
+                .entity(
+                        error.data(
+                                "status", status,
+                                "errorMessage", errorMessage,
+                                "stacktrace", stacktrace
+                        ).render().getBytes(StandardCharsets.UTF_8)
+                )
+                .type(MediaType.TEXT_HTML_TYPE)
+                .status(status)
+                .build();
     }
 
     private static String uriStringWithoutQuery(UriInfo uriInfo) {
@@ -176,10 +193,10 @@ public class ToolforgeVCatResource {
                     .type(mimeType)
                     .build();
         } catch (VCatException e) {
-            return errorResponse(Response.Status.BAD_REQUEST, exceptionStringWithStacktrace(e));
+            return errorResponse(Response.Status.BAD_REQUEST, e);
         } catch (Exception e) {
             LOG.error("Error rendering response", e);
-            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e);
         }
     }
 
