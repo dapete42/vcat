@@ -5,7 +5,7 @@ import java.util.ResourceBundle;
 
 public class Messages {
 
-    private static final String BUNDLE_NAME = "vcat.toolforge.webapp.messages";
+    private static final String BUNDLE_NAME = "org.toolforge.vcat.toolforge.webapp.messages";
 
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
