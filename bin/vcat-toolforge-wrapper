@@ -10,4 +10,4 @@ mkdir -p "$HOME/.fonts"
 ln -s /layers/fagiani_apt/apt/usr/share/fonts/* "$HOME/.fonts/"
 
 # Run Runner JAR
-java -jar "$HOME/vcat-toolforge-webapp/target/vcat-toolforge-runner.jar"
+java -Djavamelody.storage-directory="$TOOL_DATA_DIR/javamelody" -jar "$HOME/vcat-toolforge-webapp/target/vcat-toolforge-runner.jar"
