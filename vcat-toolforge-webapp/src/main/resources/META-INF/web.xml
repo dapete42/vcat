@@ -4,4 +4,14 @@
 
     <module-name>vCat</module-name>
 
+    <!-- JavaMelody configuration -->
+    <context-param>
+        <param-name>javamelody.application-name</param-name>
+        <param-value>vcat</param-value>
+    </context-param>
+    <context-param>
+        <param-name>javamelody.system-actions-enabled</param-name>
+        <param-value>false</param-value>
+    </context-param>
+
 </web-app>
