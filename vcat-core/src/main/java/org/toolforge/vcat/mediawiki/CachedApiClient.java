@@ -11,6 +11,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Getter
 public class CachedApiClient extends ApiClient {
@@ -19,6 +21,8 @@ public class CachedApiClient extends ApiClient {
     private static final long serialVersionUID = -4286304620124061421L;
 
     private final ApiCache cache;
+
+    private final Lock cacheLock = new ReentrantLock();
 
     public CachedApiClient(ApiCache cache) {
         this.cache = cache;
@@ -35,7 +39,8 @@ public class CachedApiClient extends ApiClient {
         }
         final String cacheKey = requestStuff.toString();
 
-        synchronized (cache) {
+        cacheLock.lock();
+        try {
             if (cache.containsKey(cacheKey)) {
                 try {
                     return cache.getJSONObject(cacheKey);
@@ -51,6 +56,8 @@ public class CachedApiClient extends ApiClient {
                 }
                 return jsonObject;
             }
+        } finally {
+            cacheLock.unlock();
         }
     }
 

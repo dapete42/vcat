@@ -23,24 +23,34 @@ public class ApiFileCache extends AbstractFileCache<String> implements ApiCache 
     }
 
     @Override
-    public synchronized JsonObject getJSONObject(String key) throws CacheException {
-        if (this.containsKey(key)) {
-            try (InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key));
-                 JsonReader jsonReader = Json.createReader(reader)) {
-                return jsonReader.readObject();
-            } catch (JsonException e) {
-                throw new CacheException(Messages.getString("ApiFileCache.Exception.ParseJSON"), e);
-            } catch (IOException e) {
-                throw new CacheException(Messages.getString("ApiFileCache.Exception.CloseJSON"), e);
+    public JsonObject getJSONObject(String key) throws CacheException {
+        lock.lock();
+        try {
+            if (this.containsKey(key)) {
+                try (InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key));
+                     JsonReader jsonReader = Json.createReader(reader)) {
+                    return jsonReader.readObject();
+                } catch (JsonException e) {
+                    throw new CacheException(Messages.getString("ApiFileCache.Exception.ParseJSON"), e);
+                } catch (IOException e) {
+                    throw new CacheException(Messages.getString("ApiFileCache.Exception.CloseJSON"), e);
+                }
+            } else {
+                return null;
             }
-        } else {
-            return null;
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
-    public synchronized void put(String key, JsonObject jsonObject) throws CacheException {
-        this.put(key, jsonObject.toString().getBytes());
+    public void put(String key, JsonObject jsonObject) throws CacheException {
+        lock.lock();
+        try {
+            this.put(key, jsonObject.toString().getBytes());
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

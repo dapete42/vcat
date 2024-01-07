@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class QueuedVCatRenderer implements VCatRenderer {
@@ -35,10 +37,12 @@ public class QueuedVCatRenderer implements VCatRenderer {
      */
     private final Map<String, Integer> jobs = new HashMap<>();
 
+    private final Lock jobsLock = new ReentrantLock();
+
     /**
      * Map of lock objects for each job.
      */
-    private final Map<String, Object> jobLocks = new HashMap<>();
+    private final Map<String, Lock> jobLocks = new HashMap<>();
 
     /**
      * Map of finished Jobs and results for each job. Jobs are added to this when their Runnable instance has finished.
@@ -82,10 +86,10 @@ public class QueuedVCatRenderer implements VCatRenderer {
 
         // Build a Job instance for the parameters.
         final String jobId = HashHelper.sha256Hex(all.getCombined());
-        Object lock;
+        final Lock lock;
 
-        // Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
-        synchronized (jobs) {
+        jobsLock.lock();
+        try {
             if (jobs.containsKey(jobId)) {
                 // If the job is alread queued or running, we need to record that we are also waiting for it to finish.
                 jobs.put(jobId, jobs.get(jobId) + 1);
@@ -96,16 +100,19 @@ public class QueuedVCatRenderer implements VCatRenderer {
                 // If the job is not queued or running yet, it needs to be added to ths list and a new job started.
                 jobs.put(jobId, 1);
                 // Create new lock
-                lock = new Object();
+                lock = new ReentrantLock();
                 jobLocks.put(jobId, lock);
 
                 executorService.execute(() -> runJob(jobId, all));
 
                 LOG.info(Messages.getString("QueuedVCatRenderer.Info.Scheduled"), jobId);
             }
+        } finally {
+            jobsLock.unlock();
         }
 
-        synchronized (lock) {
+        lock.lock();
+        try {
             // Loop while waiting for the thread rendering the Job in the background.
             while (!jobsFinished.containsKey(jobId)) {
                 try {
@@ -114,10 +121,12 @@ public class QueuedVCatRenderer implements VCatRenderer {
                     Thread.currentThread().interrupt();
                 }
             }
+        } finally {
+            lock.unlock();
         }
 
-        // Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
-        synchronized (jobs) {
+        jobsLock.lock();
+        try {
 
             // An Exception might have been thrown. Store it (or null if there was no Exception).
             Exception e = jobExceptions.get(jobId);
@@ -144,6 +153,8 @@ public class QueuedVCatRenderer implements VCatRenderer {
             // Return result
             return renderedFileInfo;
 
+        } finally {
+            jobsLock.unlock();
         }
 
     }
@@ -155,8 +166,15 @@ public class QueuedVCatRenderer implements VCatRenderer {
 
         LOG.info(Messages.getString("QueuedVCatRenderer.Info.ThreadStarted"), jobId);
 
-        Object lock = jobLocks.get(jobId);
-        synchronized (lock) {
+        final Lock lock;
+        jobsLock.lock();
+        try {
+            lock = jobLocks.get(jobId);
+        } finally {
+            jobsLock.unlock();
+        }
+        lock.lock();
+        try {
 
             RenderedFileInfo renderedFileInfo = null;
             try {
@@ -167,13 +185,17 @@ public class QueuedVCatRenderer implements VCatRenderer {
                 LOG.error(Messages.getString("QueuedVCatRenderer.Exception.Job"), e);
             }
 
-            // Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
-            synchronized (jobs) {
+            jobsLock.lock();
+            try {
                 // Remove job from running jobs.
                 jobsFinished.put(jobId, renderedFileInfo);
                 lock.notifyAll();
+            } finally {
+                jobsLock.unlock();
             }
 
+        } finally {
+            lock.unlock();
         }
 
         LOG.info(Messages.getString("QueuedVCatRenderer.Info.ThreadFinished"));

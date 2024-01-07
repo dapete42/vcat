@@ -23,36 +23,46 @@ public class MetadataFileCache extends AbstractFileCache<String> implements Meta
     }
 
     @Override
-    public synchronized Metadata getMetadata(Wiki wiki) throws CacheException {
-        final String key = wiki.getApiUrl();
-        if (this.containsKey(key)) {
-            try {
-                final Object metadataObject = SerializationUtils.deserialize(this.get(key));
-                if (metadataObject == null) {
-                    return null;
-                } else if (metadataObject instanceof Metadata metadata) {
-                    return metadata;
-                } else {
-                    // Wrong type
+    public Metadata getMetadata(Wiki wiki) throws CacheException {
+        lock.lock();
+        try {
+            final String key = wiki.getApiUrl();
+            if (this.containsKey(key)) {
+                try {
+                    final Object metadataObject = SerializationUtils.deserialize(this.get(key));
+                    if (metadataObject == null) {
+                        return null;
+                    } else if (metadataObject instanceof Metadata metadata) {
+                        return metadata;
+                    } else {
+                        // Wrong type
+                        this.remove(key);
+                        String message = Messages.getString("MetadataFileCache.Error.Deserialize");
+                        LOG.error(message);
+                        throw new CacheException(message);
+                    }
+                } catch (SerializationException e) {
+                    // Error during deserializing
                     this.remove(key);
-                    String message = Messages.getString("MetadataFileCache.Error.Deserialize");
-                    LOG.error(message);
-                    throw new CacheException(message);
+                    throw new CacheException(Messages.getString("MetadataFileCache.Error.Deserialize"), e);
                 }
-            } catch (SerializationException e) {
-                // Error during deserializing
-                this.remove(key);
-                throw new CacheException(Messages.getString("MetadataFileCache.Error.Deserialize"), e);
+            } else {
+                return null;
             }
-        } else {
-            return null;
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
-    public synchronized void put(Wiki wiki, Metadata metadata) throws CacheException {
-        final String key = wiki.getApiUrl();
-        this.put(key, SerializationUtils.serialize(metadata));
+    public void put(Wiki wiki, Metadata metadata) throws CacheException {
+        lock.lock();
+        try {
+            final String key = wiki.getApiUrl();
+            this.put(key, SerializationUtils.serialize(metadata));
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

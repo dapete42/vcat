@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class QueuedGraphviz implements Graphviz {
@@ -39,10 +41,12 @@ public class QueuedGraphviz implements Graphviz {
      */
     private final Map<Job, Integer> jobs = new HashMap<>();
 
+    private final Lock jobsLock = new ReentrantLock();
+
     /**
      * Map of lock objects for each job.
      */
-    private final Map<Job, Object> jobLocks = new HashMap<>();
+    private final Map<Job, Lock> jobLocks = new HashMap<>();
 
     /**
      * Set of finished Jobs. Jobs are added to this when their Runnable instance has finished. This causes calls to
@@ -83,10 +87,10 @@ public class QueuedGraphviz implements Graphviz {
 
         // Build a Job instance for the parameters.
         final Job job = new Job(inputFile, outputFile, params);
-        Object lock;
+        final Lock lock;
 
-        // Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
-        synchronized (this.jobs) {
+        jobsLock.lock();
+        try {
             if (this.jobs.containsKey(job)) {
                 // If the job is alread queued or running, we need to record that we are also waiting for it to finish.
                 this.jobs.put(job, this.jobs.get(job) + 1);
@@ -97,16 +101,19 @@ public class QueuedGraphviz implements Graphviz {
                 // If the job is not queued or running yet, it needs to be added to ths list and a new job started.
                 this.jobs.put(job, 1);
                 // Create new lock
-                lock = new Object();
+                lock = new ReentrantLock();
                 this.jobLocks.put(job, lock);
 
                 this.executorService.execute(() -> runJob(job));
 
                 LOG.info(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode());
             }
+        } finally {
+            jobsLock.unlock();
         }
 
-        synchronized (lock) {
+        lock.lock();
+        try {
             // Loop while waiting for the thread rendering the Job in the background.
             while (!this.jobsFinished.contains(job)) {
                 try {
@@ -115,10 +122,12 @@ public class QueuedGraphviz implements Graphviz {
                     Thread.currentThread().interrupt();
                 }
             }
+        } finally {
+            lock.unlock();
         }
 
-        // Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
-        synchronized (this.jobs) {
+        jobsLock.lock();
+        try {
 
             // An Exception might have been thrown. Store it (or null if there was no Exception).
             Exception e = this.jobExceptions.get(job);
@@ -139,6 +148,8 @@ public class QueuedGraphviz implements Graphviz {
                 throw new GraphvizException(Messages.getString("QueuedGraphviz.Exception.Graphviz"), e);
             }
 
+        } finally {
+            jobsLock.unlock();
         }
 
     }
@@ -150,8 +161,15 @@ public class QueuedGraphviz implements Graphviz {
 
         LOG.info(Messages.getString("QueuedGraphviz.Info.ThreadStarted"), job.hashCode());
 
-        Object lock = jobLocks.get(job);
-        synchronized (lock) {
+        final Lock lock;
+        jobsLock.lock();
+        try {
+            lock = jobLocks.get(job);
+        } finally {
+            jobsLock.unlock();
+        }
+        lock.lock();
+        try {
 
             try {
                 this.otherGraphviz.render(job.inputFile, job.outputFile, job.params);
@@ -161,13 +179,17 @@ public class QueuedGraphviz implements Graphviz {
                 LOG.error(Messages.getString("QueuedGraphviz.Exception.Job"), e);
             }
 
-            // Synchronized to jobs, as all code changing it or any of the other Collections storing Jobs.
-            synchronized (this.jobs) {
+            jobsLock.lock();
+            try {
                 // Remove job from running jobs.
                 this.jobsFinished.add(job);
                 lock.notifyAll();
+            } finally {
+                jobsLock.unlock();
             }
 
+        } finally {
+            lock.unlock();
         }
 
         LOG.info(Messages.getString("QueuedGraphviz.Info.ThreadFinished"));
