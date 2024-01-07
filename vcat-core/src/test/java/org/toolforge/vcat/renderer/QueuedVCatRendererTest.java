@@ -32,31 +32,4 @@ public class QueuedVCatRendererTest {
 
     }
 
-    @Test
-    public void testRenderConcurrent() throws VCatException {
-
-        // Use an artifical delay in the test renderer and try to render 100 times at the same time.
-        // testRenderer.createGraphFile(...) should only be called once.
-
-        testRenderer.setDelay(1000);
-        TestAllParams params = new TestAllParams();
-
-        for (int i = 0; i < 99; i++) {
-            new Thread(() -> {
-                try {
-                    underTest.render(params);
-                    assertEquals(1, testRenderer.getCreatedGraphFiles().size());
-                    assertEquals(1, testRenderer.getRenderedFileFromGraphFiles().size());
-                } catch (VCatException e) {
-                    throw new RuntimeException(e);
-                }
-            }).start();
-        }
-        underTest.render(params);
-
-        assertEquals(1, testRenderer.getCreatedGraphFiles().size());
-        assertEquals(1, testRenderer.getRenderedFileFromGraphFiles().size());
-
-    }
-
 }

@@ -174,7 +174,7 @@ public class ToolforgeVCatResource {
     @GET
     public Response render(@Context UriInfo uriInfo) {
         try {
-            if (vCatRenderer.getNumberOfQueuedJobs() > vcatQueue) {
+            if (vCatRenderer.getQueueLength() > vcatQueue) {
                 return errorResponse(Response.Status.TOO_MANY_REQUESTS,
                         Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
             }

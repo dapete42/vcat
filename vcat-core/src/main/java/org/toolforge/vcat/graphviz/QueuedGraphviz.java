@@ -1,60 +1,21 @@
 package org.toolforge.vcat.graphviz;
 
 import lombok.extern.slf4j.Slf4j;
-import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.graphviz.interfaces.Graphviz;
 import org.toolforge.vcat.params.GraphvizParams;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 
 @Slf4j
 public class QueuedGraphviz implements Graphviz {
 
-    record Job(Path inputFile, Path outputFile, GraphvizParams params) {
-    }
-
-    private final ExecutorService executorService;
-
     /**
-     * Map of Exceptions for jobs. If a job causes an exception during the call to
-     * {@link Graphviz#render(Path, Path, GraphvizParams) Graphviz.render} (on the {@link Graphviz} instance passed in
-     * the constructor), it will be saved in this Map and later thrown by {@link #render(Path, Path, GraphvizParams)}.
+     * Semaphore to control number of concurrent executions.
      */
-    private final Map<Job, Exception> jobExceptions = new HashMap<>();
+    private final Semaphore semaphore;
 
-    /**
-     * Map of all jobs. The value is an object we use to lock the number of calls to
-     * {@link #render(Path, Path, GraphvizParams)} currently waiting for each Job. Each Job will be in this Map while
-     * being processed.
-     * <p>
-     * This is also used to synchronize all operations on this Map or any of these other Collections to make the code
-     * thread-safe.
-     */
-    private final Map<Job, Integer> jobs = new HashMap<>();
-
-    private final Lock jobsLock = new ReentrantLock();
-
-    /**
-     * Map of lock objects for each job.
-     */
-    private final Map<Job, Lock> jobLocks = new HashMap<>();
-
-    /**
-     * Set of finished Jobs. Jobs are added to this when their Runnable instance has finished. This causes calls to
-     * {@link #render(Path, Path, GraphvizParams)} currently waiting for this Job to continue.
-     */
-    private final Set<Job> jobsFinished = new HashSet<>();
-
-    /**
+    /*
      * Graphviz renderer used for actual rendering
      */
     private final Graphviz otherGraphviz;
@@ -62,137 +23,45 @@ public class QueuedGraphviz implements Graphviz {
     /**
      * Return an instance of QueuedGraphviz, which uses the supplied Graphviz for rendering.
      *
-     * @param otherGraphviz   Graphviz renderer to use
-     * @param numberOfThreads Maximum number of threads to use (Zero or less means an unlimited number)
+     * @param otherGraphviz           Graphviz renderer to use.
+     * @param maxConcurrentExecutions Maximum number of concurrent executions (zero or less means no limit).
      */
-    public QueuedGraphviz(Graphviz otherGraphviz, int numberOfThreads) {
+    public QueuedGraphviz(Graphviz otherGraphviz, int maxConcurrentExecutions) {
 
         this.otherGraphviz = otherGraphviz;
 
-        final ThreadFactory tf = Thread.ofVirtual()
-                .name(getClass().getSimpleName() + '-' + hashCode())
-                .factory();
-
-        if (numberOfThreads < 1) {
-            executorService = Executors.newCachedThreadPool(tf);
-        } else if (numberOfThreads == 1) {
-            executorService = Executors.newSingleThreadExecutor(tf);
+        if (maxConcurrentExecutions < 1) {
+            semaphore = null;
         } else {
-            executorService = Executors.newFixedThreadPool(numberOfThreads, tf);
+            semaphore = new Semaphore(maxConcurrentExecutions);
+        }
+
+    }
+
+    /**
+     * @return The length of the queue for executions.
+     */
+    public int getQueueLength() {
+        if (semaphore == null) {
+            return 0;
+        } else {
+            return semaphore.getQueueLength();
         }
     }
 
     @Override
     public void render(Path inputFile, Path outputFile, GraphvizParams params) throws GraphvizException {
 
-        // Build a Job instance for the parameters.
-        final Job job = new Job(inputFile, outputFile, params);
-        final Lock lock;
-
-        jobsLock.lock();
-        try {
-            if (this.jobs.containsKey(job)) {
-                // If the job is alread queued or running, we need to record that we are also waiting for it to finish.
-                this.jobs.put(job, this.jobs.get(job) + 1);
-                LOG.info(Messages.getString("QueuedGraphviz.Info.AlreadyScheduled"), job.hashCode());
-                // Get lock
-                lock = jobLocks.get(job);
-            } else {
-                // If the job is not queued or running yet, it needs to be added to ths list and a new job started.
-                this.jobs.put(job, 1);
-                // Create new lock
-                lock = new ReentrantLock();
-                this.jobLocks.put(job, lock);
-
-                this.executorService.execute(() -> runJob(job));
-
-                LOG.info(Messages.getString("QueuedGraphviz.Info.Scheduled"), job.hashCode());
-            }
-        } finally {
-            jobsLock.unlock();
-        }
-
-        lock.lock();
-        try {
-            // Loop while waiting for the thread rendering the Job in the background.
-            while (!this.jobsFinished.contains(job)) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
-
-        jobsLock.lock();
-        try {
-
-            // An Exception might have been thrown. Store it (or null if there was no Exception).
-            Exception e = this.jobExceptions.get(job);
-
-            final int waiting = this.jobs.get(job);
-            if (waiting > 1) {
-                // If more than one is waiting, just record we are no longer waiting.
-                this.jobs.put(job, waiting - 1);
-            } else {
-                // If no one else is still waiting, clear the Job.
-                this.jobs.remove(job);
-                this.jobsFinished.remove(job);
-                this.jobLocks.remove(job);
-                this.jobExceptions.remove(job);
-            }
-            // Throw exception, if there was one.
-            if (e != null) {
-                throw new GraphvizException(Messages.getString("QueuedGraphviz.Exception.Graphviz"), e);
-            }
-
-        } finally {
-            jobsLock.unlock();
-        }
-
-    }
-
-    /**
-     * Called from the {@link Runnable#run()} implementation for the Job rendering thread.
-     */
-    private void runJob(Job job) {
-
-        LOG.info(Messages.getString("QueuedGraphviz.Info.ThreadStarted"), job.hashCode());
-
-        final Lock lock;
-        jobsLock.lock();
-        try {
-            lock = jobLocks.get(job);
-        } finally {
-            jobsLock.unlock();
-        }
-        lock.lock();
-        try {
-
+        if (semaphore == null) {
+            otherGraphviz.render(inputFile, outputFile, params);
+        } else {
             try {
-                this.otherGraphviz.render(job.inputFile, job.outputFile, job.params);
-            } catch (Exception e) {
-                // Record exception as thrown for this job
-                this.jobExceptions.put(job, e);
-                LOG.error(Messages.getString("QueuedGraphviz.Exception.Job"), e);
-            }
-
-            jobsLock.lock();
-            try {
-                // Remove job from running jobs.
-                this.jobsFinished.add(job);
-                lock.notifyAll();
+                semaphore.acquireUninterruptibly();
+                otherGraphviz.render(inputFile, outputFile, params);
             } finally {
-                jobsLock.unlock();
+                semaphore.release();
             }
-
-        } finally {
-            lock.unlock();
         }
-
-        LOG.info(Messages.getString("QueuedGraphviz.Info.ThreadFinished"));
 
     }
 
