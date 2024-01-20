@@ -22,10 +22,7 @@ import org.toolforge.vcat.mediawiki.CachedMetadataProvider;
 import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
 import org.toolforge.vcat.renderer.CachedVCatRenderer;
 import org.toolforge.vcat.renderer.QueuedVCatRenderer;
-import org.toolforge.vcat.toolforge.webapp.AllParamsToolforge;
-import org.toolforge.vcat.toolforge.webapp.Messages;
-import org.toolforge.vcat.toolforge.webapp.MyCnfConfig;
-import org.toolforge.vcat.toolforge.webapp.ToolforgeWikiProvider;
+import org.toolforge.vcat.toolforge.webapp.*;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -158,7 +155,7 @@ public class ToolforgeVCatResource {
 
             final var graphvizDirPath = Paths.get(graphvizDir);
             final var baseGraphviz = new GraphvizExternal(graphvizDirPath);
-            final var graphviz = new QueuedGraphviz(baseGraphviz, graphvizThreads);
+            final var graphviz = new WorkaroundGraphviz(new QueuedGraphviz(baseGraphviz, graphvizThreads));
 
             // Create renderer
             vCatRenderer = new QueuedVCatRenderer(

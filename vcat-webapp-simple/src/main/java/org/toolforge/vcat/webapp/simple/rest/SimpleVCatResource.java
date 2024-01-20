@@ -23,6 +23,7 @@ import org.toolforge.vcat.params.AllParams;
 import org.toolforge.vcat.renderer.CachedVCatRenderer;
 import org.toolforge.vcat.renderer.QueuedVCatRenderer;
 import org.toolforge.vcat.renderer.interfaces.VCatRenderer;
+import org.toolforge.vcat.webapp.simple.WorkaroundGraphviz;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -96,7 +97,7 @@ public class SimpleVCatResource {
         LOG.info("Using cache directory {}", cachePath);
         final var tempDir = Files.createTempDirectory("vcat-webapp-simple");
         LOG.info("Using temporary directory {}", tempDir);
-        final var graphviz = new QueuedGraphviz(new GraphvizExternal(Paths.get(graphvizDir)), 1);
+        final var graphviz = new WorkaroundGraphviz(new QueuedGraphviz(new GraphvizExternal(Paths.get(graphvizDir)), 1));
         final var apiCache = new ApiCaffeineCache(10000, cachePurge);
         final CachedApiClient apiClient = new CachedApiClient(apiCache);
         final MetadataCache metadataCache = new MetadataCaffeineCache(10000, cachePurgeMetadata);
