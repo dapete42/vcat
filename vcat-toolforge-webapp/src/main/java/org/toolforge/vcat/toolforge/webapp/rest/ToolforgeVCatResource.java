@@ -24,7 +24,6 @@ import org.toolforge.vcat.renderer.CachedVCatRenderer;
 import org.toolforge.vcat.renderer.QueuedVCatRenderer;
 import org.toolforge.vcat.toolforge.webapp.AllParamsToolforge;
 import org.toolforge.vcat.toolforge.webapp.Messages;
-import org.toolforge.vcat.toolforge.webapp.MyCnfConfig;
 import org.toolforge.vcat.toolforge.webapp.ToolforgeWikiProvider;
 
 import javax.sql.DataSource;
@@ -132,9 +131,6 @@ public class ToolforgeVCatResource {
     public void init() throws ServletException {
 
         try {
-
-            final var configMyCnf = new MyCnfConfig();
-            configMyCnf.readFromMyCnf();
 
             // Provider for Wikimedia Toolforge wiki information
             toolforgeWikiProvider = new ToolforgeWikiProvider(dataSource);
