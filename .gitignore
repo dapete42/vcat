@@ -1,5 +1,4 @@
 # Maven
-/.mvn/wrapper/maven-wrapper.jar
 /target/
 /*/target/
 /site/
