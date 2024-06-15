@@ -13,24 +13,53 @@ graphical trees.
 
 It replaces a similar tool written in PHP, Catgraph.
 
-Projects
---------
+It is designed to run on the
+[Toolforge](https://wikitech.wikimedia.org/wiki/Help:Toolforge) environment
+provided by the Wikimedia Foundation.
+
+Maven modules
+-------------
 
 It consists of five Maven submodules:
 
-* vcat-core: The core library to evaluate parameters, get the necessary
+* `vcat-core` - The core library to evaluate parameters, get the necessary
   category information from the wiki and render it into an image.
-* vcat-caffeine: An addition which allows the use of Caffeine to store the API
-  and metadata caches.
-* vcat-toolforge-webapp: A version of vCat which uses the meta_p.wiki table
-  to look up wikis, and Caffeine for caching, as used on Wikimedia Toolforge.
-  Builds an executable JAR file based on Quarkus (https://quarkus.io/).
-* vcat-webapp-simple: A simpler version of vCat for local testing.
+* `vcat-caffeine` - An addition which allows the use of Caffeine to store the 
+  API and metadata caches.
+* `vcat-toolforge-webapp`-  A version of vCat which uses the `meta_p.wiki`
+  table available in the Toolforge environment to look up wikis, and Caffeine
+  for caching. Builds an executable JAR file based on Quarkus
+  (https://quarkus.io/). This is what runs in the Toolforge environment (also
+  see the next section). 
+* `vcat-webapp-simple` - A simpler version of vCat for local testing. This also
+  creates am executable JAR file based on Quarkus, but does not require
+  anything else.
+
+Toolforge Build Service
+-----------------------
+
+The whole project is designed to be used with the
+[Toolforge Build Service](https://wikitech.wikimedia.org/wiki/Help:Toolforge/Build_Service)
+to create an image which can be run in the Toolforge environment as a web
+application.
+
+In particular this includes:
+
+* A `Procfile` to define how to start the web application
+  ([see 'Procfile' in the Build Service documentation](https://wikitech.wikimedia.org/wiki/Help:Toolforge/Build_Service#Procfile)).
+* `bin/vcat-toolforge-wrapper`, which is the start script referenced in
+  `Procfile`.
+* An `Aptfile` to define additional Ubuntu packages to be installed, which is
+  used by
+  [heroku-buildpack-apt](https://elements.heroku.com/buildpacks/heroku/heroku-buildpack-apt)
+  included in the Toolforge Build Service
+  ([see 'Installing Apt packages' in the Build Service documentation](https://wikitech.wikimedia.org/wiki/Help:Toolforge/Build_Service#Installing_Apt_packages)).
+  In particular, this is used to install Graphviz and additional fonts.
 
 Copyright notice
 ----------------
 
-Copyright 2013-2023 Peter Schlömer
+Copyright 2013-2024 Peter Schlömer
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 the files in this project except in compliance with the License. You may obtain
