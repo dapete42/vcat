@@ -25,7 +25,7 @@ jobs:
       - name: Maven package
         run: ./mvnw -B package
       - uses: codecov/codecov-action@v3
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: vcat-toolforge-runner
           path: vcat-toolforge-webapp/target/vcat-toolforge-runner.jar
