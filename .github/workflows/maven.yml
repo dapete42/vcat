@@ -24,7 +24,7 @@ jobs:
           cache: maven
       - name: Maven package
         run: ./mvnw -B package
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
       - uses: actions/upload-artifact@v4
         with:
           name: vcat-toolforge-runner
