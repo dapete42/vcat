@@ -27,12 +27,7 @@
         </developer>
     </developers>
 
-    <modules>
-        <module>vcat-caffeine</module>
-        <module>vcat-core</module>
-        <module>vcat-toolforge-webapp</module>
-        <module>vcat-webapp-simple</module>
-    </modules>
+    <!-- no <modules> definition here, see profile default below -->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -216,6 +211,22 @@
     </build>
 
     <profiles>
+        <profile>
+            <!--
+                Modules can never be removed from the <modules> list; they are defined in this profile, so they can be
+                overridden in other profiles.
+            -->
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>vcat-caffeine</module>
+                <module>vcat-core</module>
+                <module>vcat-toolforge-webapp</module>
+                <module>vcat-webapp-simple</module>
+            </modules>
+        </profile>
         <profile>
             <id>heroku-build</id>
             <activation>
