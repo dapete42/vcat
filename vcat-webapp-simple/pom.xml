@@ -15,7 +15,8 @@
 
     <properties>
         <skipITs>true</skipITs>
-        <quarkus.package.type>uber-jar</quarkus.package.type>
+        <quarkus.package.jar.enabled>true</quarkus.package.jar.enabled>
+        <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
     </properties>
 
     <dependencies>
