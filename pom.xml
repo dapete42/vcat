@@ -245,13 +245,14 @@
             </modules>
             <build>
                 <plugins>
+                    <!-- Use Maven AntRun plugin for checks whether the image is OK before the build starts. -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>build-checks-ant</id>
-                                <phase>verify</phase>
+                                <id>validate-heroku</id>
+                                <phase>validate</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
