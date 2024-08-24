@@ -11,6 +11,8 @@ import java.sql.SQLException;
 
 public class ToolforgeWikiProvider {
 
+    public static final String WIKI_DBNAME_QUERY = "SELECT * FROM wiki WHERE dbname=?";
+
     private final DataSource dataSource;
 
     public ToolforgeWikiProvider(final DataSource dataSource) {
@@ -19,7 +21,7 @@ public class ToolforgeWikiProvider {
 
     public ToolforgeWiki fromDbname(final String dbnameParam) throws VCatException {
         try (Connection connection = this.dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM wiki WHERE dbname=?")) {
+             PreparedStatement statement = connection.prepareStatement(WIKI_DBNAME_QUERY)) {
             statement.setString(1, dbnameParam);
             try (ResultSet rs = statement.executeQuery()) {
                 if (!rs.first()) {
