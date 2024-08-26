@@ -10,8 +10,6 @@
     </parent>
     <artifactId>vcat-core</artifactId>
 
-    <packaging>jar</packaging>
-
     <name>vCat Core</name>
 	<description>Core components of vCat, allowing to create category graphs and rendering them using Graphviz.</description>
 

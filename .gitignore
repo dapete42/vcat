@@ -1,7 +1,6 @@
 # Maven
 /target/
 /*/target/
-/site/
 # IntelliJ IDEA
 /.idea/
 *.iml

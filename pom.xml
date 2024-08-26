@@ -16,7 +16,7 @@
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
 
@@ -177,11 +177,6 @@
                     <version>3.4.0</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>3.4.0</version>
-                </plugin>
-                <plugin>
                     <groupId>${quarkus.platform.group-id}</groupId>
                     <artifactId>quarkus-maven-plugin</artifactId>
                     <version>${quarkus.platform.version}</version>
@@ -271,12 +266,5 @@
             </build>
         </profile>
     </profiles>
-
-    <distributionManagement>
-        <site>
-            <id>dummy</id>
-            <url>file://${project.basedir}/site</url>
-        </site>
-    </distributionManagement>
 
 </project>
