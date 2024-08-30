@@ -21,7 +21,7 @@ public class ApiClientProducer {
 
     @Produces
     @ApiClientQualifier
-    private ApiClient produceApiClient() {
+    ApiClient produceApiClient() {
         // Use Caffeine for API and metadata caches
         final var apiCache = new ApiCaffeineCache(10000, cachePurge);
         return new CachedApiClient(apiCache);
