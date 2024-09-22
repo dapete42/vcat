@@ -1,15 +1,13 @@
 package org.toolforge.vcat.mediawiki;
 
-import jakarta.json.*;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonException;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.core.UriBuilder;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.helpers.MessageFormatter;
 import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.mediawiki.interfaces.CategoryProvider;
@@ -17,37 +15,34 @@ import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
 import org.toolforge.vcat.mediawiki.interfaces.Wiki;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serial;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.*;
-import java.util.Map.Entry;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ApiClient implements CategoryProvider, MetadataProvider {
 
     @Serial
-    private static final long serialVersionUID = 2558987660016530790L;
+    private static final long serialVersionUID = 3602036144920595619L;
 
     /**
      * Maximum number of titles parameters to use in one request.
      */
     private static final int TITLES_MAX = 50;
 
-    private final HttpClientBuilder clientBuilder;
+    /**
+     * Locks for API Etiquette (see below).
+     */
+    private final WeakHashMap<String, ReentrantLock> locks = new WeakHashMap<>();
+
+    private final HttpClient httpClient;
 
     public ApiClient() {
-        final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(5);
-        /*
-         * API Etiquette: There should always be only one concurrent HTTP access; at least for Wikimedia-run wikis,
-         * doing more at the same time may lead to being blocked. It is probably nice to do this for any wiki, anyway.
-         * See https://www.mediawiki.org/wiki/API:Etiquette for more information on Wikimedia API etiquette.
-         */
-        connectionManager.setDefaultMaxPerRoute(1);
-
-        this.clientBuilder = HttpClientBuilder.create().setConnectionManager(connectionManager)
-                .setConnectionManagerShared(true).setUserAgent(Messages.getString("ApiClient.UserAgent"))
-                .disableCookieManagement();
+        httpClient = HttpClient.newBuilder()
+                .build();
     }
 
     private static Map<String, String> buildContinueMap(JsonObject result, final String oldQueryContinueChildName) {
@@ -69,49 +64,68 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
         return continueMap;
     }
 
+
+    private static URI buildRequestUri(String apiUrl, Map<String, String> params) {
+        final var uriBuilder = UriBuilder.fromUri(apiUrl)
+                .queryParam("format", "json")
+                .queryParam("action", "query");
+        params.forEach(uriBuilder::queryParam);
+        return uriBuilder.build();
+    }
+
+    private static HttpRequest buildHttpRequest(URI uri) {
+        // API Etiquette: use default "get" method to enable server-side caching
+        return HttpRequest.newBuilder(uri)
+                .setHeader("User-Agent", Messages.getString("ApiClient.UserAgent"))
+                .build();
+    }
+
+    private ReentrantLock getLock(String apiUrl) {
+        return locks.computeIfAbsent(apiUrl, k -> new ReentrantLock());
+    }
+
     protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {
-        // API Etiquette: use "get" method to enable server-side caching
-        final RequestBuilder requestBuilder = RequestBuilder.get(apiUrl);
-        requestBuilder.setCharset(StandardCharsets.UTF_8);
-        requestBuilder.addParameter("format", "json");
-        requestBuilder.addParameter("action", "query");
+        final var requestUri = buildRequestUri(apiUrl, params);
+        final var httpRequest = buildHttpRequest(requestUri);
 
-        for (Entry<String, String> param : params.entrySet()) {
-            requestBuilder.addParameter(param.getKey(), param.getValue());
-        }
-
-        final HttpUriRequest request = requestBuilder.build();
-
-        try (CloseableHttpClient client = this.clientBuilder.build();
-             CloseableHttpResponse response = client.execute(request);
-             InputStream inputStream = response.getEntity().getContent();
-             JsonReader jsonReader = Json.createReader(inputStream)) {
-            return jsonReader.readObject();
-        } catch (IllegalStateException | IOException e) {
+        /*
+         * API Etiquette: There should always be only one concurrent HTTP access; at least for Wikimedia-run wikis, doing more at the same time may lead
+         * to being blocked. It is probably nice to do this for any wiki, anyway. See <a href="https://www.mediawiki.org/wiki/API:Etiquette">API:Etiquette</a> on
+         * the MediaWiki wiki for more information on Wikimedia API etiquette.
+         */
+        final var lock = getLock(apiUrl);
+        lock.lock();
+        try {
+            final var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
+            try (var bodyStream = httpResponse.body();
+                 var jsonReader = Json.createReader(bodyStream)) {
+                return jsonReader.readObject();
+            }
+        } catch (InterruptedException | IOException e) {
             // IOException will be thrown for all HTTP problems
             throw new ApiException(MessageFormatter
-                    .format(Messages.getString("ApiClient.Exception.HTTP"), request.getURI().toString()).getMessage(),
+                    .format(Messages.getString("ApiClient.Exception.HTTP"), requestUri.toString()).getMessage(),
                     e);
         } catch (JsonException e) {
             throw new ApiException(MessageFormatter
-                    .format(Messages.getString("ApiClient.Exception.ParsingJSON"), request.getURI().toString())
+                    .format(Messages.getString("ApiClient.Exception.ParsingJSON"), requestUri.toString())
                     .getMessage(), e);
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
-    public Map<String, Collection<String>> requestCategories(Wiki wiki, List<String> fullTitles, boolean showhidden)
+    public Map<String, Collection<String>> requestCategories(Wiki wiki, List<String> fullTitles, boolean showHidden)
             throws ApiException {
-        Map<String, Collection<String>> categoryMap = new HashMap<>();
-        String clshow = showhidden ? null : "!hidden";
-        this.requestCategoriesRecursive(wiki.getApiUrl(), fullTitles, categoryMap, null, clshow);
+        final Map<String, Collection<String>> categoryMap = new HashMap<>();
+        final String clshow = showHidden ? null : "!hidden";
+        requestCategoriesRecursive(wiki.getApiUrl(), fullTitles, categoryMap, null, clshow);
         return categoryMap;
     }
 
-    private void requestCategoriesRecursive(String apiUrl, List<String> fullTitles,
-                                            final Map<String, Collection<String>> categoryMap, Map<String, String> continueMap, String clshow)
-            throws ApiException {
-
+    private void requestCategoriesRecursive(String apiUrl, List<String> fullTitles, final Map<String, Collection<String>> categoryMap,
+                                            Map<String, String> continueMap, String clshow) throws ApiException {
         if (fullTitles.size() > TITLES_MAX) {
 
             for (List<String> fullTitlesPart : ListUtils.partition(fullTitles, TITLES_MAX)) {
@@ -157,7 +171,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
                 // Try to get continue map, if there is one, make another request
                 final Map<String, String> newContinueMap = buildContinueMap(result, "categories");
                 if (newContinueMap != null) {
-                    this.requestCategoriesRecursive(apiUrl, fullTitles, categoryMap, newContinueMap, clshow);
+                    requestCategoriesRecursive(apiUrl, fullTitles, categoryMap, newContinueMap, clshow);
                 }
             } catch (JsonException e) {
                 throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
@@ -168,16 +182,16 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
 
     @Override
     public List<String> requestCategorymembers(final Wiki wiki, final String fullTitle) throws ApiException {
-        List<String> categories = new ArrayList<>();
-        this.requestCategorymembersRecursive(wiki.getApiUrl(), fullTitle, categories, null);
+        final List<String> categories = new ArrayList<>();
+        requestCategorymembersRecursive(wiki.getApiUrl(), fullTitle, categories, null);
         return categories;
     }
 
-    private void requestCategorymembersRecursive(final String apiUrl, final String fullTitle,
-                                                 final List<String> categories, final Map<String, String> continueMap) throws ApiException {
+    private void requestCategorymembersRecursive(final String apiUrl, final String fullTitle, final List<String> categories,
+                                                 final Map<String, String> continueMap) throws ApiException {
 
         // Set query properties
-        Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put("list", "categorymembers");
         params.put("cmlimit", "max");
         params.put("cmtitle", fullTitle);
@@ -202,7 +216,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
             // Try to get continue map, if there is one, make another request
             final Map<String, String> newContinueMap = buildContinueMap(result, "categorymembers");
             if (newContinueMap != null) {
-                this.requestCategorymembersRecursive(apiUrl, fullTitle, categories, newContinueMap);
+                requestCategorymembersRecursive(apiUrl, fullTitle, categories, newContinueMap);
             }
         } catch (JsonException e) {
             throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
@@ -211,8 +225,8 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
     }
 
     public Collection<Pair<String, String>> requestLinksBetween(Wiki wiki, List<String> fullTitles) throws ApiException {
-        ArrayList<Pair<String, String>> links = new ArrayList<>();
-        this.requestLinksBetweenRecursive(wiki.getApiUrl(), fullTitles, links, null);
+        final ArrayList<Pair<String, String>> links = new ArrayList<>();
+        requestLinksBetweenRecursive(wiki.getApiUrl(), fullTitles, links, null);
         return links;
     }
 
@@ -228,7 +242,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
         } else {
 
             // Set query properties
-            Map<String, String> params = new HashMap<>();
+            final Map<String, String> params = new HashMap<>();
             params.put("prop", "links");
             params.put("pllimit", "max");
             final String titlesParam = String.join("|", fullTitles);
@@ -237,19 +251,19 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
             if (continueMap != null) {
                 params.putAll(continueMap);
             }
-            JsonObject result = this.request(apiUrl, params);
+            final JsonObject result = request(apiUrl, params);
 
             try {
-                JsonObject query = result.getJsonObject("query");
+                final JsonObject query = result.getJsonObject("query");
                 if (query != null) {
-                    JsonObject pages = query.getJsonObject("pages");
+                    final JsonObject pages = query.getJsonObject("pages");
                     for (String pagesKey : pages.keySet()) {
-                        JsonObject pagesData = pages.getJsonObject(pagesKey);
+                        final JsonObject pagesData = pages.getJsonObject(pagesKey);
                         if (pagesData.containsKey("links")) {
                             JsonArray jsonLinks = pagesData.getJsonArray("links");
                             String pagesDataTitle = pagesData.getString("title");
                             for (int i = 0; i < jsonLinks.size(); i++) {
-                                JsonObject category = jsonLinks.getJsonObject(i);
+                                final JsonObject category = jsonLinks.getJsonObject(i);
                                 links.add(new MutablePair<>(pagesDataTitle, category.getString("title")));
                             }
                         }
@@ -259,7 +273,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
                 // Try to get continue map, if there is one, make another request
                 final Map<String, String> newContinueMap = buildContinueMap(result, "categories");
                 if (newContinueMap != null) {
-                    this.requestLinksBetweenRecursive(apiUrl, fullTitles, links, newContinueMap);
+                    requestLinksBetweenRecursive(apiUrl, fullTitles, links, newContinueMap);
                 }
             } catch (JsonException e) {
                 throw new ApiException(Messages.getString("ApiClient.Exception.ParsingJSON"), e);
@@ -270,20 +284,21 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
 
     @Override
     public Metadata requestMetadata(final Wiki wiki) throws ApiException {
+
         // Set query properties
         Map<String, String> params = new HashMap<>();
         params.put("meta", "siteinfo");
         params.put("siprop", "general|namespaces|namespacealiases");
 
-        JsonObject json = this.request(wiki.getApiUrl(), params);
+        final JsonObject json = request(wiki.getApiUrl(), params);
 
-        String articlepath;
-        String server;
+        final String articlepath;
+        final String server;
         final Map<Integer, String> authoritativeNamespaces = new HashMap<>();
         final Map<String, Integer> allNamespacesInverse = new HashMap<>();
 
         try {
-            JsonObject query = json.getJsonObject("query");
+            final JsonObject query = json.getJsonObject("query");
 
             articlepath = query.getJsonObject("general").getString("articlepath");
 
@@ -291,24 +306,24 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
 
             JsonObject namespaces = query.getJsonObject("namespaces");
             for (String nsIdString : namespaces.keySet()) {
-                JsonObject namespaceData = namespaces.getJsonObject(nsIdString);
-                int nsId = Integer.parseInt(nsIdString);
-                String nsName = namespaceData.getString("*");
+                final JsonObject namespaceData = namespaces.getJsonObject(nsIdString);
+                final int nsId = Integer.parseInt(nsIdString);
+                final String nsName = namespaceData.getString("*");
                 authoritativeNamespaces.put(nsId, nsName);
                 allNamespacesInverse.put(nsName, nsId);
                 if (namespaceData.containsKey("canonical")) {
-                    String nsCanonical = namespaceData.getString("canonical");
+                    final String nsCanonical = namespaceData.getString("canonical");
                     if (nsCanonical != null && !nsCanonical.isEmpty()) {
                         allNamespacesInverse.put(nsCanonical, nsId);
                     }
                 }
             }
 
-            JsonArray namespacealiases = query.getJsonArray("namespacealiases");
+            final JsonArray namespacealiases = query.getJsonArray("namespacealiases");
             for (int i = 0; i < namespacealiases.size(); i++) {
-                JsonObject namespacealiasData = namespacealiases.getJsonObject(i);
-                int nsId = namespacealiasData.getInt("id");
-                String nsName = namespacealiasData.getString("*");
+                final JsonObject namespacealiasData = namespacealiases.getJsonObject(i);
+                final int nsId = namespacealiasData.getInt("id");
+                final String nsName = namespacealiasData.getString("*");
                 if (nsName != null && !nsName.isEmpty()) {
                     allNamespacesInverse.put(nsName, nsId);
                 }

@@ -9,24 +9,19 @@ import org.toolforge.vcat.mediawiki.ApiException;
 import org.toolforge.vcat.mediawiki.CachedApiClient;
 
 import java.io.Serial;
-import java.nio.file.Path;
 import java.util.Map;
 
 public class TestApiClient extends CachedApiClient {
 
     @Serial
-    private static final long serialVersionUID = 4814974369474303893L;
+    private static final long serialVersionUID = 1969628748792074157L;
 
     @Getter
     @Setter
     private boolean callRealApi = false;
 
     public TestApiClient() throws CacheException {
-        this(TestUtils.testApiClientCacheDirectory);
-    }
-
-    TestApiClient(Path cachePath) throws CacheException {
-        super(new ApiFileCache(cachePath, -1));
+        super(new ApiFileCache(TestUtils.testApiClientCacheDirectory, -1));
     }
 
     @Override
