@@ -1,4 +1,4 @@
-// Created by GraphWriter at 2023-11-12 10:15:56 CET
+// Created by GraphWriter at 2024-09-22 18:12:57 CEST
 digraph cluster_vcat{
 charset="UTF-8";
 fontname="DejaVu Sans";
@@ -19,6 +19,7 @@ rank="min";
 "Kultur (Rösrath)" [href="http://de.wikipedia.org/wiki/Kategorie:Kultur_%28R%C3%B6srath%29"];
 "Kultur (Rösrath)" -> "Baudenkmal in Rösrath";
 "Kultur (Rösrath)" -> "Denkmal des Monats (Rösrath)";
+"Wassermühle in Rösrath" [href="http://de.wikipedia.org/wiki/Kategorie:Wasserm%C3%BChle_in_R%C3%B6srath"];
 "Ortsteil von Steinenbrück" [href="http://de.wikipedia.org/wiki/Kategorie:Ortsteil_von_Steinenbr%C3%BCck"];
 "Bergbau (Rösrath)" [href="http://de.wikipedia.org/wiki/Kategorie:Bergbau_%28R%C3%B6srath%29"];
 "Bergbau (Rösrath)" -> "Bergwerk in Rösrath";
@@ -78,6 +79,7 @@ rank="min";
 "Organisation (Rösrath)" [href="http://de.wikipedia.org/wiki/Kategorie:Organisation_%28R%C3%B6srath%29"];
 "Bauwerk in Rösrath" [href="http://de.wikipedia.org/wiki/Kategorie:Bauwerk_in_R%C3%B6srath"];
 "Bauwerk in Rösrath" -> "Fachwerkhaus in Rösrath";
+"Bauwerk in Rösrath" -> "Wassermühle in Rösrath";
 "Bauwerk in Rösrath" -> "Sakralbau in Rösrath";
 "Geographie (Overath)" [href="http://de.wikipedia.org/wiki/Kategorie:Geographie_%28Overath%29"];
 "Geographie (Overath)" -> "Bergwerk in Overath";
