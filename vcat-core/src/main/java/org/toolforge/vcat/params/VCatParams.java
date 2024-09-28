@@ -2,6 +2,7 @@ package org.toolforge.vcat.params;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.AbstractVCat;
 import org.toolforge.vcat.mediawiki.interfaces.Wiki;
 import org.toolforge.vcat.util.AbstractLinkProvider;
@@ -24,6 +25,7 @@ public class VCatParams implements Serializable {
 
     private Integer depth;
 
+    @Nullable
     private Integer limit;
 
     /**

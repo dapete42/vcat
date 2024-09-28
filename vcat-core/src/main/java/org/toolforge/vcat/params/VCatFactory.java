@@ -22,8 +22,8 @@ public class VCatFactory implements Serializable {
     public AbstractVCat createInstance(final AbstractAllParams all) {
         final Relation relation = all.getVCat().getRelation();
         return switch (relation) {
-            case Category -> new VCatForCategories(all, this.categoryProvider);
-            case Subcategory -> new VCatForSubcategories(all, this.categoryProvider);
+            case Category -> new VCatForCategories(all, categoryProvider);
+            case Subcategory -> new VCatForSubcategories(all, categoryProvider);
         };
     }
 

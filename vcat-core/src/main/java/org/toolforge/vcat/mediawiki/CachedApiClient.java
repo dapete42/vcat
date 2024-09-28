@@ -2,6 +2,7 @@ package org.toolforge.vcat.mediawiki;
 
 import jakarta.json.JsonObject;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.cache.CacheException;
 import org.toolforge.vcat.cache.interfaces.ApiCache;
@@ -29,6 +30,7 @@ public class CachedApiClient extends ApiClient {
     }
 
     @Override
+    @Nullable
     protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {
         final StringBuilder requestStuff = new StringBuilder(apiUrl)
                 .append('&');

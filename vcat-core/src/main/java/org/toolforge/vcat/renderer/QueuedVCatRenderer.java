@@ -1,6 +1,7 @@
 package org.toolforge.vcat.renderer;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.VCatException;
 import org.toolforge.vcat.params.AbstractAllParams;
 import org.toolforge.vcat.renderer.interfaces.VCatRenderer;
@@ -16,6 +17,7 @@ public class QueuedVCatRenderer implements VCatRenderer {
     /**
      * Semaphore to control number of concurrent executions.
      */
+    @Nullable
     private final Semaphore semaphore;
 
     /**
@@ -29,7 +31,7 @@ public class QueuedVCatRenderer implements VCatRenderer {
      * @param otherRenderer           vCat renderer to use.
      * @param maxConcurrentExecutions Maximum number of concurrent executions (zero or less means no limit).
      */
-    public QueuedVCatRenderer(final VCatRenderer otherRenderer, final int maxConcurrentExecutions) {
+    public QueuedVCatRenderer(VCatRenderer otherRenderer, int maxConcurrentExecutions) {
 
         this.otherRenderer = otherRenderer;
 
@@ -53,7 +55,7 @@ public class QueuedVCatRenderer implements VCatRenderer {
     }
 
     @Override
-    public RenderedFileInfo render(final AbstractAllParams all) throws VCatException {
+    public RenderedFileInfo render(AbstractAllParams all) throws VCatException {
 
         if (semaphore == null) {
             return otherRenderer.render(all);

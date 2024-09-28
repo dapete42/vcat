@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.mediawiki.interfaces.CategoryProvider;
@@ -45,6 +46,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
                 .build();
     }
 
+    @Nullable
     private static Map<String, String> buildContinueMap(JsonObject result, final String oldQueryContinueChildName) {
         Map<String, String> continueMap = null;
         JsonObject jsonContinue = null;
@@ -84,6 +86,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
         return locks.computeIfAbsent(apiUrl, k -> new ReentrantLock());
     }
 
+    @Nullable
     protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {
         final var requestUri = buildRequestUri(apiUrl, params);
         final var httpRequest = buildHttpRequest(requestUri);
@@ -125,7 +128,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
     }
 
     private void requestCategoriesRecursive(String apiUrl, List<String> fullTitles, final Map<String, Collection<String>> categoryMap,
-                                            Map<String, String> continueMap, String clshow) throws ApiException {
+                                            @Nullable Map<String, String> continueMap, @Nullable String clshow) throws ApiException {
         if (fullTitles.size() > TITLES_MAX) {
 
             for (List<String> fullTitlesPart : ListUtils.partition(fullTitles, TITLES_MAX)) {
@@ -145,19 +148,19 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
             if (continueMap != null) {
                 params.putAll(continueMap);
             }
-            JsonObject result = this.request(apiUrl, params);
+            final JsonObject result = request(apiUrl, params);
 
             try {
-                JsonObject query = result.getJsonObject("query");
+                final JsonObject query = result.getJsonObject("query");
                 if (query != null) {
-                    JsonObject pages = query.getJsonObject("pages");
+                    final JsonObject pages = query.getJsonObject("pages");
                     if (pages != null) {
                         for (String pagesKey : pages.keySet()) {
-                            JsonObject pagesData = pages.getJsonObject(pagesKey);
+                            final JsonObject pagesData = pages.getJsonObject(pagesKey);
                             if (pagesData.containsKey("categories")) {
-                                JsonArray jsonCategories = pagesData.getJsonArray("categories");
-                                String pagesDataTitle = pagesData.getString("title");
-                                Collection<String> categories = categoryMap.computeIfAbsent(pagesDataTitle,
+                                final JsonArray jsonCategories = pagesData.getJsonArray("categories");
+                                final String pagesDataTitle = pagesData.getString("title");
+                                final Collection<String> categories = categoryMap.computeIfAbsent(pagesDataTitle,
                                         k -> new ArrayList<>(jsonCategories.size()));
                                 for (int i = 0; i < jsonCategories.size(); i++) {
                                     JsonObject category = jsonCategories.getJsonObject(i);
@@ -169,7 +172,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
                 }
 
                 // Try to get continue map, if there is one, make another request
-                final Map<String, String> newContinueMap = buildContinueMap(result, "categories");
+                final var newContinueMap = buildContinueMap(result, "categories");
                 if (newContinueMap != null) {
                     requestCategoriesRecursive(apiUrl, fullTitles, categoryMap, newContinueMap, clshow);
                 }
@@ -181,14 +184,14 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
     }
 
     @Override
-    public List<String> requestCategorymembers(final Wiki wiki, final String fullTitle) throws ApiException {
+    public List<String> requestCategorymembers(Wiki wiki, String fullTitle) throws ApiException {
         final List<String> categories = new ArrayList<>();
         requestCategorymembersRecursive(wiki.getApiUrl(), fullTitle, categories, null);
         return categories;
     }
 
-    private void requestCategorymembersRecursive(final String apiUrl, final String fullTitle, final List<String> categories,
-                                                 final Map<String, String> continueMap) throws ApiException {
+    private void requestCategorymembersRecursive(String apiUrl, String fullTitle, List<String> categories,
+                                                 @Nullable Map<String, String> continueMap) throws ApiException {
 
         // Set query properties
         final Map<String, String> params = new HashMap<>();
@@ -199,7 +202,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
         if (continueMap != null) {
             params.putAll(continueMap);
         }
-        JsonObject result = this.request(apiUrl, params);
+        JsonObject result = request(apiUrl, params);
 
         try {
             JsonObject query = result.getJsonObject("query");
@@ -230,8 +233,8 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
         return links;
     }
 
-    private void requestLinksBetweenRecursive(final String apiUrl, final List<String> fullTitles,
-                                              final Collection<Pair<String, String>> links, Map<String, String> continueMap) throws ApiException {
+    private void requestLinksBetweenRecursive(final String apiUrl, final List<String> fullTitles, final Collection<Pair<String, String>> links,
+                                              @Nullable Map<String, String> continueMap) throws ApiException {
 
         if (fullTitles.size() > TITLES_MAX) {
 
@@ -271,7 +274,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
                 }
 
                 // Try to get continue map, if there is one, make another request
-                final Map<String, String> newContinueMap = buildContinueMap(result, "categories");
+                final var newContinueMap = buildContinueMap(result, "categories");
                 if (newContinueMap != null) {
                     requestLinksBetweenRecursive(apiUrl, fullTitles, links, newContinueMap);
                 }
@@ -286,7 +289,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
     public Metadata requestMetadata(final Wiki wiki) throws ApiException {
 
         // Set query properties
-        Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         params.put("meta", "siteinfo");
         params.put("siprop", "general|namespaces|namespacealiases");
 

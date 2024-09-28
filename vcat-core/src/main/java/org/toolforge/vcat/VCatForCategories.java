@@ -19,10 +19,8 @@ public class VCatForCategories extends AbstractVCat {
     }
 
     @Override
-    protected void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode,
-                                             Set<Node> allNodesFound, String fullTitle, String categoryNamespacePrefix,
-                                             boolean showHidden)
-            throws ApiException {
+    protected void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode, Set<Node> allNodesFound, String fullTitle,
+                                             String categoryNamespacePrefix, boolean showHidden) throws ApiException {
         List<String> rootFullTitles = Collections.singletonList(fullTitle);
         {
             Collection<String> categoryFullTitles = categoryProvider
@@ -34,9 +32,8 @@ public class VCatForCategories extends AbstractVCat {
         }
     }
 
-    private void renderGraphInnerFirstLoop(
-            Graph graph, Node rootNode, Set<Node> allNodesFound, Collection<Node> newNodes,
-            Collection<String> categoryFullTitles, String categoryNamespacePrefix) {
+    private void renderGraphInnerFirstLoop(Graph graph, Node rootNode, Set<Node> allNodesFound, Collection<Node> newNodes,
+                                           Collection<String> categoryFullTitles, String categoryNamespacePrefix) {
         for (String categoryFullTitle : categoryFullTitles) {
             final String categoryTitle = categoryFullTitle.substring(categoryNamespacePrefix.length());
             final var categoryNode = graph.node(categoryTitle);
@@ -75,12 +72,12 @@ public class VCatForCategories extends AbstractVCat {
 
     @Override
     protected GroupRank renderGraphExceedRank() {
-        return GroupRank.min;
+        return GroupRank.Min;
     }
 
     @Override
     protected GroupRank renderGraphRootRank() {
-        return GroupRank.max;
+        return GroupRank.Max;
     }
 
 }

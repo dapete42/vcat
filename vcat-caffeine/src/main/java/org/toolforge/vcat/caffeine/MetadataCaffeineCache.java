@@ -2,6 +2,7 @@ package org.toolforge.vcat.caffeine;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.cache.interfaces.MetadataCache;
 import org.toolforge.vcat.mediawiki.Metadata;
 import org.toolforge.vcat.mediawiki.interfaces.Wiki;
@@ -21,6 +22,7 @@ public class MetadataCaffeineCache implements MetadataCache {
 
 
     @Override
+    @Nullable
     public Metadata getMetadata(Wiki wiki) {
         return cache.getIfPresent(wiki);
     }

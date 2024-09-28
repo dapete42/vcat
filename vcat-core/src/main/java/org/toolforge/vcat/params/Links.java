@@ -1,5 +1,7 @@
 package org.toolforge.vcat.params;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Links parameter for vCat. Determines whether links are included in the graph, and where they should lead to.
  *
@@ -20,6 +22,7 @@ public enum Links {
      */
     Wiki;
 
+    @Nullable
     public static Links valueOfIgnoreCase(String name) {
         for (Links link : values()) {
             if (link.name().equalsIgnoreCase(name)) {

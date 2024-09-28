@@ -113,9 +113,13 @@ public class Graph extends AbstractHasGraphProperties {
     protected SortedMap<String, String> propertiesInternal() {
         final SortedMap<String, String> properties = new TreeMap<>();
         properties.put(PROPERTY_FONTNAME, fontname);
-        properties.put(PROPERTY_FONTSIZE, fontsize == 0 ? null : Integer.toString(fontsize));
+        if (fontsize != 0) {
+            properties.put(PROPERTY_FONTSIZE, Integer.toString(fontsize));
+        }
         properties.put(PROPERTY_LABEL, label);
-        properties.put(PROPERTY_SPLINES, splines ? TRUE : null);
+        if (splines) {
+            properties.put(PROPERTY_SPLINES, TRUE);
+        }
         return properties;
     }
 

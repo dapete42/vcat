@@ -29,7 +29,7 @@ public class WikiLinkProvider extends AbstractLinkProvider {
         if (tempPattern.startsWith("//")) {
             tempPattern = "http:" + tempPattern;
         }
-        this.pattern = tempPattern;
+        pattern = tempPattern;
     }
 
     @Override

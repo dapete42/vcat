@@ -17,7 +17,7 @@ public class AllParamsToolforge extends AbstractAllParams {
 
     @Override
     protected ToolforgeWiki initWiki(String wikiString) throws VCatException {
-        return this.toolforgeMetainfo.fromDbname(wikiString);
+        return toolforgeMetainfo.fromDbname(wikiString);
     }
 
 }

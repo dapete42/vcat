@@ -1,5 +1,7 @@
 package org.toolforge.vcat.mediawiki;
 
+import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 import org.toolforge.vcat.Messages;
 
@@ -34,6 +36,7 @@ public class Metadata implements Serializable {
     /**
      * The path on the server to access wiki pages (contains <code>$1</code> as a placeholder for the page title).
      */
+    @Getter
     protected final String articlepath;
 
     /**
@@ -44,18 +47,18 @@ public class Metadata implements Serializable {
     /**
      * The server the wiki is running on (start of URL).
      */
+    @Getter
     protected final String server;
 
-    public Metadata(final String articlepath, final String server, final Map<Integer, String> authoritativeNamespaces,
-                    final Map<String, Integer> allNamespacesInverse) {
+    public Metadata(String articlepath, String server, Map<Integer, String> authoritativeNamespaces, Map<String, Integer> allNamespacesInverse) {
         this.articlepath = articlepath;
         this.server = server;
         this.authoritativeNamespaces = authoritativeNamespaces;
         this.allNamespacesInverse = allNamespacesInverse;
     }
 
-    public String fullTitle(final String title, final int namespace) throws ApiException {
-        String namespaceName = this.getAuthoritativeName(namespace);
+    public String fullTitle(String title, int namespace) throws ApiException {
+        final String namespaceName = getAuthoritativeName(namespace);
         if (namespaceName == null) {
             throw new ApiException(MessageFormatter
                     .format(Messages.getString("Metadata.Exception.ArticleTitle"), namespace).getMessage());
@@ -67,7 +70,7 @@ public class Metadata implements Serializable {
     }
 
     public Set<String> getAllNames(int namespace) {
-        Set<String> allNames = new HashSet<>();
+        final Set<String> allNames = new HashSet<>();
         for (Entry<String, Integer> entry : allNamespacesInverse.entrySet()) {
             if (namespace == entry.getValue()) {
                 allNames.add(entry.getKey());
@@ -76,40 +79,33 @@ public class Metadata implements Serializable {
         return allNames;
     }
 
-    public Map<String, Integer> getAllNamespacesInverseMap() {
-        return Collections.unmodifiableMap(this.allNamespacesInverse);
+    public Map<String, Integer> getAllNamespacesInverse() {
+        return Collections.unmodifiableMap(allNamespacesInverse);
     }
 
-    public String getArticlepath() {
-        return this.articlepath;
-    }
-
+    @Nullable
     public String getAuthoritativeName(int namespace) {
-        return this.authoritativeNamespaces.get(namespace);
-    }
-
-    public String getServer() {
-        return this.server;
+        return authoritativeNamespaces.get(namespace);
     }
 
     public int namespaceFromTitle(String title) {
-        for (Entry<String, Integer> entry : this.allNamespacesInverse.entrySet()) {
-            String key = entry.getKey();
+        for (Entry<String, Integer> entry : allNamespacesInverse.entrySet()) {
+            final String key = entry.getKey();
             if (!key.isEmpty()) {
-                String prefix = key + ":";
+                final String prefix = key + ":";
                 if (title.startsWith(prefix)) {
                     return entry.getValue();
                 }
             }
         }
-        return 0;
+        return NS_ARTICLE;
     }
 
     public String titleWithoutNamespace(String title) {
-        for (Entry<String, Integer> entry : this.allNamespacesInverse.entrySet()) {
-            String key = entry.getKey();
+        for (Entry<String, Integer> entry : allNamespacesInverse.entrySet()) {
+            final String key = entry.getKey();
             if (!key.isEmpty()) {
-                String prefix = key + ":";
+                final String prefix = key + ":";
                 if (title.startsWith(prefix)) {
                     return title.substring(prefix.length());
                 }
@@ -119,10 +115,10 @@ public class Metadata implements Serializable {
     }
 
     public String truncateTitle(String fullTitle) {
-        for (Entry<String, Integer> entry : this.allNamespacesInverse.entrySet()) {
-            String key = entry.getKey();
+        for (Entry<String, Integer> entry : allNamespacesInverse.entrySet()) {
+            final String key = entry.getKey();
             if (!key.isEmpty()) {
-                String prefix = key + ":";
+                final String prefix = key + ":";
                 if (fullTitle.startsWith(prefix)) {
                     return fullTitle.substring(prefix.length());
                 }

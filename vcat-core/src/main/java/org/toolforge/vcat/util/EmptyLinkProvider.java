@@ -1,5 +1,7 @@
 package org.toolforge.vcat.util;
 
+import org.jspecify.annotations.Nullable;
+
 import java.io.Serial;
 
 /**
@@ -13,7 +15,8 @@ public class EmptyLinkProvider extends AbstractLinkProvider {
     private static final long serialVersionUID = 4130505369114014479L;
 
     @Override
-    public String provideLink(final String title) {
+    @Nullable
+    public String provideLink(String title) {
         return null;
     }
 

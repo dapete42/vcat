@@ -1,24 +1,16 @@
 package org.toolforge.vcat.renderer;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.nio.file.Path;
 
+@AllArgsConstructor
+@Getter
 public class RenderedFileInfo {
 
     private final Path file;
 
     private final String mimeType;
-
-    public RenderedFileInfo(Path file, String mimeType) {
-        this.file = file;
-        this.mimeType = mimeType;
-    }
-
-    public Path getFile() {
-        return file;
-    }
-
-    public String getMimeType() {
-        return mimeType;
-    }
 
 }

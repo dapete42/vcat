@@ -1,5 +1,7 @@
 package org.toolforge.vcat.params;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.toolforge.vcat.graphviz.GraphvizExternal;
 
@@ -12,6 +14,8 @@ import java.io.Serializable;
  *
  * @author Peter Schlömer
  */
+@Getter
+@Setter
 public class GraphvizParams implements Serializable {
 
     @Serial
@@ -32,28 +36,12 @@ public class GraphvizParams implements Serializable {
         }
     }
 
-    public Algorithm getAlgorithm() {
-        return this.algorithm;
-    }
-
-    public OutputFormat getOutputFormat() {
-        return this.outputFormat;
-    }
-
     @Override
     public int hashCode() {
         HashCodeBuilder hcb = new HashCodeBuilder(71, 67);
         hcb.append(this.algorithm);
         hcb.append(this.outputFormat);
         return hcb.toHashCode();
-    }
-
-    public void setAlgorithm(Algorithm algorithm) {
-        this.algorithm = algorithm;
-    }
-
-    public void setOutputFormat(OutputFormat outputFormat) {
-        this.outputFormat = outputFormat;
     }
 
 }

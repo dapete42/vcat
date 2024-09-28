@@ -57,7 +57,7 @@ public class GraphvizExternal implements Graphviz {
         final List<String> commandList = buildCommandParts(command, params, inputFile, outputFile);
         final String[] commandArray = commandList.toArray(String[]::new);
 
-        final ProcessBuilder processBuilder = new ProcessBuilder(commandArray)
+        final var processBuilder = new ProcessBuilder(commandArray)
                 .redirectErrorStream(true);
         final Process graphvizProcess;
         try {
@@ -96,7 +96,7 @@ public class GraphvizExternal implements Graphviz {
             }
         } while (running);
 
-        long endMillis = System.currentTimeMillis();
+        final long endMillis = System.currentTimeMillis();
 
         if (exitValue == 0) {
             LOG.info(Messages.getString("GraphvizExternal.Info.Finished"), inputFile.toAbsolutePath(),

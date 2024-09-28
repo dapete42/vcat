@@ -31,15 +31,15 @@ public class VCatRenderer extends AbstractVCatRenderer {
 
     public VCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider categoryProvider) {
         this.graphviz = graphviz;
-        this.outputDir = tempDir;
-        this.vCatFactory = new VCatFactory(categoryProvider);
+        outputDir = tempDir;
+        vCatFactory = new VCatFactory(categoryProvider);
     }
 
     @Override
     protected Path createGraphFile(final AbstractAllParams all) throws VCatException {
-        final AbstractVCat vCat = this.vCatFactory.createInstance(all);
+        final AbstractVCat vCat = vCatFactory.createInstance(all);
         try {
-            final Path outputFile = Files.createTempFile(this.outputDir, "temp-Graph-", ".gv");
+            final Path outputFile = Files.createTempFile(outputDir, "temp-Graph-", ".gv");
             vCat.renderToFile(outputFile);
             return outputFile;
         } catch (GraphvizException | IOException e) {
@@ -55,17 +55,17 @@ public class VCatRenderer extends AbstractVCatRenderer {
 
         // Render in image format
         all.getGraphviz().setOutputFormat(imageFormat);
-        final Path imageRawFile = this.createRenderedFile(all);
+        final Path imageRawFile = createRenderedFile(all);
 
         // Render image map fragment
         all.getGraphviz().setOutputFormat(OutputFormat._Imagemap);
-        final Path imagemapRawFile = this.createRenderedFile(all);
+        final Path imagemapRawFile = createRenderedFile(all);
 
         all.getGraphviz().setOutputFormat(outputFormat);
 
         try {
             // This has to be embedded in another file
-            final Path outputFile = Files.createTempFile(this.outputDir, "temp-RenderedFile-",
+            final Path outputFile = Files.createTempFile(outputDir, "temp-RenderedFile-",
                     '.' + all.getGraphviz().getOutputFormat().getFileExtension());
 
             createImagemapHtmlFileComposeHtml(imageFormat, imageRawFile, imagemapRawFile, outputFile);
@@ -121,7 +121,7 @@ public class VCatRenderer extends AbstractVCatRenderer {
     protected Path createRenderedFileFromGraphFile(final AbstractAllParams all, final Path graphFile)
             throws VCatException {
         try {
-            final Path outputFile = Files.createTempFile(this.outputDir, "temp-RenderedFile-",
+            final Path outputFile = Files.createTempFile(outputDir, "temp-RenderedFile-",
                     '.' + all.getGraphviz().getOutputFormat().getFileExtension());
             graphviz.render(graphFile, outputFile, all.getCombined().getGraphviz());
             return outputFile;

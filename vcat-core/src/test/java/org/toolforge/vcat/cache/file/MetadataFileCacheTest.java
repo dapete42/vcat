@@ -35,10 +35,7 @@ class MetadataFileCacheTest {
         } catch (CacheException e) {
             // ignore
         }
-        if (tempDirectory != null) {
-            PathUtils.deleteDirectory(tempDirectory);
-        }
-
+        PathUtils.deleteDirectory(tempDirectory);
     }
 
     @Test
@@ -90,8 +87,8 @@ class MetadataFileCacheTest {
         assertEquals(testMetadata.getArticlepath(), resultMetadata.getArticlepath());
         assertEquals(testMetadata.getServer(), resultMetadata.getServer());
         assertEquals(testMetadata.getAllNames(1), resultMetadata.getAllNames(1));
-        assertEquals(testMetadata.getAllNamespacesInverseMap().get("test"),
-                resultMetadata.getAllNamespacesInverseMap().get("test"));
+        assertEquals(testMetadata.getAllNamespacesInverse().get("test"),
+                resultMetadata.getAllNamespacesInverse().get("test"));
 
     }
 

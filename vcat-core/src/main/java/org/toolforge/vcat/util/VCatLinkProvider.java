@@ -37,7 +37,7 @@ public class VCatLinkProvider extends AbstractLinkProvider {
                 }
             }
         }
-        this.renderParams = renderParamsBuilder.toString();
+        renderParams = renderParamsBuilder.toString();
     }
 
     public VCatLinkProvider(final AbstractAllParams all) {
@@ -46,7 +46,7 @@ public class VCatLinkProvider extends AbstractLinkProvider {
 
     @Override
     public String provideLink(final String title) {
-        return this.renderUrl + "?title=" + escapeMediawikiTitleForUrl(title) + this.renderParams;
+        return renderUrl + "?title=" + escapeMediawikiTitleForUrl(title) + renderParams;
     }
 
 }

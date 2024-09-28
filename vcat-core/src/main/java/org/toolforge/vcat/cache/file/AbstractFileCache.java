@@ -2,6 +2,7 @@ package org.toolforge.vcat.cache.file;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.cache.CacheException;
@@ -61,8 +62,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
      * @param maxAgeInSeconds Maximum age of cached items in seconds.
      * @throws CacheException If the directory does not exist or is not writeable.
      */
-    protected AbstractFileCache(Path cacheDirectory, String prefix, String suffix, final int maxAgeInSeconds)
-            throws CacheException {
+    protected AbstractFileCache(Path cacheDirectory, String prefix, String suffix, final int maxAgeInSeconds) throws CacheException {
         if (!Files.exists(cacheDirectory) || !Files.isDirectory(cacheDirectory) || !Files.isWritable(cacheDirectory)) {
             throw new CacheException(MessageFormatter
                     .format(Messages.getString("AbstractFileCache.Exception.DirMustExist"), cacheDirectory)
@@ -78,7 +78,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
         lock.lock();
         try {
             int clearedFiles = 0;
-            for (Path path : this.getAllFiles()) {
+            for (Path path : getAllFiles()) {
                 try {
                     Files.delete(path);
                     clearedFiles++;
@@ -97,16 +97,16 @@ public abstract class AbstractFileCache<K extends Serializable> {
     public boolean containsKey(K key) {
         lock.lock();
         try {
-            return Files.exists(this.getCacheFile(key));
+            return Files.exists(getCacheFile(key));
         } finally {
             lock.unlock();
         }
     }
 
-    public byte[] get(K key) throws CacheException {
+    public byte @Nullable [] get(K key) throws CacheException {
         lock.lock();
         try {
-            Path cacheFile = this.getCacheFile(key);
+            final Path cacheFile = getCacheFile(key);
             if (Files.exists(cacheFile)) {
                 try {
                     return Files.readAllBytes(cacheFile);
@@ -128,7 +128,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
         lock.lock();
         try {
             try (Stream<Path> pathStream = Files.list(cacheDirectory)) {
-                return pathStream.filter(s -> s.getFileName().toString().startsWith(this.prefix))
+                return pathStream.filter(s -> s.getFileName().toString().startsWith(prefix))
                         .collect(Collectors.toList());
             } catch (IOException e) {
                 throw new CacheException("Error reading list of files", e);
@@ -138,12 +138,13 @@ public abstract class AbstractFileCache<K extends Serializable> {
         }
     }
 
+    @Nullable
     public InputStream getAsInputStream(K key) throws CacheException {
         lock.lock();
         try {
-            if (this.containsKey(key)) {
+            if (containsKey(key)) {
                 try {
-                    return Files.newInputStream(this.getCacheFile(key));
+                    return Files.newInputStream(getCacheFile(key));
                 } catch (Exception e) {
                     throw new CacheException(Messages.getString("AbstractFileCache.Exception.IOReading"), e);
                 }
@@ -160,7 +161,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
      * @return The file the item with the specified key is stored in.
      */
     public Path getCacheFile(K key) {
-        return this.cacheDirectory.resolve(this.getCacheFilename(key));
+        return cacheDirectory.resolve(getCacheFilename(key));
     }
 
     /**
@@ -168,7 +169,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
      * @return The filename to use to store a specified key in.
      */
     protected String getCacheFilename(K key) {
-        return prefix + this.hashForKey(key) + suffix;
+        return prefix + hashForKey(key) + suffix;
     }
 
     /**
@@ -187,9 +188,9 @@ public abstract class AbstractFileCache<K extends Serializable> {
             if (maxAgeInSeconds < 0) {
                 return;
             }
-            long lastModifiedThreshold = System.currentTimeMillis() - (1000L * this.maxAgeInSeconds);
+            final long lastModifiedThreshold = System.currentTimeMillis() - (1000L * maxAgeInSeconds);
             int purgedFiles = 0;
-            for (Path path : this.getAllFiles()) {
+            for (Path path : getAllFiles()) {
                 if (path.toFile().lastModified() < lastModifiedThreshold) {
                     try {
                         Files.delete(path);
@@ -210,8 +211,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
     public void put(K key, byte[] value) throws CacheException {
         lock.lock();
         try {
-            try (OutputStream outputStream = Files.newOutputStream(this.getCacheFile(key))) {
-                this.writeValueToStream(value, outputStream);
+            try (OutputStream outputStream = Files.newOutputStream(getCacheFile(key))) {
+                writeValueToStream(value, outputStream);
             } catch (IOException e) {
                 throw new CacheException(Messages.getString("AbstractFileCache.Exception.WriteFailed"), e);
             }
@@ -223,7 +224,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
     public void putFile(K key, Path file, boolean move) throws CacheException {
         lock.lock();
         try {
-            Path cacheFile = this.getCacheFile(key);
+            final Path cacheFile = getCacheFile(key);
             // Delete file in cache, if it exists
             try {
                 Files.deleteIfExists(cacheFile);
@@ -252,7 +253,7 @@ public abstract class AbstractFileCache<K extends Serializable> {
         lock.lock();
         try {
             try {
-                Files.delete(this.getCacheFile(key));
+                Files.delete(getCacheFile(key));
             } catch (IOException e) {
                 throw new CacheException(Messages.getString("AbstractFileCache.Exception.DeleteFailed"), e);
             }

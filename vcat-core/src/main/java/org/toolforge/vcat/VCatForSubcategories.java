@@ -35,8 +35,8 @@ public class VCatForSubcategories extends AbstractVCat {
     protected void renderGraphOuterFirstLoop(
             Graph graph, Collection<Node> newNodes, Node rootNode, Set<Node> allNodesFound, String fullTitle,
             String categoryNamespacePrefix, boolean showHidden) throws ApiException {
-        Collection<String> categoryFullTitles = categoryProvider.requestCategorymembers(all.getWiki(), fullTitle);
-        if (categoryFullTitles != null) {
+        final Collection<String> categoryFullTitles = categoryProvider.requestCategorymembers(all.getWiki(), fullTitle);
+        if (!categoryFullTitles.isEmpty()) {
             renderGraphInnerLoop(graph, rootNode, allNodesFound, newNodes, categoryFullTitles, categoryNamespacePrefix);
         }
     }
@@ -59,12 +59,12 @@ public class VCatForSubcategories extends AbstractVCat {
 
     @Override
     protected GroupRank renderGraphExceedRank() {
-        return GroupRank.max;
+        return GroupRank.Max;
     }
 
     @Override
     protected GroupRank renderGraphRootRank() {
-        return GroupRank.min;
+        return GroupRank.Min;
     }
 
 }

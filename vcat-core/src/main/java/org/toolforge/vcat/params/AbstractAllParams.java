@@ -4,6 +4,7 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.VCatException;
@@ -51,15 +52,16 @@ public abstract class AbstractAllParams {
     private final CombinedParams combinedParams = new CombinedParams();
 
     @Getter
+    @Nullable
     protected Metadata metadata;
 
     @Getter
+    @Nullable
     private String renderUrl;
 
     protected final MultivaluedMap<String, String> requestParams = new MultivaluedHashMap<>();
 
-    protected void init(final MultivaluedMap<String, String> requestParams, final String renderUrl,
-                        final MetadataProvider metadataProvider) throws VCatException {
+    protected void init(MultivaluedMap<String, String> requestParams, String renderUrl, MetadataProvider metadataProvider) throws VCatException {
 
         // Remember the URL used to render a graph
         this.renderUrl = renderUrl;
@@ -79,7 +81,7 @@ public abstract class AbstractAllParams {
         this.getVCat().setWiki(wiki);
 
         try {
-            this.metadata = metadataProvider.requestMetadata(wiki);
+            metadata = metadataProvider.requestMetadata(wiki);
         } catch (ApiException e) {
             throw new VCatException(Messages.getString("AbstractAllParams.Exception.RetrievingMetadata"), e);
         }
@@ -296,6 +298,7 @@ public abstract class AbstractAllParams {
 
     }
 
+    @Nullable
     protected static String getAndRemove(MultivaluedMap<String, String> params, String key) throws VCatException {
         var values = params.get(key);
         if (values == null) {
@@ -312,6 +315,7 @@ public abstract class AbstractAllParams {
         }
     }
 
+    @Nullable
     protected static List<String> getAndRemoveMulti(MultivaluedMap<String, String> params, String key) {
         var values = params.get(key);
         if (values == null) {
@@ -329,9 +333,10 @@ public abstract class AbstractAllParams {
      * @return Wiki corresponding to wikiString.
      * @throws VCatException If the wiki object could not be created.
      */
-    protected abstract Wiki initWiki(final String wikiString) throws VCatException;
+    protected abstract Wiki initWiki(String wikiString) throws VCatException;
 
-    private static String unescapeMediawikiTitle(String title) {
+    @Nullable
+    private static String unescapeMediawikiTitle(@Nullable String title) {
         if (title == null) {
             return null;
         } else {
@@ -340,23 +345,23 @@ public abstract class AbstractAllParams {
     }
 
     public CombinedParams getCombined() {
-        return this.combinedParams;
+        return combinedParams;
     }
 
     public GraphvizParams getGraphviz() {
-        return this.combinedParams.getGraphviz();
+        return combinedParams.getGraphviz();
     }
 
     public Map<String, List<String>> getRequestParams() {
-        return Collections.unmodifiableMap(this.requestParams);
+        return Collections.unmodifiableMap(requestParams);
     }
 
     public VCatParams getVCat() {
-        return this.combinedParams.getVCat();
+        return combinedParams.getVCat();
     }
 
     public Wiki getWiki() {
-        return this.combinedParams.getVCat().getWiki();
+        return combinedParams.getVCat().getWiki();
     }
 
 }

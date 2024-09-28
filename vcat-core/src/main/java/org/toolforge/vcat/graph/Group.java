@@ -21,7 +21,7 @@ public class Group extends AbstractHasGraphProperties {
 
     private final Set<Node> nodes = new HashSet<>();
 
-    private GroupRank rank = GroupRank.none;
+    private GroupRank rank = GroupRank.None;
 
     public Group(String name) {
         this.name = name;
@@ -33,7 +33,7 @@ public class Group extends AbstractHasGraphProperties {
 
     protected SortedMap<String, String> propertiesInternal() {
         final SortedMap<String, String> properties = new TreeMap<>();
-        properties.put(Graph.PROPERTY_RANK, rank.name());
+        properties.put(Graph.PROPERTY_RANK, rank.getValue());
         return properties;
     }
 

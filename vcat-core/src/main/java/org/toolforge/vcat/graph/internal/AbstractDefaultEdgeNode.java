@@ -39,7 +39,9 @@ public abstract class AbstractDefaultEdgeNode extends AbstractHasGraphProperties
     protected SortedMap<String, String> propertiesInternal() {
         final SortedMap<String, String> properties = new TreeMap<>();
         properties.put(Graph.PROPERTY_FONTNAME, fontname);
-        properties.put(Graph.PROPERTY_FONTSIZE, fontsize == 0 ? null : Integer.toString(fontsize));
+        if (fontsize != 0) {
+            properties.put(Graph.PROPERTY_FONTSIZE, Integer.toString(fontsize));
+        }
         properties.put(Graph.PROPERTY_HREF, href);
         properties.put(Graph.PROPERTY_STYLE, style);
         return properties;

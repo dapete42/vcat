@@ -3,6 +3,7 @@ package org.toolforge.vcat.caffeine;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.json.JsonObject;
+import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.cache.interfaces.ApiCache;
 
 import java.time.Duration;
@@ -24,6 +25,7 @@ public class ApiCaffeineCache implements ApiCache {
     }
 
     @Override
+    @Nullable
     public JsonObject getJSONObject(String key) {
         return cache.getIfPresent(key);
     }

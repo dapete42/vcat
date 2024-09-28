@@ -17,17 +17,17 @@ public class SimpleWikimediaWiki implements Wiki {
 
     @Override
     public String getApiUrl() {
-        return "https://" + this.host + "/w/api.php";
+        return "https://" + host + "/w/api.php";
     }
 
     @Override
     public String getDisplayName() {
-        return this.host;
+        return host;
     }
 
     @Override
     public String getName() {
-        return this.host;
+        return host;
     }
 
 }

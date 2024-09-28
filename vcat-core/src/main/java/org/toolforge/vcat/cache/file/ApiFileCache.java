@@ -3,7 +3,7 @@ package org.toolforge.vcat.cache.file;
 import jakarta.json.Json;
 import jakarta.json.JsonException;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
+import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.cache.CacheException;
 import org.toolforge.vcat.cache.interfaces.ApiCache;
@@ -23,14 +23,15 @@ public class ApiFileCache extends AbstractFileCache<String> implements ApiCache 
     }
 
     @Override
+    @Nullable
     public JsonObject getJSONObject(String key) throws CacheException {
         lock.lock();
         try {
-            if (this.containsKey(key)) {
-                try (InputStreamReader reader = new InputStreamReader(this.getAsInputStream(key));
-                     JsonReader jsonReader = Json.createReader(reader)) {
+            if (containsKey(key)) {
+                try (var reader = new InputStreamReader(getAsInputStream(key));
+                     var jsonReader = Json.createReader(reader)) {
                     return jsonReader.readObject();
-                } catch (JsonException e) {
+                } catch (JsonException | NullPointerException e) {
                     throw new CacheException(Messages.getString("ApiFileCache.Exception.ParseJSON"), e);
                 } catch (IOException e) {
                     throw new CacheException(Messages.getString("ApiFileCache.Exception.CloseJSON"), e);
@@ -47,7 +48,7 @@ public class ApiFileCache extends AbstractFileCache<String> implements ApiCache 
     public void put(String key, JsonObject jsonObject) throws CacheException {
         lock.lock();
         try {
-            this.put(key, jsonObject.toString().getBytes());
+            put(key, jsonObject.toString().getBytes());
         } finally {
             lock.unlock();
         }

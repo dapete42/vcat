@@ -1,10 +1,14 @@
 package org.toolforge.vcat.params;
 
+import lombok.Getter;
+import org.jspecify.annotations.Nullable;
+
 /**
  * Output format for vCat.
  *
  * @author Peter Schlömer
  */
+@Getter
 public enum OutputFormat {
 
     /**
@@ -41,6 +45,7 @@ public enum OutputFormat {
      */
     SVG("svg", "svg", "image/svg+xml; charset=UTF-8", null, "svg");
 
+    @Nullable
     public static OutputFormat valueOfIgnoreCase(String name) {
         for (OutputFormat format : values()) {
             for (String parameterName : format.parameterNames) {
@@ -54,10 +59,13 @@ public enum OutputFormat {
 
     private final String fileExtension;
 
+    @Nullable
     private final String graphvizTypeParameter;
 
+    @Nullable
     private final OutputFormat imageMapOutputFormat;
 
+    @Nullable
     private final String mimeType;
 
     private final String[] parameterNames;
@@ -70,8 +78,8 @@ public enum OutputFormat {
      *                              create an image map and an HTML page containing it.
      * @param parameterNames        Names this format should be recognized by when calling {@link #valueOfIgnoreCase(String)}.
      */
-    OutputFormat(String fileExtension, String graphvizTypeParameter, String mimeType,
-                 OutputFormat imageMapOutputFormat, String... parameterNames) {
+    OutputFormat(String fileExtension, @Nullable String graphvizTypeParameter, @Nullable String mimeType, @Nullable OutputFormat imageMapOutputFormat,
+                 String... parameterNames) {
         this.fileExtension = fileExtension;
         this.graphvizTypeParameter = graphvizTypeParameter;
         this.mimeType = mimeType;
@@ -80,46 +88,10 @@ public enum OutputFormat {
     }
 
     /**
-     * @return File extension for the output format.
-     */
-    public String getFileExtension() {
-        return this.fileExtension;
-    }
-
-    /**
-     * @return Type parameter to pass when calling the graphviz command line tool.
-     */
-    public String getGraphvizTypeParameter() {
-        return this.graphvizTypeParameter;
-    }
-
-    /**
-     * @return Output format to use when creating an image map page to support links in static images, null if not
-     * applicable.
-     */
-    public OutputFormat getImageMapOutputFormat() {
-        return this.imageMapOutputFormat;
-    }
-
-    /**
-     * @return MIME type for the output format.
-     */
-    public String getMimeType() {
-        return this.mimeType;
-    }
-
-    /**
-     * @return Names this format should be recognized by when calling {@link #valueOfIgnoreCase(String)}.
-     */
-    public String[] getParameterNames() {
-        return this.parameterNames;
-    }
-
-    /**
      * @return Whether to use another output format when creating an image map page to support links in static images.
      */
     public boolean hasImageMapOutputFormat() {
-        return this.getImageMapOutputFormat() != null;
+        return imageMapOutputFormat != null;
     }
 
 }

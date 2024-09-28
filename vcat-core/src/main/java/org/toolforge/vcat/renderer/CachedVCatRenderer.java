@@ -31,13 +31,11 @@ public class CachedVCatRenderer extends VCatRenderer {
 
     private final RenderedFileCache renderedCache;
 
-    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider categoryProvider,
-                              final Path cacheDir) throws VCatException {
+    public CachedVCatRenderer(Graphviz graphviz, Path tempDir, CategoryProvider categoryProvider, Path cacheDir) throws VCatException {
         this(graphviz, tempDir, categoryProvider, cacheDir, 600);
     }
 
-    public CachedVCatRenderer(final Graphviz graphviz, final Path tempDir, final CategoryProvider categoryProvider,
-                              final Path cacheDir, final int purge) throws VCatException {
+    public CachedVCatRenderer(Graphviz graphviz, Path tempDir, CategoryProvider categoryProvider, Path cacheDir, int purge) throws VCatException {
         super(graphviz, tempDir, categoryProvider);
         this.purge = purge;
 
@@ -46,69 +44,69 @@ public class CachedVCatRenderer extends VCatRenderer {
 
         try {
             Files.createDirectories(graphCacheDir);
-            this.graphCache = new GraphFileCache(graphCacheDir, this.purge);
+            graphCache = new GraphFileCache(graphCacheDir, purge);
             Files.createDirectories(renderedFileCacheDir);
-            this.renderedCache = new RenderedFileCache(renderedFileCacheDir, this.purge);
+            renderedCache = new RenderedFileCache(renderedFileCacheDir, purge);
         } catch (CacheException | IOException e) {
             throw new VCatException("Error while setting up caches", e);
         }
 
-        this.purge();
+        purge();
     }
 
     @Override
-    protected Path createGraphFile(final AbstractAllParams all) throws VCatException {
+    protected Path createGraphFile(AbstractAllParams all) throws VCatException {
         final VCatParams vCatParams = all.getVCat();
-        if (!this.graphCache.containsKey(vCatParams)) {
+        if (!graphCache.containsKey(vCatParams)) {
             final Path otherFile = super.createGraphFile(all);
             try {
-                this.graphCache.putFile(vCatParams, otherFile, true);
+                graphCache.putFile(vCatParams, otherFile, true);
             } catch (CacheException e) {
                 throw new VCatException(e);
             }
         }
-        return this.graphCache.getCacheFile(vCatParams);
+        return graphCache.getCacheFile(vCatParams);
     }
 
     @Override
-    protected Path createImagemapHtmlFile(final AbstractAllParams all, final OutputFormat imageFormat)
+    protected Path createImagemapHtmlFile(AbstractAllParams all, OutputFormat imageFormat)
             throws VCatException {
         final CombinedParams combinedParams = all.getCombined();
-        if (!this.renderedCache.containsKey(combinedParams)) {
+        if (!renderedCache.containsKey(combinedParams)) {
             final Path otherFile = super.createImagemapHtmlFile(all, imageFormat);
             try {
-                this.renderedCache.putFile(combinedParams, otherFile, true);
+                renderedCache.putFile(combinedParams, otherFile, true);
             } catch (CacheException e) {
                 throw new VCatException(e);
             }
         }
-        return this.renderedCache.getCacheFile(combinedParams);
+        return renderedCache.getCacheFile(combinedParams);
     }
 
     @Override
-    protected Path createRenderedFileFromGraphFile(final AbstractAllParams all, final Path graphFile)
+    protected Path createRenderedFileFromGraphFile(AbstractAllParams all, Path graphFile)
             throws VCatException {
         final CombinedParams combinedParams = all.getCombined();
-        if (!this.renderedCache.containsKey(combinedParams)) {
+        if (!renderedCache.containsKey(combinedParams)) {
             final Path otherFile = super.createRenderedFileFromGraphFile(all, graphFile);
             try {
-                this.renderedCache.putFile(combinedParams, otherFile, true);
+                renderedCache.putFile(combinedParams, otherFile, true);
             } catch (CacheException e) {
                 throw new VCatException(e);
             }
         }
-        return this.renderedCache.getCacheFile(combinedParams);
+        return renderedCache.getCacheFile(combinedParams);
     }
 
     private void purge() throws VCatException {
         VCatException e = null;
         try {
-            this.graphCache.purge();
+            graphCache.purge();
         } catch (CacheException ee) {
             e = new VCatException("Error purging caches", ee);
         }
         try {
-            this.renderedCache.purge();
+            renderedCache.purge();
         } catch (CacheException ee) {
             if (e == null) {
                 e = new VCatException("Error purging caches", ee);
@@ -117,7 +115,7 @@ public class CachedVCatRenderer extends VCatRenderer {
             }
         }
         try {
-            this.purgeOutputDir();
+            purgeOutputDir();
         } catch (CacheException ee) {
             if (e == null) {
                 e = new VCatException("Error purging output directory", ee);
@@ -158,7 +156,7 @@ public class CachedVCatRenderer extends VCatRenderer {
     @Override
     public RenderedFileInfo render(AbstractAllParams all) throws VCatException {
         // Purge caches
-        this.purge();
+        purge();
         return super.render(all);
     }
 

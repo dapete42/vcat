@@ -1,10 +1,16 @@
 package org.toolforge.vcat.params;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.jspecify.annotations.Nullable;
+
 /**
  * Algorithm for vCat.
  *
  * @author Peter Schlömer
  */
+@AllArgsConstructor
+@Getter
 public enum Algorithm {
 
     /**
@@ -17,6 +23,7 @@ public enum Algorithm {
      */
     FDP("fdp");
 
+    @Nullable
     public static Algorithm valueOfIgnoreCase(String name) {
         for (Algorithm format : values()) {
             if (format.name().equalsIgnoreCase(name)) {
@@ -26,17 +33,9 @@ public enum Algorithm {
         return null;
     }
 
-    private final String program;
-
-    Algorithm(String program) {
-        this.program = program;
-    }
-
     /**
-     * @return graphviz program to use when rendering with this algorithm.
+     * graphviz program to use when rendering with this algorithm.
      */
-    public String getProgram() {
-        return this.program;
-    }
+    private final String program;
 
 }

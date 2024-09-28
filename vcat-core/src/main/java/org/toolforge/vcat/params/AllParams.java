@@ -14,9 +14,8 @@ import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
  */
 public class AllParams extends AbstractAllParams {
 
-    public AllParams(final MultivaluedMap<String, String> requestParams, final String renderUrl,
-                     final MetadataProvider metadataProvider) throws VCatException {
-        this.init(requestParams, renderUrl, metadataProvider);
+    public AllParams(MultivaluedMap<String, String> requestParams, String renderUrl, MetadataProvider metadataProvider) throws VCatException {
+        init(requestParams, renderUrl, metadataProvider);
     }
 
     @Override

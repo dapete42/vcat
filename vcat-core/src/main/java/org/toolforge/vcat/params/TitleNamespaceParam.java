@@ -15,10 +15,6 @@ public class TitleNamespaceParam implements Serializable {
 
     private final String title;
 
-    public TitleNamespaceParam(String title) {
-        this(title, 0);
-    }
-
     public TitleNamespaceParam(String title, int namespace) {
         this.title = title;
         this.namespace = namespace;

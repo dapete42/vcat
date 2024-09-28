@@ -1,6 +1,7 @@
 package org.toolforge.vcat;
 
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.toolforge.vcat.graph.*;
@@ -91,7 +92,7 @@ public abstract class AbstractVCat {
         return renderGraphForDepth(all.getVCat().getDepth());
     }
 
-    private Graph renderGraphForDepth(Integer maxDepth) throws VCatException {
+    private Graph renderGraphForDepth(@Nullable Integer maxDepth) throws VCatException {
 
         final long startMillis = System.currentTimeMillis();
 
@@ -138,7 +139,7 @@ public abstract class AbstractVCat {
             // Counting depth and storing various information to be used when it is exceeded
             int curDepth = 0;
             boolean exceedDepth = false;
-            Integer limit = all.getVCat().getLimit();
+            final Integer limit = all.getVCat().getLimit();
 
             while (!newNodes.isEmpty() && !exceedDepth) {
                 curDepth++;
@@ -230,14 +231,11 @@ public abstract class AbstractVCat {
 
     protected abstract GroupRank renderGraphExceedRank();
 
-    protected abstract void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode,
-                                                      Set<Node> allNodesFound, String fullTitle,
-                                                      String categoryNamespacePrefix, boolean showHidden)
-            throws ApiException;
+    protected abstract void renderGraphOuterFirstLoop(Graph graph, Collection<Node> newNodes, Node rootNode, Set<Node> allNodesFound, String fullTitle,
+                                                      String categoryNamespacePrefix, boolean showHidden) throws ApiException;
 
-    protected abstract void renderGraphOuterLoop(Graph graph, Collection<Node> newNodes, Collection<Node> curNodes,
-                                                 Set<Node> allNodesFound, String categoryNamespacePrefix,
-                                                 boolean showHidden, boolean exceedDepth) throws ApiException;
+    protected abstract void renderGraphOuterLoop(Graph graph, Collection<Node> newNodes, Collection<Node> curNodes, Set<Node> allNodesFound,
+                                                 String categoryNamespacePrefix, boolean showHidden, boolean exceedDepth) throws ApiException;
 
     protected final void renderGraphInnerLoop(
             Graph graph, Collection<Node> newNodes, Set<Node> allNodesFound, String categoryNamespacePrefix,

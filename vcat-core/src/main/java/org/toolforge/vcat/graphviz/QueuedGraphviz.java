@@ -1,6 +1,7 @@
 package org.toolforge.vcat.graphviz;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.graphviz.interfaces.Graphviz;
 import org.toolforge.vcat.params.GraphvizParams;
 
@@ -13,6 +14,7 @@ public class QueuedGraphviz implements Graphviz {
     /**
      * Semaphore to control number of concurrent executions.
      */
+    @Nullable
     private final Semaphore semaphore;
 
     /*
