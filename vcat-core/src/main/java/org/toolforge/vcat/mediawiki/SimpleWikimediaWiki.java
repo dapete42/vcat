@@ -1,8 +1,10 @@
 package org.toolforge.vcat.mediawiki;
 
+import jakarta.ws.rs.core.UriBuilder;
 import org.toolforge.vcat.mediawiki.interfaces.Wiki;
 
 import java.io.Serial;
+import java.net.URI;
 
 public class SimpleWikimediaWiki implements Wiki {
 
@@ -17,7 +19,9 @@ public class SimpleWikimediaWiki implements Wiki {
 
     @Override
     public String getApiUrl() {
-        return "https://" + host + "/w/api.php";
+        // Security: use an UriBuilder to escape the host name
+        final var uri = URI.create("https://HOST/w/api.php");
+        return UriBuilder.fromUri(uri).host(host).toString();
     }
 
     @Override
