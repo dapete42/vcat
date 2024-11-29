@@ -14,6 +14,7 @@ import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.mediawiki.interfaces.CategoryProvider;
 import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
 import org.toolforge.vcat.mediawiki.interfaces.Wiki;
+import org.toolforge.vcat.util.ReentrantLocks;
 
 import java.io.IOException;
 import java.io.Serial;
@@ -22,12 +23,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class ApiClient implements CategoryProvider, MetadataProvider {
 
     @Serial
-    private static final long serialVersionUID = 3602036144920595619L;
+    private static final long serialVersionUID = -5476476560276033334L;
 
     /**
      * Maximum number of titles parameters to use in one request.
@@ -37,7 +37,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
     /**
      * Locks for API Etiquette (see below).
      */
-    private final WeakHashMap<String, ReentrantLock> locks = new WeakHashMap<>();
+    private final ReentrantLocks<String> locks = new ReentrantLocks<>();
 
     private final HttpClient httpClient;
 
@@ -82,10 +82,6 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
                 .build();
     }
 
-    private ReentrantLock getLock(String apiUrl) {
-        return locks.computeIfAbsent(apiUrl, k -> new ReentrantLock());
-    }
-
     @Nullable
     protected JsonObject request(String apiUrl, Map<String, String> params) throws ApiException {
         final var requestUri = buildRequestUri(apiUrl, params);
@@ -96,8 +92,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
          * to being blocked. It is probably nice to do this for any wiki, anyway. See <a href="https://www.mediawiki.org/wiki/API:Etiquette">API:Etiquette</a> on
          * the MediaWiki wiki for more information on Wikimedia API etiquette.
          */
-        final var lock = getLock(apiUrl);
-        lock.lock();
+        final var lock = locks.lock(apiUrl);
         try {
             final var httpResponse = httpClient.send(httpRequest, BodyHandlers.ofInputStream());
             try (var bodyStream = httpResponse.body();
