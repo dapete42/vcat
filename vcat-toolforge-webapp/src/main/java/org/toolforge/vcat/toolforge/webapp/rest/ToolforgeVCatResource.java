@@ -4,7 +4,6 @@ import io.quarkus.qute.Template;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -27,6 +26,9 @@ import java.util.stream.Stream;
 @Slf4j
 @Path("/render")
 public class ToolforgeVCatResource {
+
+    @Inject
+    UriInfo uriInfo;
 
     /**
      * Maximum number of processes to queue vor vCat
@@ -81,10 +83,10 @@ public class ToolforgeVCatResource {
     }
 
     @GET
-    public Response render(@Context UriInfo uriInfo) {
+    public Response render() {
         try {
             if (vCatRenderer instanceof QueuedVCatRenderer queuedVCatRenderer
-                    && queuedVCatRenderer.getQueueLength() > vcatQueue) {
+                && queuedVCatRenderer.getQueueLength() > vcatQueue) {
                 return errorResponse(Response.Status.TOO_MANY_REQUESTS,
                         Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
             }

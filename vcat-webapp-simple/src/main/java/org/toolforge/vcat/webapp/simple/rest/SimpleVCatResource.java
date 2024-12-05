@@ -3,7 +3,6 @@ package org.toolforge.vcat.webapp.simple.rest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -21,6 +20,9 @@ import java.util.stream.Stream;
 @Slf4j
 @Path("/render")
 public class SimpleVCatResource {
+
+    @Inject
+    UriInfo uriInfo;
 
     @Inject
     MetadataProvider metadataProvider;
@@ -49,7 +51,7 @@ public class SimpleVCatResource {
     }
 
     @GET
-    public Response render(@Context UriInfo uriInfo) {
+    public Response render() {
         try {
             final var renderedFileInfo = vCatRenderer.render(
                     new AllParams(uriInfo.getQueryParameters(), uriStringWithoutQuery(uriInfo), metadataProvider));
