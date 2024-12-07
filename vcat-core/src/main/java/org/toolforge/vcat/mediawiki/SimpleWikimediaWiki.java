@@ -20,7 +20,7 @@ public class SimpleWikimediaWiki implements Wiki {
     @Override
     public String getApiUrl() {
         // Security: use an UriBuilder to escape the host name
-        final var escapedHost = UriBuilder.fromUri("http://" + host + "/").host(host).build().toString();
+        final var escapedHost = UriBuilder.fromUri("http://HOST/").host(host).build().getHost();
         return "https://" + escapedHost + "/w/api.php";
     }
 
