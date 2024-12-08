@@ -64,6 +64,7 @@ public class ReentrantLocks<K> {
     }
 
     private ReentrantLock getLock(K key) {
+        processQueue();
         instanceLock.lock();
         try {
             final var lockReference = lockReferenceMap.get(key);
