@@ -84,7 +84,7 @@
         <dependency>
             <groupId>net.dapete.qucockpit</groupId>
             <artifactId>qucockpit</artifactId>
-            <version>0.1.3</version>
+            <version>0.1.4</version>
         </dependency>
 
         <dependency>
