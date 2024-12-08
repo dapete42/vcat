@@ -29,7 +29,7 @@ public class ReentrantLocks<K> {
 
     }
 
-    private final Lock lock = new ReentrantLock();
+    private final Lock instanceLock = new ReentrantLock();
 
     private final Map<K, LockReference> lockReferenceMap = new HashMap<>();
 
@@ -55,16 +55,16 @@ public class ReentrantLocks<K> {
      */
     public int size() {
         processQueue();
-        lock.lock();
+        instanceLock.lock();
         try {
             return lockReferenceMap.size();
         } finally {
-            lock.unlock();
+            instanceLock.unlock();
         }
     }
 
     private ReentrantLock getLock(K key) {
-        lock.lock();
+        instanceLock.lock();
         try {
             final var lockReference = lockReferenceMap.get(key);
             final var lock = lockReference == null ? null : lockReference.get();
@@ -76,7 +76,7 @@ public class ReentrantLocks<K> {
                 return lock;
             }
         } finally {
-            lock.unlock();
+            instanceLock.unlock();
         }
     }
 
@@ -85,14 +85,14 @@ public class ReentrantLocks<K> {
      */
     @SuppressWarnings("unchecked")
     private void processQueue() {
-        lock.lock();
+        instanceLock.lock();
         try {
             LockReference lockReference;
             while ((lockReference = (LockReference) lockReferenceQueue.poll()) != null) {
                 lockReferenceMap.remove(lockReference.getKey());
             }
         } finally {
-            lock.unlock();
+            instanceLock.unlock();
         }
     }
 
