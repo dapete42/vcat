@@ -1,0 +1,3 @@
+# For integration tests.
+
+target/vcat-toolforge-runner.jar
