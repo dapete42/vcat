@@ -1,17 +1,22 @@
-package org.toolforge.vcat.toolforge.webapp.test.integration.apps;
+package org.toolforge.vcat.toolforge.webapp.test.integration.util;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.Network;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Map;
 
-public class VcatToolforgeWebapp {
+public class VcatToolforgeContainers {
 
     private final MariaDBContainer<?> mariadbContainer;
     private final GenericContainer<?> vcatToolforgeWebappContainer;
 
-    public VcatToolforgeWebapp() {
+    public VcatToolforgeContainers() {
         mariadbContainer = new MariaDBContainer<>("mariadb:11");
         vcatToolforgeWebappContainer = new GenericContainer<>("vcat-toolforge-webapp");
     }
@@ -27,7 +32,6 @@ public class VcatToolforgeWebapp {
                 .withEnv(getEnv())
                 .withExposedPorts(8000)
                 .start();
-        System.out.printf("Test instance of vcat-toolforge-webapp running on %s%n", getUrl(""));
     }
 
     private Map<String, String> getEnv() {
@@ -41,16 +45,35 @@ public class VcatToolforgeWebapp {
 
     private String getQuarkusDatasourceJdbcUrl() {
         // driver has to be explicitly added as a parameter
-        return "jdbc:mariadb://mariadb:3306/meta_p?driver=" +  mariadbContainer.getDriverClassName();
+        return "jdbc:mariadb://mariadb:3306/meta_p?driver=" + mariadbContainer.getDriverClassName();
     }
 
     public void stop() {
+        mariadbContainer.stop();
         vcatToolforgeWebappContainer.stop();
     }
 
     public String getUrl(String path) {
         return String.format("http://%s:%s/%s",
                 vcatToolforgeWebappContainer.getHost(), vcatToolforgeWebappContainer.getMappedPort(8000), path);
+    }
+
+    public HttpResponse<byte[]> getHttpResponse(String path) throws IOException, InterruptedException {
+        try (var httpClient = HttpClient.newHttpClient()) {
+            final var uri = URI.create(getUrl(path));
+            final var request = HttpRequest.newBuilder(uri).build();
+            final var bodyHandler = HttpResponse.BodyHandlers.ofByteArray();
+            return httpClient.send(request, bodyHandler);
+        }
+    }
+
+    public HttpResponse<String> getHttpResponseStringBody(String path) throws IOException, InterruptedException {
+        try (var httpClient = HttpClient.newHttpClient()) {
+            final var uri = URI.create(getUrl(path));
+            final var request = HttpRequest.newBuilder(uri).build();
+            final var bodyHandler = HttpResponse.BodyHandlers.ofString();
+            return httpClient.send(request, bodyHandler);
+        }
     }
 
 }
