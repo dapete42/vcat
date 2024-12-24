@@ -22,14 +22,7 @@ public class ToolforgeWiki implements Wiki {
     protected ToolforgeWiki(@Nullable String dbname, @Nullable String name, @Nullable String url) {
         this.dbname = Objects.requireNonNull(dbname);
         this.name = Objects.requireNonNull(name);
-        // Since June 2015, WMF have started to make wikis HTTPS-only, with all HTTP requests redirecting. All wikis
-        // support HTTPS, so using it for the API would already have made sense before, and will now also avoid
-        // unnecessary requests.
-        if (Objects.requireNonNull(url).startsWith("http://")) {
-            this.url = "https" + url.substring(4);
-        } else {
-            this.url = url;
-        }
+        this.url = url;
     }
 
     @Override
