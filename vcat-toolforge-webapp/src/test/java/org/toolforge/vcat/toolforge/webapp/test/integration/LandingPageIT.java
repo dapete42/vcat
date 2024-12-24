@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeAssertions.assertContains;
+import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeAssertions.assertContentType;
 
 /**
  * Integration tests for the landing page using a simulated environment with MariaDB and VCat.
@@ -25,7 +26,7 @@ class LandingPageIT {
 
         // returns an HTML page with status 200
         assertEquals(200, response.statusCode());
-        assertEquals("text/html", response.headers().firstValue("Content-Type").orElse(null));
+        assertContentType("text/html", response);
         assertContains("<h1>vCat</h1>", response.body());
     }
 
