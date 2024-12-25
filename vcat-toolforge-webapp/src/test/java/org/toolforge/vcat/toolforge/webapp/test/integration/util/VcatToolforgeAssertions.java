@@ -41,10 +41,8 @@ public abstract class VcatToolforgeAssertions {
                 final Path outputFile = Paths.get("target", resourceName);
                 Files.createDirectories(outputFile.getParent());
                 Files.copy(actualImageStream, outputFile, StandardCopyOption.REPLACE_EXISTING);
-                System.out.printf("""
-                                Could not find reference image %s. \
-                                It has been initialized at %s, but needs to be moved to %s and committed to Git.%n""",
-                        expectedReferenceImage, outputFile, Paths.get("src", "test", "resources", resourceName));
+                fail("Could not find reference image %s. It has been initialized at %s, but needs to be moved to %s and committed to Git."
+                        .formatted(expectedReferenceImage, outputFile, Paths.get("src", "test", "resources", resourceName)));
             } else {
                 assertImageEquals(expectedResourceStream, actualImageStream);
             }

@@ -7,6 +7,8 @@ import org.toolforge.vcat.params.OutputFormat;
 import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeContainers;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeAssertions.assertContentType;
@@ -24,12 +26,13 @@ class FontRenderingIT {
 
     @ParameterizedTest
     @CsvSource(textBlock = """
-            äöüÄÖÜßxxxxx, lang-de
-            ベルリンxxxxx, lang-ja
-            新德國臺灣xxxxx, lang-zh
+            äöüÄÖÜß, lang-de
+            ベルリン, lang-ja
+            新德國臺灣, lang-zh
             """)
-    void testFontRendering(String title, String expectedReferenceImage) throws InterruptedException, IOException {
-        final var response = VcatToolforgeContainers.instance().getHttpResponse("render?wiki=enwiki&title=%s".formatted(title));
+    void testFontRendering(String text, String expectedReferenceImage) throws InterruptedException, IOException {
+        final var response = VcatToolforgeContainers.instance()
+                .getHttpResponse("test-font-rendering?text=%s".formatted(URLEncoder.encode(text.replace(' ', '_'), StandardCharsets.UTF_8)));
 
         // returns with status 200
         assertEquals(200, response.statusCode());

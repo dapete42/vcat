@@ -71,7 +71,8 @@ public class VcatToolforgeContainers {
                 "TOOL_REPLICA_USER", mariadbContainer.getUsername(),
                 "TOOL_REPLICA_PASSWORD", mariadbContainer.getPassword(),
                 "QUARKUS_DATASOURCE_JDBC_URL", getQuarkusDatasourceJdbcUrl(),
-                "GRAPHVIZ_DIR", "/usr/bin"
+                "GRAPHVIZ_DIR", "/usr/bin",
+                "TESTFONTRENDERING_ENABLED", "true"
         );
     }
 

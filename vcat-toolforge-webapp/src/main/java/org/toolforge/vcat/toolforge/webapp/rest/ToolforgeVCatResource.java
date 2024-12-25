@@ -1,10 +1,8 @@
 package org.toolforge.vcat.toolforge.webapp.rest;
 
-import io.quarkus.qute.Template;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +16,7 @@ import org.toolforge.vcat.toolforge.webapp.Messages;
 import org.toolforge.vcat.toolforge.webapp.ToolforgeWikiProvider;
 import org.toolforge.vcat.toolforge.webapp.cdi.qualifier.MetadataProviderQualifier;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Path("/render")
@@ -37,46 +32,18 @@ public class ToolforgeVCatResource {
     @ConfigProperty(name = "vcat.queue", defaultValue = "100")
     Integer vcatQueue;
 
-    /**
-     * Cute error template
-     */
-    @Inject
-    Template error;
-
     @Inject
     @MetadataProviderQualifier
     MetadataProvider metadataProvider;
+
+    @Inject
+    ResponseService responseService;
 
     @Inject
     ToolforgeWikiProvider toolforgeWikiProvider;
 
     @Inject
     VCatRenderer vCatRenderer;
-
-    private Response errorResponse(Response.Status status, String message) {
-        return errorResponse(status, message, "");
-    }
-
-    private Response errorResponse(Response.Status status, Exception e) {
-        var stacktrace = Stream.of(e.getStackTrace())
-                .map(StackTraceElement::toString)
-                .collect(Collectors.joining("\n"));
-        return errorResponse(status, e.getMessage(), stacktrace);
-    }
-
-    private Response errorResponse(Response.Status status, String errorMessage, String stacktrace) {
-        return Response.ok()
-                .entity(
-                        error.data(
-                                "status", status,
-                                "errorMessage", errorMessage,
-                                "stacktrace", stacktrace
-                        ).render().getBytes(StandardCharsets.UTF_8)
-                )
-                .type(MediaType.TEXT_HTML_TYPE)
-                .status(status)
-                .build();
-    }
 
     private static String uriStringWithoutQuery(UriInfo uriInfo) {
         return uriInfo.getRequestUriBuilder().replaceQuery(null).build().toString();
@@ -87,7 +54,7 @@ public class ToolforgeVCatResource {
         try {
             if (vCatRenderer instanceof QueuedVCatRenderer queuedVCatRenderer
                 && queuedVCatRenderer.getQueueLength() > vcatQueue) {
-                return errorResponse(Response.Status.TOO_MANY_REQUESTS,
+                return responseService.errorResponse(Response.Status.TOO_MANY_REQUESTS,
                         Messages.getString("ToolforgeVCatServlet.Error.TooManyQueuedJobs"));
             }
 
@@ -105,10 +72,10 @@ public class ToolforgeVCatResource {
                     .type(mimeType)
                     .build();
         } catch (VCatException e) {
-            return errorResponse(Response.Status.BAD_REQUEST, e);
+            return responseService.errorResponse(Response.Status.BAD_REQUEST, e);
         } catch (Exception e) {
             LOG.error("Error rendering response", e);
-            return errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e);
+            return responseService.errorResponse(Response.Status.INTERNAL_SERVER_ERROR, e);
         }
     }
 

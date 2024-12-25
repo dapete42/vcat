@@ -7,6 +7,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.toolforge.vcat.VCatException;
 import org.toolforge.vcat.graphviz.GraphvizExternal;
 import org.toolforge.vcat.graphviz.QueuedGraphviz;
+import org.toolforge.vcat.graphviz.interfaces.Graphviz;
 import org.toolforge.vcat.mediawiki.ApiClient;
 import org.toolforge.vcat.renderer.CachedVCatRenderer;
 import org.toolforge.vcat.renderer.QueuedVCatRenderer;
@@ -53,7 +54,7 @@ public class VCatRendererProducer {
     ApiClient apiClient;
 
     @Produces
-    public VCatRenderer VCatRenderer() throws IOException, VCatException {
+    public VCatRenderer produceVCatRenderer(Graphviz graphviz) throws IOException, VCatException {
         // For cache of Graphviz files and rendered images, use this directory
         final var cacheDir = Files.createTempDirectory("vcat-cache");
         // Temporary directory for Graphviz files and rendered images
@@ -62,13 +63,16 @@ public class VCatRendererProducer {
         Files.createDirectories(cacheDir);
         Files.createDirectories(tempDir);
 
-        final var graphvizDirPath = Paths.get(graphvizDir);
-        final var baseGraphviz = new GraphvizExternal(graphvizDirPath);
-        final var graphviz = new QueuedGraphviz(baseGraphviz, graphvizThreads);
-
         return new QueuedVCatRenderer(
                 new CachedVCatRenderer(graphviz, tempDir, apiClient, cacheDir, cachePurge),
                 vcatThreads);
+    }
+
+    @Produces
+    public Graphviz produceGraphviz() {
+        final var graphvizDirPath = Paths.get(graphvizDir);
+        final var baseGraphviz = new GraphvizExternal(graphvizDirPath);
+        return new QueuedGraphviz(baseGraphviz, graphvizThreads);
     }
 
 }

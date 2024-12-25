@@ -53,7 +53,7 @@ public abstract class AbstractVCat {
      */
     private static final Logger LOG = LoggerFactory.getLogger(AbstractVCat.class);
 
-    private static final String GRAPH_FONT = "DejaVu Sans";
+    public static final String GRAPH_FONT = "DejaVu Sans";
 
     private static final String GROUP_EXCEED = "exceed";
 
