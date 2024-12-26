@@ -80,13 +80,6 @@
             <version>2.4.0</version>
         </dependency>
 
-        <!-- https://gitlab.dapete.net/java/qucockpit/ -->
-        <dependency>
-            <groupId>net.dapete.qucockpit</groupId>
-            <artifactId>qucockpit</artifactId>
-            <version>0.1.4</version>
-        </dependency>
-
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
@@ -232,13 +225,5 @@
             </build>
         </profile>
     </profiles>
-
-    <repositories>
-        <!-- https://gitlab.dapete.net/java/qucockpit/ -->
-        <repository>
-            <id>qucockpit</id>
-            <url>https://gitlab.dapete.net/api/v4/projects/23/packages/maven</url>
-        </repository>
-    </repositories>
 
 </project>
