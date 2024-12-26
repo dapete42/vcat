@@ -46,7 +46,9 @@ public abstract class VcatToolforgeAssertions {
                 fail("Could not find reference image %s. It has been initialized at %s, but needs to be moved to %s and committed to Git."
                         .formatted(expectedReferenceImage, actualImageFile, Paths.get("src", "test", "resources", resourceName)));
             } else {
-                if (!areImagesEqual(expectedResourceStream, actualImageFile)) {
+                if (areImagesEqual(expectedResourceStream, actualImageFile)) {
+                    Files.delete(actualImageFile);
+                } else {
                     fail("Results for reference image %s differ. The actual image is at %s."
                             .formatted(expectedReferenceImage, actualImageFile));
                 }
