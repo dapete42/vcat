@@ -20,3 +20,5 @@ fonts-lohit-taml-classical
 fonts-lohit-telu
 # support for language my (Myanmarsar)
 fonts-myanmar
+# support for language am (Amharic) and others
+fonts-sil-abyssinica
