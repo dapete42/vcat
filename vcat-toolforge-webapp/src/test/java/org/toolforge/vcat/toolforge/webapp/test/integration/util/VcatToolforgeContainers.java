@@ -47,7 +47,7 @@ public class VcatToolforgeContainers {
             mariadbContainer.withNetwork(network)
                     .withNetworkAliases("mariadb")
                     .withDatabaseName("meta_p")
-                    .withInitScript("integration/mariadb-init.sql")
+                    .withInitScript("mariadb-init.sql")
                     .start();
         }
     }

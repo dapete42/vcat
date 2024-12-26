@@ -2,7 +2,7 @@ package org.toolforge.vcat.toolforge.webapp.test.integration;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.toolforge.vcat.params.OutputFormat;
 import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeContainers;
 
@@ -25,11 +25,7 @@ class FontRenderingIT {
     }
 
     @ParameterizedTest
-    @CsvSource(textBlock = """
-            äöüÄÖÜß, lang-de
-            ベルリン, lang-ja
-            新德國臺灣, lang-zh
-            """)
+    @CsvFileSource(resources = "/testFontRendering.csv")
     void testFontRendering(String text, String expectedReferenceImage) throws InterruptedException, IOException {
         final var response = VcatToolforgeContainers.instance()
                 .getHttpResponse("test-font-rendering?text=%s".formatted(URLEncoder.encode(text.replace(' ', '_'), StandardCharsets.UTF_8)));
