@@ -11,6 +11,7 @@ import org.toolforge.vcat.VCatException;
 import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
 import org.toolforge.vcat.params.AllParams;
 import org.toolforge.vcat.renderer.interfaces.VCatRenderer;
+import org.toolforge.vcat.webapp.simple.cdi.qualifier.MetadataProviderQualifier;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,6 +26,7 @@ public class SimpleVCatResource {
     UriInfo uriInfo;
 
     @Inject
+    @MetadataProviderQualifier
     MetadataProvider metadataProvider;
 
     @Inject
