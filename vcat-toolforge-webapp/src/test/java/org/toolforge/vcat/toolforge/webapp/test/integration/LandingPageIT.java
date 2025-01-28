@@ -1,7 +1,7 @@
 package org.toolforge.vcat.toolforge.webapp.test.integration;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeITBase;
 import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeContainers;
 
 import java.io.IOException;
@@ -13,12 +13,7 @@ import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatTool
 /**
  * Integration tests for the landing page using a simulated environment with MariaDB and VCat.
  */
-class LandingPageIT {
-
-    @BeforeAll
-    static void beforeAll() {
-        VcatToolforgeContainers.instance().start();
-    }
+class LandingPageIT extends VcatToolforgeITBase {
 
     @Test
     void landingPage() throws InterruptedException, IOException {

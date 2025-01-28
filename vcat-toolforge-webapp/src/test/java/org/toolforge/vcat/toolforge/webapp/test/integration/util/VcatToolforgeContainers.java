@@ -11,6 +11,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class VcatToolforgeContainers {
@@ -64,9 +65,7 @@ public class VcatToolforgeContainers {
     }
 
     private Map<String, String> getEnv() {
-        if (mariadbContainer == null) {
-            throw new IllegalStateException("Mariadb container not started");
-        }
+        Objects.requireNonNull(mariadbContainer, "Mariadb container not started");
         return Map.of(
                 "TOOL_REPLICA_USER", mariadbContainer.getUsername(),
                 "TOOL_REPLICA_PASSWORD", mariadbContainer.getPassword(),
@@ -98,9 +97,7 @@ public class VcatToolforgeContainers {
     }
 
     public String getUrl(String path) {
-        if (vcatToolforgeWebappContainer == null) {
-            throw new IllegalStateException("vCat Toolforge webapp container not started");
-        }
+        Objects.requireNonNull(vcatToolforgeWebappContainer, "vCat Toolforge webapp container not started");
         return String.format("http://%s:%s/%s",
                 vcatToolforgeWebappContainer.getHost(), vcatToolforgeWebappContainer.getMappedPort(8000), path);
     }
