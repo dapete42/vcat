@@ -1,8 +1,8 @@
-package org.toolforge.vcat.toolforge.webapp.test.integration;
+package org.toolforge.vcat.toolforge.webapp.test.integration.docker;
 
 import org.junit.jupiter.api.Test;
-import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeITBase;
-import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeContainers;
+import org.toolforge.vcat.toolforge.webapp.test.integration.docker.util.VcatToolforgeContainers;
+import org.toolforge.vcat.toolforge.webapp.test.integration.docker.util.VcatToolforgeDockerITBase;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatTool
 /**
  * Integration tests for the landing page using a simulated environment with MariaDB and VCat.
  */
-class LandingPageIT extends VcatToolforgeITBase {
+class LandingPageIT extends VcatToolforgeDockerITBase {
 
     @Test
     void landingPage() throws InterruptedException, IOException {

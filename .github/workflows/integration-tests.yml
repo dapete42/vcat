@@ -20,4 +20,4 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Maven verify with integration test for vcat-toolforge-webapp
-        run: ./mvnw -B -pl vcat-toolforge-webapp -am -P integration-test verify
+        run: ./mvnw -B -pl vcat-toolforge-webapp -am -P integration-tests-docker verify

@@ -1,10 +1,12 @@
 # Integration Tests
 
-Integrations tests will only run if the `integration-test` profile is explicitly activated and the 
+## Docker Integration Tests
+
+Docker-based untegrations tests will only run if the `integration-tests-docker` profile is explicitly activated and the 
 `verify` Maven goal is executed.
 
 ```sh
-./mvnw -pl vcat-toolforge-webapp -am -P integration-test verify
+./mvnw -pl vcat-toolforge-webapp -am -P integration-tests-docker verify
 ```
 
 *What this does:*
@@ -19,3 +21,8 @@ TODO:
 * Set up a GitHub action.
 * More tests.
 * Perhaps use a real source for the `wiki` table.
+
+## Heroku Integration Tests
+
+Some integration tests for Toolforge's Heroku build environment are automatically run for builds in this environment.
+This is triggered by the `heroku-build` profile.

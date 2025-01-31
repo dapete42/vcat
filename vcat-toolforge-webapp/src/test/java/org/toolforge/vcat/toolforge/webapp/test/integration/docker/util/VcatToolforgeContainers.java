@@ -1,4 +1,4 @@
-package org.toolforge.vcat.toolforge.webapp.test.integration.util;
+package org.toolforge.vcat.toolforge.webapp.test.integration.docker.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.containers.GenericContainer;
@@ -83,7 +83,7 @@ public class VcatToolforgeContainers {
         return "jdbc:mariadb://mariadb:3306/meta_p?driver=" + mariadbContainer.getDriverClassName();
     }
 
-    void stop() {
+    public void stop() {
         if (mariadbContainer != null) {
             LOG.info("Stopping Mariadb container");
             mariadbContainer.stop();

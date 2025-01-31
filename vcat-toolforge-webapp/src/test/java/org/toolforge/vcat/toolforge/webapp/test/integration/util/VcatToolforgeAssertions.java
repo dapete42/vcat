@@ -72,4 +72,8 @@ public abstract class VcatToolforgeAssertions {
         return true;
     }
 
+    public static void assertImageEquals(String expectedReferenceImage, Path actualImageFile) throws IOException {
+        assertImageEquals(expectedReferenceImage, Files.readAllBytes(actualImageFile));
+    }
+
 }

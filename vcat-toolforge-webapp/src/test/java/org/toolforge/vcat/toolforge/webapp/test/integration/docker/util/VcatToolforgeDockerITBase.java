@@ -1,11 +1,11 @@
-package org.toolforge.vcat.toolforge.webapp.test.integration.util;
+package org.toolforge.vcat.toolforge.webapp.test.integration.docker.util;
 
 import org.junit.jupiter.api.BeforeAll;
 
 /**
  * Base integration test.
  */
-public abstract class VcatToolforgeITBase {
+public abstract class VcatToolforgeDockerITBase {
 
     @BeforeAll
     static void beforeAll() {

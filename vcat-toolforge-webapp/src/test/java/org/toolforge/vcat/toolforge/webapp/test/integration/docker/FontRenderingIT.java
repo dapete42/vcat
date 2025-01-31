@@ -1,10 +1,10 @@
-package org.toolforge.vcat.toolforge.webapp.test.integration;
+package org.toolforge.vcat.toolforge.webapp.test.integration.docker;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.toolforge.vcat.params.OutputFormat;
-import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeContainers;
-import org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeITBase;
+import org.toolforge.vcat.toolforge.webapp.test.integration.docker.util.VcatToolforgeContainers;
+import org.toolforge.vcat.toolforge.webapp.test.integration.docker.util.VcatToolforgeDockerITBase;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -17,7 +17,7 @@ import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatTool
 /**
  * Integration tests for the {@code /render} endpoint using a simulated environment with MariaDB and VCat.
  */
-class FontRenderingIT extends VcatToolforgeITBase {
+class FontRenderingIT extends VcatToolforgeDockerITBase {
 
     @ParameterizedTest
     @CsvFileSource(resources = "/testFontRendering.csv")
