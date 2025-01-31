@@ -270,6 +270,7 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
+                                <inherited>false</inherited>
                                 <id>validate-heroku</id>
                                 <phase>validate</phase>
                                 <goals>
