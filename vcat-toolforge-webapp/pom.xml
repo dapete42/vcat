@@ -156,7 +156,7 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <!-- We also need the list of Debian packages form ../Aptfile. Ant can do this and will
-                            stored the list in the ${Aptfile-packages} property. -->
+                            store the list in the ${Aptfile-packages} property. -->
                             <execution>
                                 <phase>pre-integration-test</phase>
                                 <goals>
@@ -198,6 +198,7 @@
                                                 <dockerFile>${project.basedir}/src/test/docker/Dockerfile</dockerFile>
                                                 <contextDir>${project.basedir}</contextDir>
                                                 <args>
+                                                    <image>${heroku.image}</image>
                                                     <java_version>${system.properties-java.runtime.version}
                                                     </java_version>
                                                     <apt_packages>${Aptfile-packages}</apt_packages>

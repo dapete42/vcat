@@ -39,6 +39,12 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.18.1</quarkus.platform.version>
+
+        <!-- expected OS in the Toolforge Heroku build environment -->
+        <heroku.os>Ubuntu</heroku.os>
+        <heroku.os.version>22.04</heroku.os.version>
+        <!-- for integration tests, we want to use a Docker image for the same OS -->
+        <heroku.image>ubuntu:${heroku.os.version}</heroku.image>
     </properties>
 
     <dependencyManagement>
@@ -268,10 +274,10 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
+                        <inherited>false</inherited>
                         <executions>
                             <execution>
-                                <inherited>false</inherited>
-                                <id>validate-heroku</id>
+                                <id>heroku-validate-graphviz</id>
                                 <phase>validate</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -282,6 +288,40 @@
                                         <exec executable="/layers/fagiani_apt/apt/usr/bin/dot" failonerror="true">
                                             <arg value="-V"/>
                                         </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>heroku-validate-os</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo level="info">Verify OS is ${heroku.os} ${heroku.os.version} in the Toolforge Heroku build environment</echo>
+                                        <exec executable="/bin/sh" resultproperty="os_exitcode">
+                                            <arg value="-c"/>
+                                            <arg line='"lsb_release -is | grep ${heroku.os}"'/>
+                                        </exec>
+                                        <exec executable="/bin/sh" resultproperty="os_version_exitcode">
+                                            <arg value="-c"/>
+                                            <arg line='"lsb_release -rs | grep ${heroku.os.version}"'/>
+                                        </exec>
+                                        <fail message="OS is not ${heroku.os} in the Toolforge Heroku build environment">
+                                            <condition>
+                                                <not>
+                                                    <equals arg1="0" arg2="${os_exitcode}"/>
+                                                </not>
+                                            </condition>
+                                        </fail>
+                                        <fail message="OS version is not ${heroku.os.version} in the Toolforge Heroku build environment">
+                                            <condition>
+                                                <not>
+                                                    <equals arg1="0" arg2="${os_version_exitcode}"/>
+                                                </not>
+                                            </condition>
+                                        </fail>
                                     </target>
                                 </configuration>
                             </execution>
