@@ -5,6 +5,8 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonException;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.core.UriBuilder;
+import net.dapete.locks.Locks;
+import net.dapete.locks.ReentrantLocks;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,7 +16,6 @@ import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.mediawiki.interfaces.CategoryProvider;
 import org.toolforge.vcat.mediawiki.interfaces.MetadataProvider;
 import org.toolforge.vcat.mediawiki.interfaces.Wiki;
-import org.toolforge.vcat.util.ReentrantLocks;
 
 import java.io.IOException;
 import java.io.Serial;
@@ -37,7 +38,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
     /**
      * Locks for API Etiquette (see below).
      */
-    private final ReentrantLocks<String> locks = new ReentrantLocks<>();
+    private final ReentrantLocks<String> locks = Locks.reentrant();
 
     private final HttpClient httpClient;
 
