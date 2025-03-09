@@ -98,7 +98,7 @@ public class VcatToolforgeContainers {
 
     public String getUrl(String path) {
         Objects.requireNonNull(vcatToolforgeWebappContainer, "vCat Toolforge webapp container not started");
-        return String.format("http://%s:%s/%s",
+        return String.format("https://%s:%s/%s",
                 vcatToolforgeWebappContainer.getHost(), vcatToolforgeWebappContainer.getMappedPort(8000), path);
     }
 

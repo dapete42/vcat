@@ -4,7 +4,6 @@ import jakarta.ws.rs.core.UriBuilder;
 import org.toolforge.vcat.mediawiki.interfaces.Wiki;
 
 import java.io.Serial;
-import java.net.URI;
 
 public class SimpleWikimediaWiki implements Wiki {
 
@@ -20,7 +19,7 @@ public class SimpleWikimediaWiki implements Wiki {
     @Override
     public String getApiUrl() {
         // Security: use an UriBuilder to escape the host name
-        final var escapedHost = UriBuilder.fromUri("http://HOST/").host(host).build().getHost();
+        final var escapedHost = UriBuilder.fromUri("https://HOST/").host(host).build().getHost();
         return "https://" + escapedHost + "/w/api.php";
     }
 
