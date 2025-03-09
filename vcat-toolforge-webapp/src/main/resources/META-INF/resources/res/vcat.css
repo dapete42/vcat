@@ -10,9 +10,6 @@ th, td {
   text-align: left;
   vertical-align: top;
 }
-td.nowrap, td.tool-maintainers, td.tool-name {
-  white-space: nowrap;
-}
 a {
   color:#369;
 }
@@ -29,70 +26,6 @@ p {
 }
 img {
   margin:10px 0 5px;
-}
-/* Header styles */
-#header {
-  clear:both;
-  float:left;
-  width:100%;
-}
-#header {
-  border-bottom:1px solid #000;
-}
-#header p,
-#header h1,
-#header h2 {
-  padding:.4em 15px 0 15px;
-  margin:0;
-}
-#header ul {
-  clear:left;
-  float:left;
-  width:100%;
-  list-style:none;
-  margin:10px 0 0 0;
-  padding:0;
-}
-#header ul li {
-  display:inline;
-  list-style:none;
-  margin:0;
-  padding:0;
-}
-#header ul li a {
-  display:block;
-  float:left;
-  margin:0 0 0 1px;
-  padding:3px 10px;
-  text-align:center;
-  background:#eee;
-  color:#000;
-  text-decoration:none;
-  position:relative;
-  left:15px;
-  line-height:1.3em;
-}
-#header ul li a:hover {
-  background:#369;
-  color:#fff;
-}
-#header ul li a.active,
-#header ul li a.active:hover {
-  color:#fff;
-  background:#000;
-  font-weight:bold;
-}
-#header ul li a span {
-  display:block;
-}
-/* 'widths' sub menu */
-#layoutdims {
-  clear:both;
-  background:#eee;
-  border-top:4px solid #000;
-  margin:0;
-  padding:6px 15px !important;
-  text-align:right;
 }
 /* column container */
 .colmask {
@@ -131,151 +64,21 @@ img {
   position:relative;
   right:185px;
 }
-/* Footer styles */
-#footer {
-  clear:both;
-  float:left;
-  width:100%;
-  border-top:1px solid #000;
-}
-#footer p {
-  padding:10px;
-  margin:0;
-}
 #logo {
   text-align: center;
 }
 .col2 ul {
-  margin: 0px;
-  margin-bottom: 20px;
+  margin: 0 0 20px;
   list-style-type: none;
-  padding: 0;
-  padding-left: 15px;
+  padding: 0 0 0 15px;
 }
 .col2 ul li {
   padding: 0;
 }
-.tool-name, .tool-maintainers, .tool-desc, .subtool-name, .subtool-desc {
-  text-align: left;
-  vertical-align: top;
-}
-span.mw-editsection {
-  display: block;
-}
-div.subtool {
-  display: block;
-  padding-bottom: 3px;
-  border-top: dotted thin #888;
-  width: 100%;
-}
-div.subtool.first {
-  border-top: none;
-}
-span.subtool-name {
-  display: inline-block;
-  padding-right: 4px;
-  width: 20%;
-}
-span.subtool-desc {
-  display: inline-block;
-  padding-left: 1ex;
-  width: 75%;
-}
 
 /* Backwards and goofy */
-.tool-name {
-  font-size: 150%;
-}
-.tool-name span.mw-editsection {
-  font-size: 50%;
-}
 .tool-maintainers a {
   display: block;
-}
-/* --> */
-
-/* tables */
-table.tablesorter {
-  margin:10px 0pt 15px;
-  width: 100%;
-  text-align: left;
-  border-collapse:collapse;
-}
-table.tablesorter thead tr th {
-  background-color: #fff;
-  border-bottom: 2px solid #000;
-  padding: 4px;
-  font-size: 125%;
-  transition: background-color 0.2s linear;
-  -moz-transition: background-color 0.2s linear;
-  -o-transition: background-color 0.2s linear;
-  -webkit-transition: background-color 0.2s linear;
-
-}
-table.tablesorter thead tr th:hover {
-  background-color: #397ffb;
-  border-bottom: 2px solid #1b61dd;
-  color: #fff;
-  padding: 4px;
-}
-table.tablesorter thead tr .header {
-  background-repeat: no-repeat;
-  background-position: center right;
-  cursor: pointer;
-}
-table.tablesorter tbody td {
-  color: #222;
-  padding: 4px;
-  vertical-align: top;
-}
-table.tablesorter tbody tr.odd td {
-  background-color:#f8f8f8;
-}
-table.tablesorter thead tr .headerSortUp {
-  background-image: url(/web/20170714062933im_/https://tools.wmflabs.org/admin/img/asc_dark.png);
-  border-bottom: 2px solid #1b61dd;
-}
-table.tablesorter thead tr .headerSortDown {
-  background-image: url(/web/20170714062933im_/https://tools.wmflabs.org/admin/img/desc_dark.png);
-  border-bottom: 2px solid #1b61dd;
-}
-table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-  background-color: #ddd;
-  color: #222;
-}
-/* Extra selectors needed to override the default styling */
-table.tablesorter tbody tr.normal-row td {
-  background: #fff;
-  color: #fff;
-}
-table.tablesorter tbody tr.alt-row td {
-  background: #f8f8f8;
-  color: #fff;
-}
-
-/* Special data type alignments */
-td.jobno {
-  text-align: right;
-}
-
-div.hostline {
-  border-left: 2px solid #ddd;
-  border-bottom: 2px solid #ddd;
-  background-color: #f8f8f8;
-  color: #222;
-  padding: 5px;
-}
-span.hostname {
-  font-size: 150%;
-  font-weight: bold;
-}
-
-.seealso {
-  border-bottom:1px solid #ccc;
-  color:#555;
-  font-style:italic;
-  margin-bottom:.5em;
-  padding:0 0 .5em 0;
 }
 
 /* Small screen layout */
@@ -304,59 +107,6 @@ span.hostname {
     position:static;
     width:auto;
   }
-  #thebigtable,
-  #thebigtable td,
-  #thebigtable th {
-    display:block;
-  }
-  #thebigtable thead tr {
-    position:absolute;
-    top:-9999px;
-    left:-9999px;
-  }
-  #thebigtable tr {
-    border:1px solid #ccc;
-  }
-  #thebigtable td::before {
-    font-style:italic;
-    padding-right:.5em;
-    white-space:nowrap;
-  }
-  #thebigtable td.tool-name span.mw-editsection {
-    float:right;
-  }
-  #thebigtable td.tool-maintainers::before {
-    content:"Maintainer(s):";
-  }
-  #thebigtable td.tool-maintainers {
-    white-space:normal;
-  }
-  #thebigtable td.tool-maintainers a {
-    display:inline;
-    white-space:nowrap;
-  }
-  #thebigtable td.tool-desc {
-    padding-left:1em;
-  }
-  #thebigtable td.tool-desc span.subtool-name,
-  #thebigtable td.tool-desc span.subtool-desc {
-    display:block;
-    width:auto;
-    padding:0;
-  }
-  #thebigtable td.tool-desc span.subtool-desc {
-    padding-left:1em;
-  }
-}
-
-/* Additional definitions for vcat */
-.formfullwidth {
-	display: block;
-	width: 100%;
-}
-
-.formline {
-	margin: 0.5em 0;
 }
 
 table.result td,
@@ -394,23 +144,6 @@ table.status caption {
 	border-bottom: 2px solid #1B61DD;
 	font-weight: bold;
 	text-align: left;
-}
-
-td.number {
-	text-align: right;
-}
-
-ul.oneline {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-}
-
-ul.oneline li {
-	display: inline;
-	list-style-type: none;
-	margin: 0 1em 0 0;
-	padding: 0;
 }
 
 #logo a {
