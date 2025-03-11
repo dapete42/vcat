@@ -114,17 +114,4 @@ public class Metadata implements Serializable {
         return title;
     }
 
-    public String truncateTitle(String fullTitle) {
-        for (Entry<String, Integer> entry : allNamespacesInverse.entrySet()) {
-            final String key = entry.getKey();
-            if (!key.isEmpty()) {
-                final String prefix = key + ":";
-                if (fullTitle.startsWith(prefix)) {
-                    return fullTitle.substring(prefix.length());
-                }
-            }
-        }
-        return fullTitle;
-    }
-
 }

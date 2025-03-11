@@ -223,12 +223,6 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
 
     }
 
-    public Collection<Pair<String, String>> requestLinksBetween(Wiki wiki, List<String> fullTitles) throws ApiException {
-        final ArrayList<Pair<String, String>> links = new ArrayList<>();
-        requestLinksBetweenRecursive(wiki.getApiUrl(), fullTitles, links, null);
-        return links;
-    }
-
     private void requestLinksBetweenRecursive(final String apiUrl, final List<String> fullTitles, final Collection<Pair<String, String>> links,
                                               @Nullable Map<String, String> continueMap) throws ApiException {
 
