@@ -38,7 +38,7 @@ public class ApiClient implements CategoryProvider, MetadataProvider {
     /**
      * Locks for API Etiquette (see below).
      */
-    private final ReentrantLocks<String> locks = Locks.reentrant();
+    private final ReentrantLocks<String> locks = Locks.reentrant(true);
 
     private final HttpClient httpClient;
 
