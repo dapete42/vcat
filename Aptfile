@@ -22,3 +22,5 @@ fonts-lohit-telu
 fonts-myanmar
 # support for language am (Amharic) and others
 fonts-sil-abyssinica
+# support for language zh-yue (Cantonese)
+fonts-noto-cjk
