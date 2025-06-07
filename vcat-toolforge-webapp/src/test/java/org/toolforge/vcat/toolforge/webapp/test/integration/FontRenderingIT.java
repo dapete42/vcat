@@ -23,7 +23,7 @@ class FontRenderingIT extends VcatToolforgeITBase {
     @CsvFileSource(resources = "/testFontRendering.csv")
     void testFontRendering(String text, String expectedReferenceImage) throws InterruptedException, IOException {
         final var response = VcatToolforgeContainers.instance()
-                .getHttpResponse("test-font-rendering?text=%s".formatted(URLEncoder.encode(text.replace(' ', '_'), StandardCharsets.UTF_8)));
+                .getHttpResponse("test-font-rendering?text=%s".formatted(URLEncoder.encode(text, StandardCharsets.UTF_8)));
 
         // returns with status 200
         assertEquals(200, response.statusCode());
