@@ -40,4 +40,9 @@ public class ApiCaffeineCache implements ApiCache {
         cache.put(key, jsonObject);
     }
 
+    @Override
+    public long currentSize() {
+        return cache.estimatedSize();
+    }
+
 }

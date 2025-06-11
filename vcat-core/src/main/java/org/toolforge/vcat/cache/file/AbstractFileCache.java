@@ -270,4 +270,8 @@ public abstract class AbstractFileCache<K extends Serializable> {
         }
     }
 
+    public long currentSize() throws CacheException {
+        return getAllFiles().size();
+    }
+
 }

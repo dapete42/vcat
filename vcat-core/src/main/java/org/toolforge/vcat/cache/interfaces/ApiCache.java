@@ -15,4 +15,6 @@ public interface ApiCache {
 
     void put(String key, JsonObject jsonObject) throws CacheException;
 
+    long currentSize() throws CacheException;
+
 }
