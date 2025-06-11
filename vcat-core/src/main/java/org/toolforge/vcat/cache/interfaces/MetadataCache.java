@@ -14,4 +14,6 @@ public interface MetadataCache {
 
     void put(Wiki wiki, Metadata metadata) throws CacheException;
 
+    long currentSize() throws CacheException;
+
 }

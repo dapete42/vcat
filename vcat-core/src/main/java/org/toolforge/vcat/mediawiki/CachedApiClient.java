@@ -1,7 +1,6 @@
 package org.toolforge.vcat.mediawiki;
 
 import jakarta.json.JsonObject;
-import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.Messages;
 import org.toolforge.vcat.cache.CacheException;
@@ -15,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-@Getter
 public class CachedApiClient extends ApiClient {
 
     @Serial
@@ -65,6 +63,10 @@ public class CachedApiClient extends ApiClient {
 
     protected JsonObject uncachedRequest(String apiUrl, Map<String, String> params) throws ApiException {
         return super.request(apiUrl, params);
+    }
+
+    public long currentCacheSize() throws CacheException {
+        return cache.currentSize();
     }
 
 }
