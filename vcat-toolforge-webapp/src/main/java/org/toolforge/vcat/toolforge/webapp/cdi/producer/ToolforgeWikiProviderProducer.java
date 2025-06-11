@@ -1,4 +1,4 @@
-package org.toolforge.vcat.toolforge.webapp.cdi;
+package org.toolforge.vcat.toolforge.webapp.cdi.producer;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
