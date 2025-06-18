@@ -125,10 +125,11 @@
                 <version>3.2.1</version>
             </dependency>
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
                 <version>5.13.1</version>
-                <scope>test</scope>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -304,7 +305,9 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <echo level="info">Verify OS is ${heroku.os} ${heroku.os.version} in the Toolforge Heroku build environment</echo>
+                                        <echo level="info">Verify OS is ${heroku.os} ${heroku.os.version} in the
+                                            Toolforge Heroku build environment
+                                        </echo>
                                         <exec executable="/bin/sh" resultproperty="os_exitcode">
                                             <arg value="-c"/>
                                             <arg line='"lsb_release -is | grep ${heroku.os}"'/>
