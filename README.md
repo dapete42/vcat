@@ -32,7 +32,7 @@ It consists of five Maven submodules:
   (https://quarkus.io/). This is what runs in the Toolforge environment (also
   see the next section). 
 * `vcat-webapp-simple` - A simpler version of vCat for local testing. This also
-  creates am executable JAR file based on Quarkus, but does not require
+  creates an executable JAR file based on Quarkus, but does not require
   anything else.
 
 Toolforge Build Service
@@ -92,12 +92,12 @@ environment.
 The main `pom.xml` also defines `heroku.os` and `heroku.os.version`. When the build runs in the
 Toolforge build environment, these will be checked against the actual OS. If this fails, both
 these properties and `heroku.image` have to be changed accordingly. Then the integration test can
-be used to verify whether everything still work works.
+be used to verify whether everything still works.
 
 ### Font rendering test
 
 The font rendering test calls a special REST endpoint in `vcat-toolforge-webapp`, which is only
-activated for the integration tests. This is used to renders images and compare them to reference
+activated for the integration tests. This is used to render images and compare them to reference
 images. It is primarily used to check for language support, i.e. that the script used for a
 language can be rendered correctly.
 
