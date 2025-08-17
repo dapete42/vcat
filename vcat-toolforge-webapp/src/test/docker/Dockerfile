@@ -1,28 +1,27 @@
 ARG image
+ARG java_version
+
+FROM eclipse-temurin:${java_version}-jdk AS jdk
+
 FROM ${image}
 
 SHELL ["/bin/bash", "-c"]
 
+# create $TOOL_DATA_DIR
+ENV TOOL_DATA_DIR=/tmp/tool-data-dir/
+RUN mkdir -p ${TOOL_DATA_DIR}
+
+# install packages defined in Aptfile
 ARG apt_packages
-# install required packages for SDKMAN! and those defined in Aptfile
 RUN apt-get update \
- && apt-get install -y curl unzip zip ${apt_packages} \
+ && apt-get install -y ${apt_packages} \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# install Java using SDKMAN!
-ARG java_version
-RUN curl -s "https://get.sdkman.io" | bash \
- && source /root/.sdkman/bin/sdkman-init.sh \
- && sdk install java ${java_version}-tem \
-# links java binary so it is available
- && ln -s /root/.sdkman/candidates/java/current/bin/java /usr/local/bin
+# copy Java from JDK docker image
+COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 
 # copy JAR to the image
 COPY target/vcat-toolforge-runner.jar /
 
-# create $TOOL_DATA_DIR
-ENV TOOL_DATA_DIR=/tool-data-dir/
-RUN mkdir -p ${TOOL_DATA_DIR}
-
-CMD ["/usr/local/bin/java", "-jar", "/vcat-toolforge-runner.jar"]
+CMD ["/opt/java/openjdk/bin/java", "-jar", "/vcat-toolforge-runner.jar"]
