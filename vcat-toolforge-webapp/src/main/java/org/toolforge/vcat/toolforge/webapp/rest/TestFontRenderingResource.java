@@ -45,6 +45,7 @@ public class TestFontRenderingResource {
             graphvizFile = Files.createTempFile("testFontRendering", ".gv");
             final var graph = new Graph();
             graph.getDefaultNode().setFontname(AbstractVCat.GRAPH_FONT);
+            graph.getDefaultNode().setFontsize(40);
             graph.getDefaultNode().setShape("none");
             graph.node("default").setLabel(text);
             GraphWriter.writeGraphToFile(graph, graphvizFile);
