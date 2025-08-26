@@ -37,9 +37,4 @@ public class MetadataCaffeineCache implements MetadataCache {
         cache.put(wiki, metadata);
     }
 
-    @Override
-    public long currentSize() {
-        return cache.estimatedSize();
-    }
-
 }

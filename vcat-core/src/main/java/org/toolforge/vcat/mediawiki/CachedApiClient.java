@@ -65,8 +65,4 @@ public class CachedApiClient extends ApiClient {
         return super.request(apiUrl, params);
     }
 
-    public long currentCacheSize() throws CacheException {
-        return cache.currentSize();
-    }
-
 }

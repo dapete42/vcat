@@ -46,8 +46,4 @@ public class CachedMetadataProvider implements MetadataProvider {
         return metadata;
     }
 
-    public long currentCacheSize() throws CacheException {
-        return metadataCache.currentSize();
-    }
-
 }
