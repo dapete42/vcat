@@ -18,7 +18,6 @@ public class VcatToolforgeContainers {
 
     private static VcatToolforgeContainers INSTANCE;
 
-    private Network network;
     private MariaDBContainer<?> mariadbContainer;
     private GenericContainer<?> vcatToolforgeWebappContainer;
 
@@ -30,22 +29,15 @@ public class VcatToolforgeContainers {
     }
 
     public void start() {
-        newNetwork();
         startMariadbContainer();
         startVcatToolforgeWebappContainer();
-    }
-
-    private void newNetwork() {
-        if (network == null) {
-            network = Network.newNetwork();
-        }
     }
 
     private void startMariadbContainer() {
         if (mariadbContainer == null) {
             LOG.info("Starting Mariadb container");
             mariadbContainer = new MariaDBContainer<>("mariadb:12");
-            mariadbContainer.withNetwork(network)
+            mariadbContainer.withNetwork(Network.SHARED)
                     .withNetworkAliases("mariadb")
                     .withDatabaseName("meta_p")
                     .withInitScript("mariadb-init.sql")
@@ -57,7 +49,7 @@ public class VcatToolforgeContainers {
         if (vcatToolforgeWebappContainer == null) {
             LOG.info("Starting vCat Toolforge webapp container");
             vcatToolforgeWebappContainer = new GenericContainer<>("vcat-toolforge-webapp");
-            vcatToolforgeWebappContainer.withNetwork(network)
+            vcatToolforgeWebappContainer.withNetwork(Network.SHARED)
                     .withEnv(getEnv())
                     .withExposedPorts(8000)
                     .start();
@@ -84,11 +76,19 @@ public class VcatToolforgeContainers {
     }
 
     void stop() {
+        stopMariadbContainer();
+        stopVcatToolforgeWebappContainer();
+    }
+
+    private void stopMariadbContainer() {
         if (mariadbContainer != null) {
             LOG.info("Stopping Mariadb container");
             mariadbContainer.stop();
             mariadbContainer = null;
         }
+    }
+
+    private void stopVcatToolforgeWebappContainer() {
         if (vcatToolforgeWebappContainer != null) {
             LOG.info("Stopping vCat Toolforge webapp container");
             vcatToolforgeWebappContainer.stop();
