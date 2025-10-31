@@ -44,7 +44,7 @@ public class VcatToolforgeContainers {
     private void startMariadbContainer() {
         if (mariadbContainer == null) {
             LOG.info("Starting Mariadb container");
-            mariadbContainer = new MariaDBContainer<>("mariadb:11");
+            mariadbContainer = new MariaDBContainer<>("mariadb:12");
             mariadbContainer.withNetwork(network)
                     .withNetworkAliases("mariadb")
                     .withDatabaseName("meta_p")
