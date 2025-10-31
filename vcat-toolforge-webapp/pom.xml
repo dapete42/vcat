@@ -146,6 +146,40 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!--
+                                            We need the packages from ../Aptfile. Ant is used to merge them into a
+                                            single line and write them to target/apt_packages.properties.
+                                        -->
+                                        <loadfile srcFile="${project.basedir}/../Aptfile"
+                                                  property="apt_packages">
+                                            <filterchain>
+                                                <!-- Remove comments, insert spaces and merge into one line. -->
+                                                <linecontainsregexp negate="true">
+                                                    <regexp pattern="^#.*"/>
+                                                </linecontainsregexp>
+                                                <prefixlines prefix=" "/>
+                                                <striplinebreaks/>
+                                            </filterchain>
+                                        </loadfile>
+                                        <echo file="${project.build.directory}/apt_packages.properties">
+                                            apt_packages=${apt_packages}
+                                        </echo>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>properties-maven-plugin</artifactId>
                         <executions>
@@ -154,6 +188,7 @@
                                 ${system.properties-java.runtime.version} property.
                             -->
                             <execution>
+                                <id>read-system.properties</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>read-project-properties</goal>
@@ -165,36 +200,23 @@
                                     <keyPrefix>system.properties-</keyPrefix>
                                 </configuration>
                             </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <!-- We also need the list of Debian packages form ../Aptfile. Ant can do this and will
-                            store the list in the ${Aptfile-packages} property. -->
+                            <!--
+                                We also need apt_packages from target/apt_packages.properties. No prefix required,
+                                this will just be in ${apt_packages} ready for use by docker-maven-plugin.
+                            -->
                             <execution>
+                                <id>read-apt_packages.properties</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
-                                    <goal>run</goal>
+                                    <goal>read-project-properties</goal>
                                 </goals>
                                 <configuration>
-                                    <exportAntProperties>true</exportAntProperties>
-                                    <target>
-                                        <loadfile srcFile="../Aptfile"
-                                                  property="Aptfile-packages">
-                                            <filterchain>
-                                                <!-- Remove comments, insert spaces and merge into one line. -->
-                                                <linecontainsregexp negate="true">
-                                                    <regexp pattern="^#.*"/>
-                                                </linecontainsregexp>
-                                                <prefixlines prefix=" "/>
-                                                <striplinebreaks/>
-                                            </filterchain>
-                                        </loadfile>
-                                    </target>
+                                    <files>
+                                        <file>${project.build.directory}/apt_packages.properties</file>
+                                    </files>
                                 </configuration>
                             </execution>
+
                         </executions>
                     </plugin>
                     <plugin>
@@ -217,7 +239,7 @@
                                                     <image>${heroku.image}</image>
                                                     <java_version>${system.properties-java.runtime.version}
                                                     </java_version>
-                                                    <apt_packages>${Aptfile-packages}</apt_packages>
+                                                    <apt_packages>${apt_packages}</apt_packages>
                                                 </args>
                                             </build>
                                         </image>
@@ -237,7 +259,8 @@
                                 </goals>
                                 <configuration>
                                     <systemPropertyVariables>
-                                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                                        <java.util.logging.manager>org.jboss.logmanager.LogManager
+                                        </java.util.logging.manager>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>
