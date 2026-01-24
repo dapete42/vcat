@@ -2,5 +2,41 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "description": "Automerge Maven updates",
+      "matchPackageNames": ["maven"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge updates for test-scoped dependencies",
+      "matchManagers": ["maven","gradle"],
+      "matchDepTypes": ["test"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge update for test library BOMs",
+      "matchManagers": ["maven","gradle"],
+      "matchPackageNames": [
+        "org.junit:junit-bom",
+        "org.junit.jupiter:junit-jupiter-bom",
+        "org.mockito:mockito-bom"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Automerge Lombok updates",
+      "matchManagers": ["maven","gradle"],
+      "matchPackageNames": ["org.projectlombok:lombok"]
+    },
+    {
+      "description": "Automerge Quarkus updates",
+      "matchManagers": ["maven","gradle"],
+      "matchPackageNames": [
+        "io.quarkus.platform:quarkus-bom",
+        "io.quarkus.platform:quarkus-maven-plugin"
+      ]
+    }
   ]
 }
