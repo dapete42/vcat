@@ -5,8 +5,8 @@
   ],
   "packageRules": [
     {
-      "description": "Automerge Maven updates",
-      "matchPackageNames": ["maven"],
+      "description": "Automerge Maven and Maven Wrapper updates",
+      "matchPackageNames": ["maven","maven-wrapper"],
       "automerge": true
     },
     {
