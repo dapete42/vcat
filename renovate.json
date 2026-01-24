@@ -28,7 +28,8 @@
     {
       "description": "Automerge Lombok updates",
       "matchManagers": ["maven","gradle"],
-      "matchPackageNames": ["org.projectlombok:lombok"]
+      "matchPackageNames": ["org.projectlombok:lombok"],
+      "automerge": true
     },
     {
       "description": "Automerge Quarkus updates",
@@ -36,7 +37,8 @@
       "matchPackageNames": [
         "io.quarkus.platform:quarkus-bom",
         "io.quarkus.platform:quarkus-maven-plugin"
-      ]
+      ],
+      "automerge": true
     }
   ]
 }
