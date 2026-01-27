@@ -6,7 +6,7 @@
   "packageRules": [
     {
       "description": "Automerge Maven and Maven Wrapper updates",
-      "matchPackageNames": ["maven","maven-wrapper"],
+      "matchDepNames": ["maven","maven-wrapper"],
       "automerge": true
     },
     {
@@ -18,7 +18,7 @@
     {
       "description": "Automerge update for test library BOMs",
       "matchManagers": ["maven","gradle"],
-      "matchPackageNames": [
+      "matchDepNames": [
         "org.junit:junit-bom",
         "org.junit.jupiter:junit-jupiter-bom",
         "org.mockito:mockito-bom"
@@ -28,13 +28,13 @@
     {
       "description": "Automerge Lombok updates",
       "matchManagers": ["maven","gradle"],
-      "matchPackageNames": ["org.projectlombok:lombok"],
+      "matchDepNames": ["org.projectlombok:lombok"],
       "automerge": true
     },
     {
       "description": "Automerge Quarkus updates",
       "matchManagers": ["maven","gradle"],
-      "matchPackageNames": [
+      "matchDepNames": [
         "io.quarkus.platform:quarkus-bom",
         "io.quarkus.platform:quarkus-maven-plugin"
       ],
