@@ -32,6 +32,11 @@
       "automerge": true
     },
     {
+      "description": "Automerge default Maven plugin updates",
+      "matchDepNames": ["org.apache.maven.plugins:*"],
+      "automerge": true
+    },
+    {
       "description": "Automerge Quarkus updates",
       "matchManagers": ["maven","gradle"],
       "matchDepNames": [
