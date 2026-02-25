@@ -37,12 +37,13 @@
       "automerge": true
     },
     {
-      "description": "Automerge Quarkus updates",
+      "description": "Automerge Quarkus updates (3.33 LTS version)",
       "matchManagers": ["maven","gradle"],
       "matchDepNames": [
         "io.quarkus.platform:quarkus-bom",
         "io.quarkus.platform:quarkus-maven-plugin"
       ],
+      "allowedVersions": "<3.34",
       "automerge": true
     }
   ]
