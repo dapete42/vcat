@@ -26,6 +26,14 @@
       "automerge": true
     },
     {
+      "description": "Automerge SLF4J BOM",
+      "matchManagers": ["maven","gradle"],
+      "matchDepNames": [
+        "org.slf4j:slf4j-bom"
+      ],
+      "automerge": true
+    },
+    {
       "description": "Automerge Lombok updates",
       "matchManagers": ["maven","gradle"],
       "matchDepNames": ["org.projectlombok:lombok"],
