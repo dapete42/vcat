@@ -21,7 +21,8 @@
       "matchDepNames": [
         "org.junit:junit-bom",
         "org.junit.jupiter:junit-jupiter-bom",
-        "org.mockito:mockito-bom"
+        "org.mockito:mockito-bom",
+        "org.testcontainers:testcontainers-bom"
       ],
       "automerge": true
     },
