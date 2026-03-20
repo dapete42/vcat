@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "dependencyDashboardAutoclose": true,
   "packageRules": [
     {
       "description": "Automerge Maven and Maven Wrapper updates",
