@@ -54,6 +54,7 @@
         "io.quarkus.platform:quarkus-maven-plugin"
       ],
       "allowedVersions": "<3.34",
+      "separateMinorPatch": true,
       "automerge": true
     }
   ]
