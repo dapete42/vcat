@@ -2,8 +2,8 @@ package org.toolforge.vcat.toolforge.webapp.test.integration.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.mariadb.MariaDBContainer;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,7 +18,7 @@ public class VcatToolforgeContainers {
 
     private static VcatToolforgeContainers INSTANCE;
 
-    private MariaDBContainer<?> mariadbContainer;
+    private MariaDBContainer mariadbContainer;
     private GenericContainer<?> vcatToolforgeWebappContainer;
 
     public static VcatToolforgeContainers instance() {
@@ -36,7 +36,7 @@ public class VcatToolforgeContainers {
     private void startMariadbContainer() {
         if (mariadbContainer == null) {
             LOG.info("Starting Mariadb container");
-            mariadbContainer = new MariaDBContainer<>("mariadb:12");
+            mariadbContainer = new MariaDBContainer("mariadb:12");
             mariadbContainer.withNetwork(Network.SHARED)
                     .withNetworkAliases("mariadb")
                     .withDatabaseName("meta_p")
