@@ -109,7 +109,7 @@ public class GraphvizExternal implements Graphviz {
                 LOG.error(Messages.getString("GraphvizExternal.Error.CouldNotRemoveOutputFile"), outputFile, e);
             }
             if (processOutput != null) {
-                LOG.error(Messages.getString("GraphvitExternal.Error.ProcessOutput"), processOutput);
+                LOG.error(Messages.getString("GraphvizExternal.Error.ProcessOutput"), processOutput);
             }
             throw new GraphvizException(MessageFormatter
                     .format(Messages.getString("GraphvizExternal.Exception.ExitCode"), exitValue).getMessage());
