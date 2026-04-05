@@ -57,5 +57,10 @@
       "separateMinorPatch": true,
       "automerge": true
     }
-  ]
+  ],
+  "osvVulnerabilityAlerts": true,
+  "dependencyDashboardOSVVulnerabilitySummary": "unresolved",
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  }
 }
