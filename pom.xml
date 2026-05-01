@@ -298,28 +298,26 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <echo level="info">Verify OS is ${heroku.os} ${heroku.os.version} in the
-                                            Toolforge Heroku build environment
-                                        </echo>
-                                        <exec executable="/bin/sh" resultproperty="os_exitcode">
+                                        <echo level="info" xml:space="preserve">Verify OS is ${heroku.os} ${heroku.os.version} in the Toolforge Heroku build environment</echo>
+                                        <exec executable="/bin/sh" outputproperty="os">
                                             <arg value="-c"/>
-                                            <arg line='"lsb_release -is | grep ${heroku.os}"'/>
+                                            <arg line='"lsb_release -is"'/>
                                         </exec>
-                                        <exec executable="/bin/sh" resultproperty="os_version_exitcode">
+                                        <exec executable="/bin/sh" outputproperty="os_version">
                                             <arg value="-c"/>
-                                            <arg line='"lsb_release -rs | grep ${heroku.os.version}"'/>
+                                            <arg line='"lsb_release -rs"'/>
                                         </exec>
-                                        <fail message="OS is not ${heroku.os} in the Toolforge Heroku build environment">
+                                        <fail message="OS is not ${heroku.os} in the Toolforge Heroku build environment (it is ${os})">
                                             <condition>
                                                 <not>
-                                                    <equals arg1="0" arg2="${os_exitcode}"/>
+                                                    <equals arg1="${heroku.os}" arg2="${os}"/>
                                                 </not>
                                             </condition>
                                         </fail>
-                                        <fail message="OS version is not ${heroku.os.version} in the Toolforge Heroku build environment">
+                                        <fail message="OS version is not ${heroku.os.version} in the Toolforge Heroku build environment (it is ${os_version})">
                                             <condition>
                                                 <not>
-                                                    <equals arg1="0" arg2="${os_version_exitcode}"/>
+                                                    <equals arg1="${heroku.os.version}" arg2="${os_version}"/>
                                                 </not>
                                             </condition>
                                         </fail>
