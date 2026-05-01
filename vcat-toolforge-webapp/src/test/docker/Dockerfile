@@ -24,4 +24,4 @@ COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 # copy JAR to the image
 COPY target/vcat-toolforge-runner.jar /
 
-CMD ["/opt/java/openjdk/bin/java", "-jar", "/vcat-toolforge-runner.jar"]
+CMD ["/opt/java/openjdk/bin/java", "-XX:+UseCompactObjectHeaders", "-jar", "/vcat-toolforge-runner.jar"]
