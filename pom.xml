@@ -39,7 +39,7 @@
 
         <!-- expected OS in the Toolforge Heroku build environment -->
         <heroku.os>Ubuntu</heroku.os>
-        <heroku.os.version>22.04</heroku.os.version>
+        <heroku.os.version>24.04</heroku.os.version>
         <!-- for integration tests, we want to use a Docker image for the same OS -->
         <heroku.image>ubuntu:${heroku.os.version}</heroku.image>
     </properties>
