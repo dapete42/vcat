@@ -157,20 +157,13 @@
                                 <configuration>
                                     <target>
                                         <!--
-                                            We need the packages from ../Aptfile. Ant is used to merge them into a
-                                            single line and write them to target/apt_packages.properties.
+                                            We need the packages to be installed from ../project.toml. They are
+                                            converted to a single line and written to target/apt_packages.properties.
                                         -->
-                                        <loadfile srcFile="${project.basedir}/../Aptfile"
-                                                  property="apt_packages">
-                                            <filterchain>
-                                                <!-- Remove comments, insert spaces and merge into one line. -->
-                                                <linecontainsregexp negate="true">
-                                                    <regexp pattern="^#.*"/>
-                                                </linecontainsregexp>
-                                                <prefixlines prefix=" "/>
-                                                <striplinebreaks/>
-                                            </filterchain>
-                                        </loadfile>
+                                        <exec executable="/bin/sh" outputproperty="apt_packages">
+                                            <arg value="-c"/>
+                                            <arg value="sed -n '/install = \[/,/\]/{ /&quot;/ s/.*&quot;\([^&quot;]*\)&quot;.*/\1/p }' ${project.basedir}/../project.toml | xargs"/>
+                                        </exec>
                                         <echo file="${project.build.directory}/apt_packages.properties">
                                             apt_packages=${apt_packages}
                                         </echo>
