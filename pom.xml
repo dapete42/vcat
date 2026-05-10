@@ -324,6 +324,19 @@
                                     </target>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>heroku-pre-build</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <echo level="info" xml:space="preserve">Execute pre-build script</echo>
+                                        <exec executable="bin/vcat-toolforge-pre-build"/>
+                                    </target>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>

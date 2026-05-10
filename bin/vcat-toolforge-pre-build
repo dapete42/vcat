@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# This is meant to run before the build using the Wikimedia Toolforge Build
+# Service (see README.md).
+
+# TODO 20250807
+# Temporary measure: $HOME should point here, but now seems to point to $TOOL_DATA_DIR (/data/project/<toolname>/).
+HOME=/workspace
+
+# Register Graphviz plugins.
+# This would normally be run by APT when Graphviz is installed, but this does
+# not work with the Build Service.
+/layers/heroku_deb-packages/packages/usr/bin/dot -c
+
+# Symlink fonts from the APT layer into $HOME/.fonts
+# This ia another Build Service limitation with APT packages - fonts are
+# installed in a location that is not searched, so they are provided in a
+# location that is.
+mkdir -p "$HOME/.fonts"
+ln -s /layers/heroku_deb-packages/packages/usr/share/fonts/* "$HOME/.fonts/"
