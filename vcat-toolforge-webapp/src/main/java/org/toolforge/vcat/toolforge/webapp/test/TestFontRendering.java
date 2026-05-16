@@ -1,7 +1,9 @@
 package org.toolforge.vcat.toolforge.webapp.test;
 
+import io.quarkus.runtime.Startup;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.csv.CSVFormat;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.toolforge.vcat.AbstractVCat;
@@ -14,6 +16,9 @@ import org.toolforge.vcat.params.GraphvizParams;
 import org.toolforge.vcat.params.OutputFormat;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -22,6 +27,28 @@ public class TestFontRendering {
 
     @Inject
     Graphviz graphviz;
+
+    @Startup
+    public void testFontRenderingOnStartup() {
+        final var csvFormat = CSVFormat.DEFAULT;
+        try (Reader csvReader = new InputStreamReader(getClass().getResourceAsStream("/testFontRendering.csv"), StandardCharsets.UTF_8)) {
+            csvFormat.parse(csvReader).forEach(record -> {
+                testFontRendering(record.get(0), record.get(1));
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void testFontRendering(String text, String expectedReferenceImage) {
+        final byte[] imageBytes;
+        try {
+            imageBytes = test(text);
+            FontRenderingUtils.checkImageEquals(expectedReferenceImage, imageBytes);
+        } catch (GraphvizException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public byte @NonNull [] test(String text) throws GraphvizException, IOException {
         Path graphvizFile = null;

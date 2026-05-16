@@ -3,6 +3,7 @@ package org.toolforge.vcat.toolforge.webapp.test.integration.util;
 import com.github.romankh3.image.comparison.ImageComparison;
 import com.github.romankh3.image.comparison.model.ImageComparisonState;
 import lombok.extern.slf4j.Slf4j;
+import org.toolforge.vcat.toolforge.webapp.test.FontRenderingUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -36,42 +37,12 @@ public abstract class VcatToolforgeAssertions {
         );
     }
 
-    public static void assertImageEquals(String expectedReferenceImage, byte[] actualImageData) throws IOException {
-        final String fileName = expectedReferenceImage + ".png";
-        final String resourceName = "/reference-images/" + fileName;
-        final Path actualImageFile = Paths.get("target", resourceName);
-
-        try (var expectedResourceStream = VcatToolforgeAssertions.class.getResourceAsStream(resourceName)) {
-            if (expectedResourceStream == null) {
-                writeImageFile(actualImageData, actualImageFile);
-                fail("Could not find reference image %s. It has been initialized at %s, but needs to be moved to %s and committed to Git."
-                        .formatted(expectedReferenceImage, actualImageFile, Paths.get("src", "test", "resources", resourceName)));
-            }
-            if (!areImagesEqual(expectedResourceStream, actualImageData)) {
-                writeImageFile(actualImageData, actualImageFile);
-                fail("Results for reference image %s differ. The actual image is at %s."
-                        .formatted(expectedReferenceImage, actualImageFile));
-            }
+    public static void verifyImageEquals(String expectedReferenceImage, byte[] actualImageData) throws IOException {
+        try {
+            FontRenderingUtils.checkImageEquals(expectedReferenceImage, actualImageData);
+        } catch (RuntimeException e) {
+            fail(e.getMessage());
         }
-    }
-
-    private static void writeImageFile(byte[] actualImageData, Path actualImageFile) throws IOException {
-        Files.createDirectories(actualImageFile.getParent());
-        try (var actualImageStream = new ByteArrayInputStream(actualImageData)) {
-            Files.copy(actualImageStream, actualImageFile, StandardCopyOption.REPLACE_EXISTING);
-        }
-    }
-
-    private static boolean areImagesEqual(InputStream expectedResourceStream, byte[] actualImageData) throws IOException {
-        final var expectedImage = ImageIO.read(expectedResourceStream);
-        final BufferedImage actualImage;
-        try (var actualImageStream = new ByteArrayInputStream(actualImageData)) {
-            actualImage = ImageIO.read(actualImageStream);
-        }
-
-        final var imageComparison = new ImageComparison(expectedImage, actualImage);
-        final var imageComparisonResult = imageComparison.compareImages();
-        return imageComparisonResult.getImageComparisonState() == ImageComparisonState.MATCH;
     }
 
 }

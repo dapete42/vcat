@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeAssertions.assertContentType;
-import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeAssertions.assertImageEquals;
+import static org.toolforge.vcat.toolforge.webapp.test.integration.util.VcatToolforgeAssertions.verifyImageEquals;
 
 /**
  * Integration tests for the {@code /render} endpoint using a simulated environment with MariaDB and VCat.
@@ -28,7 +28,7 @@ class FontRenderingIT extends VcatToolforgeITBase {
         // returns with status 200
         assertEquals(200, response.statusCode());
         assertContentType(OutputFormat.PNG.getMimeType(), response);
-        assertImageEquals(expectedReferenceImage, response.body());
+        verifyImageEquals(expectedReferenceImage, response.body());
     }
 
 }
