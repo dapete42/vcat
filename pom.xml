@@ -202,6 +202,18 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-scripting-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.groovy</groupId>
+                            <artifactId>groovy-jsr223</artifactId>
+                            <version>5.0.6</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.5.6</version>
                 </plugin>
@@ -269,59 +281,50 @@
             </modules>
             <build>
                 <plugins>
-                    <!-- Use Maven AntRun plugin for checks whether the image is OK before the build starts. -->
+                    <!-- Use Maven Scripting plugin for checks whether the image is OK before the build starts. -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
+                        <artifactId>maven-scripting-plugin</artifactId>
                         <inherited>false</inherited>
                         <executions>
                             <execution>
-                                <id>heroku-validate-graphviz</id>
+                                <id>heroku-validate-environment</id>
                                 <phase>validate</phase>
                                 <goals>
-                                    <goal>run</goal>
+                                    <goal>eval</goal>
                                 </goals>
                                 <configuration>
-                                    <target>
-                                        <echo level="info">Verify Graphviz has been installed and can be executed</echo>
-                                        <exec executable="/layers/heroku_deb-packages/packages/usr/bin/dot" failonerror="true">
-                                            <arg value="-V"/>
-                                        </exec>
-                                    </target>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>heroku-validate-os</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <echo level="info" xml:space="preserve">Verify OS is ${heroku.os} ${heroku.os.version} in the Toolforge Heroku build environment</echo>
-                                        <exec executable="/bin/sh" outputproperty="os">
-                                            <arg value="-c"/>
-                                            <arg line='"lsb_release -is"'/>
-                                        </exec>
-                                        <exec executable="/bin/sh" outputproperty="os_version">
-                                            <arg value="-c"/>
-                                            <arg line='"lsb_release -rs"'/>
-                                        </exec>
-                                        <fail message="OS is not ${heroku.os} in the Toolforge Heroku build environment (it is ${os})">
-                                            <condition>
-                                                <not>
-                                                    <equals arg1="${heroku.os}" arg2="${os}"/>
-                                                </not>
-                                            </condition>
-                                        </fail>
-                                        <fail message="OS version is not ${heroku.os.version} in the Toolforge Heroku build environment (it is ${os_version})">
-                                            <condition>
-                                                <not>
-                                                    <equals arg1="${heroku.os.version}" arg2="${os_version}"/>
-                                                </not>
-                                            </condition>
-                                        </fail>
-                                    </target>
+                                    <engineName>groovy</engineName>
+                                    <script><![CDATA[
+                                        // 1. Verify Graphviz has been installed and can be executed
+                                        println "Verify Graphviz has been installed and can be executed"
+                                        try {
+                                            def dotProcess = "/layers/heroku_deb-packages/packages/usr/bin/dot -V".execute()
+                                            dotProcess.waitFor()
+                                            if (dotProcess.exitValue() != 0) {
+                                                throw new RuntimeException("Graphviz execution failed with exit code: " + dotProcess.exitValue())
+                                            }
+                                        } catch (Exception e) {
+                                            throw new RuntimeException("Failed to execute Graphviz: " + e.getMessage())
+                                        }
+
+                                        // 2. Verify OS and OS version in the Toolforge Heroku build environment
+                                        def expectedOs = project.properties['heroku.os']
+                                        def expectedVersion = project.properties['heroku.os.version']
+
+                                        println "Verify OS is ${expectedOs} ${expectedVersion} in the Toolforge Heroku build environment"
+
+                                        def os = "lsb_release -is".execute().text.trim()
+                                        def osVersion = "lsb_release -rs".execute().text.trim()
+
+                                        if (expectedOs != os) {
+                                            throw new RuntimeException("OS is not ${expectedOs} in the Toolforge Heroku build environment (it is ${os})")
+                                        }
+
+                                        if (expectedVersion != osVersion) {
+                                            throw new RuntimeException("OS version is not ${expectedVersion} in the Toolforge Heroku build environment (it is ${os_version})")
+                                        }
+                                    ]]></script>
                                 </configuration>
                             </execution>
                         </executions>
