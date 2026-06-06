@@ -41,8 +41,11 @@
       "automerge": true
     },
     {
-      "description": "Automerge default Maven plugin updates",
-      "matchDepNames": ["org.apache.maven.plugins:*"],
+      "description": "Automerge Maven plugin updates",
+      "matchDepNames": [
+        "org.apache.maven.plugins:*",
+        "org.jacoco:jacoco-maven-plugin"
+      ],
       "automerge": true
     },
     {
