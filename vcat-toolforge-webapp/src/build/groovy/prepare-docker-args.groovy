@@ -2,20 +2,14 @@
 def tomlFile = new File(project.basedir.parentFile, "project.toml")
 def aptPackagesList = []
 if (tomlFile.exists()) {
-    def inInstallBlock = false
-    tomlFile.eachLine { line ->
-        line = line.trim()
-        if (line.contains("install = [")) {
-            inInstallBlock = true
-        }
-        if (inInstallBlock) {
-            // Extract values enclosed in quotes
-            def matcher = line =~ /"([^"]+)"|'([^']+)'/
+    def tomlText = tomlFile.text
+    def blockMatcher = tomlText =~ /(?s)install\s*=\s*\[([^]]+)]/
+    if (blockMatcher.find()) {
+        def blockContent = blockMatcher.group(1)
+        blockContent.eachLine { line ->
+            def matcher = line.trim() =~ /"([^"]+)"|'([^']+)'/
             if (matcher) {
                 aptPackagesList << (matcher[0][1] ?: matcher[0][2])
-            }
-            if (line.contains("]")) {
-                inInstallBlock = false
             }
         }
     }
